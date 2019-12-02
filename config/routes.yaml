@@ -10,3 +10,6 @@ app_lucky_number:
 app_ger_category:
     path: admin/All/Categories
     controller: app\Controller\categoriesController::getAllCategoryAction
+controllers:
+    resource: ../src/Controller/
+    type: annotation
