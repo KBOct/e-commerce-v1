@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Controller/ProductController.php
+// src/Controller/ProductController.php
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -88,7 +88,6 @@ class ProductController extends Controller
         public function getProductById(int $id)
         {
             $em = $this->getDoctrine()->getManager();
-
             $product=$em->getRepository(Product::class)->findOneById($id);
 
                 $result= array(
@@ -105,19 +104,15 @@ class ProductController extends Controller
      // tous les produits d'une cat
 
      /**
-      * @Route("/products/{id})
+      * @Route("/products/{id}")
       */
 
      public function getProductsByCategory(int $id)
      {
          $em = $this->getDoctrine()->getManager();
-
          $em->getRepository(Product::class);
-
          $category=$em->getRepository(Category::class)->findOneById($id);
-
          $products=$em->getRepository(Product::class)->findByCategory($category);
-         
          $result=array();
 
          foreach($products as $product){
