@@ -1,3 +1,12 @@
-index:
-    path: /
-    controller: App\Controller\LuckyController::numberAction
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+# config/routes.yaml
+
+# the "app_lucky_number" route name is not important yet
+app_lucky_number:
+    path: /lucky/number
+    controller: App\Controller\LuckyController::number
+app_ger_category:
+    path: admin/All/Categories
+    controller: app\Controller\categoriesController::getAllCategoryAction
