@@ -118,15 +118,15 @@ class AppFixtures extends Fixture
             }
 
             // Commandes
-            for($j = 1; $j <= mt_rand(0,10);$j++){
-                $commande = new Commande();
-                $productCount = mt_rand(0,10);
+            // for($j = 1; $j <= mt_rand(0,10);$j++){
+            //     $commande = new Commande();
+            //     $productCount = mt_rand(0,10);
 
-                $date = $faker->dateTimeBetween('-9 months');
-                $totalAmount = $product->getPrice() * $productCount;
+            //     $date = $faker->dateTimeBetween('-9 months');
+            //     $totalAmount = $product->getPrice() * $productCount;
 
-                
-            }
+            //     $buyer = $users[mt_rand(0, count($users) - 1)]
+            // }
             
             $manager->persist($product);
         }
