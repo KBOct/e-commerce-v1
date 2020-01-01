@@ -1,130 +1,141 @@
 <?php
-// src/Controller/ProductController.php
+
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+//use App\Entity\Image;
+use App\Entity\Product;
+use App\Form\ProductType;
+use App\Repository\ProductRepository;
+//use Symfony\Component\HttpFoundation\Session\SessionInterface;
+// OBSOLETE depuis doctrine-bundle v2.0.0 : use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-use App\Entity\Product;
-use App\Entity\Category;
-
-
-class ProductController extends Controller
+class ProductController extends AbstractController
 {
     /**
-     * @Route("/products/test")
+     * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
+     * 
+     * Permet de générer la page Produits
+     * 
+     * @Route("/products", name="products_index")
      */
-
-     // tous les produits
-
-    public function getProductsTest()
+    public function index(ProductRepository $repo)
     {
-        $em = $this->getDoctrine()->getManager();
+        $products = $repo->findAll();
 
-        $em->getRepository(Product::class);
+        return $this->render('product/index.html.twig', [
+            'products' => $products,
+        ]);
+    }
+    
+    /**
+     * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
+     * 
+     * Permet de créer une fiche produit
+     * 
+     * @Route("/products/new", name="products_create")
+     * @IsGranted("ROLE_ADMIN")
+     * 
+     * @return Response
+     */
+    public function create(Request $request, EntityManagerInterface $manager){
+        $product = new Product();
 
-        $produit=new Product();
-        $em->persist($produit);
-        $em->flush();
+        $form = $this->createForm(ProductType::class, $product);
+ 
+        $form->handleRequest($request);
 
-        $product2=$em->getRepository(Product::class)->findOneById(2);
-        $product2->setDescription("ceci est le produit numéro 2");
-        $em->flush();
 
-        $products=$em->getRepository(Product::class)->findAll();
-        $result=array();
+        if($form->isSubmitted() && $form->isValid()){
+            foreach($product->getImages() as $image){
+                $image->setProduct($product);
+                $manager->persist($image);
+            }
 
-        foreach($products as $product){
-            $result[]= array(
-                "id" => $product->getId(),
-                "description" => $product->getDescription(),
-                "quantity" => $product->getQuantity(),
-                "is_deleted" => $product->getIsDeleted(),
+            $manager->persist($product);
+            $manager->flush();
+
+        $this->addFlash(
+            'success',
+            "La fiche <strong>{$product->getName()}</strong> a bien été enregistrée !"
             );
-
+    
+            
+            return $this -> redirectToRoute('products_show',[
+                'slug' => $product -> getSlug()
+            ]);
         }
 
-        return $this->json($result);
+        dump($product);
+
+        return $this->render('product/new.html.twig',[
+            'form' => $form->createView()
+        ]);
     }
 
     /**
-     * @Route("/products")
+     * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
+     * 
+     * Permet d'afficher le formulaire de modification
+     * 
+     * @Route("/products/{slug}/edit", name="products_edit")
+     * @IsGranted("ROLE_ADMIN")
+     * 
+     * @return Response
      */
 
-    public function getProducts()
-    {
-        $em = $this->getDoctrine()->getManager();
+    public function edit(Product $product, Request $request,EntityManagerInterface $manager){
+        $form = $this->createForm(ProductType::class, $product);
 
-        $em->getRepository(Product::class);
+        $form->handleRequest($request);
 
-        $produit=new Product();
-        $em->persist($produit);
-        $em->flush();
+        if($form->isSubmitted() && $form->isValid()){
+            foreach($product->getImages() as $image){
+                $image->setProduct($product);
+                $manager->persist($image);
+            }
 
-        $products=$em->getRepository(Product::class)->findAll();
-        $result=array();
+            $manager->persist($product);
+            $manager->flush();
 
-        foreach($products as $product){
-            $result[]= array(
-                "id" => $product->getId(),
-                "description" => $product->getDescription(),
-                "quantity" => $product->getQuantity(),
-                "is_deleted" => $product->getIsDeleted(),
+        $this->addFlash(
+            'success',
+            "Les modifications de la fiche <strong>{$product->getName()}</strong> ont bien été enregistrées !"
             );
-
+    
+            
+            return $this -> redirectToRoute('products_show',[
+                'slug' => $product -> getSlug()
+            ]);
         }
 
-        return $this->json($result);
+        return $this -> render('product/edit.html.twig',[
+            'form'=>$form->createView(),
+            'product'=> $product
+        ]);
     }
 
-     // un produit par id
+   /**
+    * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
+    * 
+    * Permet d'afficher une seule annonce
+    * On récupère la fiche qui correspond au slug du produit "product" par type hinting (ParamConverter sous-entendu)
+    * 
+    * @Route("/products/{slug}", name="products_show")
+    * 
+    * @return Response
+    */
+    public function show(Product $product){
+        // $product = $repo -> findOneBySlug($slug);
+        return $this->render('product/show.html.twig', [
+            'product' => $product
+        ]);
+    }
 
-     /**
-      * @Route("/product/{id}")
-      */
-
-        public function getProductById(int $id)
-        {
-            $em = $this->getDoctrine()->getManager();
-            $product=$em->getRepository(Product::class)->findOneById($id);
-
-                $result= array(
-                    "id" => $product->getId(),
-                    "description" => $product->getDescription(),
-                    "quantity" => $product->getQuantity(),
-                    "is_deleted" => $product->getIsDeleted(),
-                );
-
-
-            return $this->json($result);
-        }
-
-     // tous les produits d'une cat
-
-     /**
-      * @Route("/products/{id}")
-      */
-
-     public function getProductsByCategory(int $id)
-     {
-         $em = $this->getDoctrine()->getManager();
-         $em->getRepository(Product::class);
-         $category=$em->getRepository(Category::class)->findOneById($id);
-         $products=$em->getRepository(Product::class)->findByCategory($category);
-         $result=array();
-
-         foreach($products as $product){
-             $result[]= array(
-                 "id" => $product->getId(),
-                 "description" => $product->getDescription(),
-                 "quantity" => $product->getQuantity(),
-                 "is_deleted" => $product->getIsDeleted(),
-             );
-
-         }
-
-         return $this->json($result);
-     }
 }

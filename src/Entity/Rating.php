@@ -17,10 +17,10 @@ class Rating
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Client", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="App\Entity\User", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
-    private $client;
+    private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Product", inversedBy="ratings")
@@ -43,14 +43,14 @@ class Rating
         return $this->id;
     }
 
-    public function getClient(): ?Client
+    public function getUser(): ?User
     {
-        return $this->client;
+        return $this->user;
     }
 
-    public function setClient(Client $client): self
+    public function setUser(User $user): self
     {
-        $this->client = $client;
+        $this->user = $user;
 
         return $this;
     }

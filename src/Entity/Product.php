@@ -2,12 +2,23 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
+ * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
+ * 
  * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks
+ * @UniqueEntity(
+ *  fields={"name"},
+ *  message="Une autre fiche possède déjà ce nom, merci de le modifier"
+ * )
  */
 class Product
 {
@@ -19,27 +30,40 @@ class Product
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $clothes;
-
-    /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text")
+     * @Assert\Length(min=30, minMessage="La description doit faire plus de 30 caractères")
      */
     private $description;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=3, max=255, minMessage="Le nom doit faire plus de 3 caractères", maxMessage="Le nom ne peut pas faire plus de 255 caractères")
      */
-    private $is_deleted;
+    private $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="string", length=255)
+     */
+    private $slug;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $isDeleted;
+
+    /**
+     * @ORM\Column(type="integer", nullable=false)
      */
     private $quantity;
 
     /**
+     * @ORM\Column(type="float")
+     */
+    private $price;
+
+    /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Url()
      */
     private $photo;
 
@@ -58,28 +82,46 @@ class Product
      */
     private $tags;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Image", mappedBy="product", orphanRemoval=true)
+     * @Assert\Valid()
+     */
+    private $images;
+
+    /**
+     * @ORM\Column(type="text", nullable=false)
+     * @Assert\Length(min=20, minMessage="Votre introduction doit faire plus de 20 caractères")
+     */
+    private $introduction;
+
+    /**
+     * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
+     * 
+     * Permet d'initialiser le Slug !
+     * 
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     * 
+     */  
+    
+    public function initializeSlug(){
+        if(empty($this->slug)){
+            $slugify = new Slugify();
+            $this->slug = $slugify->slugify($this->name);
+        }
+    }
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
         $this->ratings = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getClothes(): ?string
-    {
-        return $this->clothes;
-    }
-
-    public function setClothes(string $clothes): self
-    {
-        $this->clothes = $clothes;
-
-        return $this;
     }
 
     public function getDescription(): ?string
@@ -94,14 +136,38 @@ class Product
         return $this;
     }
 
-    public function getIsDeleted(): ?bool
+    public function getName(): ?string
     {
-        return $this->is_deleted;
+        return $this->name;
     }
 
-    public function setIsDeleted(bool $is_deleted): self
+    public function setName(string $name): self
     {
-        $this->is_deleted = $is_deleted;
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getIsDeleted(): ?bool
+    {
+        return $this->isDeleted;
+    }
+
+    public function setIsDeleted(bool $isDeleted): self
+    {
+        $this->isDeleted = $isDeleted;
 
         return $this;
     }
@@ -114,6 +180,18 @@ class Product
     public function setQuantity(?int $quantity): self
     {
         $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?float $price): self
+    {
+        $this->price = $price;
 
         return $this;
     }
@@ -136,6 +214,13 @@ class Product
     public function getCategories(): Collection
     {
         return $this->categories;
+    }
+
+    public function setCategories(Category $categories): self
+    {
+        $this->categories[] = $categories;
+
+        return $this;
     }
 
     public function addCategory(Category $category): self
@@ -164,6 +249,13 @@ class Product
     public function getRatings(): Collection
     {
         return $this->ratings;
+    }
+
+    public function setRatings(string $ratings): self
+    {
+        $this->ratings = $ratings;
+
+        return $this;
     }
 
     public function addRating(Rating $rating): self
@@ -197,6 +289,13 @@ class Product
         return $this->tags;
     }
 
+    public function setTags(Tag $tags): self
+    {
+        $this->tags[] = $tags;
+
+        return $this;
+    }
+
     public function addTag(Tag $tag): self
     {
         if (!$this->tags->contains($tag)) {
@@ -213,6 +312,49 @@ class Product
             $this->tags->removeElement($tag);
             $tag->removeProduct($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Image[]
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(Image $image): self
+    {
+        if ($this->images->contains($image)) {
+            $this->images->removeElement($image);
+            // set the owning side to null (unless already changed)
+            if ($image->getProduct() === $this) {
+                $image->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getIntroduction(): ?string
+    {
+        return $this->introduction;
+    }
+
+    public function setIntroduction(string $introduction): self
+    {
+        $this->introduction = $introduction;
 
         return $this;
     }
