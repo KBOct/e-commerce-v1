@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "@babel/preset-react": "^7.7.4",
-    "@symfony/webpack-encore": "^0.27.0",
+    "@symfony/webpack-encore": "^0.28.2",
     "core-js": "^3.6.1",
     "webpack-notifier": "^1.8.0"
   },
@@ -14,12 +14,16 @@
     "build": "encore production --progress"
   },
   "dependencies": {
+    "@babel/core": "^7.7.7",
     "axios": "^0.18.0",
+    "bootstrap": "^4.4.1",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
+    "jquery": "^3.4.1",
     "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
     "react": "^16.12.0",
+    "react-bootstrap": "^1.0.0-beta.16",
     "react-content-loader": "^4.3.4",
     "react-dom": "^16.12.0",
     "react-router-dom": "^5.1.2",

@@ -17,7 +17,7 @@ const Navbar = ({ history }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <NavLink className="navbar-brand" to="/">
-       e-com paradise
+       The Store
       </NavLink>
       <button
         className="navbar-toggler"
@@ -39,7 +39,7 @@ const Navbar = ({ history }) => {
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink className="nav-link" to="/invoices">
+            <NavLink className="nav-link" to="/products">
               Produits
             </NavLink>
           </li>

@@ -13,6 +13,7 @@ import AuthAPI from "./services/authAPI";
 import CustomerPage from "./pages/CustomerPage";
 import InvoicePage from "./pages/InvoicePage";
 import RegisterPage from "./pages/RegisterPage";
+import ProductsPage from "./pages/ProductsPage";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -46,6 +47,7 @@ const App = () => {
             <PrivateRoute path="/invoices" component={InvoicesPage} />
             <PrivateRoute path="/customers/:id" component={CustomerPage} />
             <PrivateRoute path="/customers" component={CustomersPage} />
+            <Route path="/products" component={ProductsPage} />
             <Route path="/" component={HomePage} />
           </Switch>
         </main>
