@@ -3,15 +3,15 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Switch, withRouter } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import PrivateRoute from "./components/PrivateRoute";
+// import PrivateRoute from "./components/PrivateRoute";
 import AuthContext from "./contexts/AuthContext";
-import CustomersPage from "./pages/CustomersPage";
+// import CustomersPage from "./pages/CustomersPage";
 import HomePage from "./pages/HomePage";
-import InvoicesPage from "./pages/InvoicesPage";
+// import InvoicesPage from "./pages/InvoicesPage";
 import LoginPage from "./pages/LoginPage";
 import AuthAPI from "./services/authAPI";
-import CustomerPage from "./pages/CustomerPage";
-import InvoicePage from "./pages/InvoicePage";
+// import CustomerPage from "./pages/CustomerPage";
+// import InvoicePage from "./pages/InvoicePage";
 import RegisterPage from "./pages/RegisterPage";
 import ProductsPage from "./pages/ProductsPage";
 import { ToastContainer, toast } from "react-toastify";
@@ -43,10 +43,10 @@ const App = () => {
           <Switch>
             <Route path="/login" component={LoginPage} />
             <Route path="/register" component={RegisterPage} />
-            <PrivateRoute path="/invoices/:id" component={InvoicePage} />
-            <PrivateRoute path="/invoices" component={InvoicesPage} />
-            <PrivateRoute path="/customers/:id" component={CustomerPage} />
-            <PrivateRoute path="/customers" component={CustomersPage} />
+            {/* <PrivateRoute path="/invoices/:id" component={InvoicePage} />
+            <PrivateRoute path="/invoices" component={InvoicesPage} /> */}
+            {/* <PrivateRoute path="/customers/:id" component={CustomerPage} />
+            <PrivateRoute path="/customers" component={CustomersPage} /> */}
             <Route path="/products" component={ProductsPage} />
             <Route path="/" component={HomePage} />
           </Switch>
