@@ -5,7 +5,7 @@
 Pour visualiser le site :
 - Ouvrir un terminal,invite de commandes ou powershell
 - Allez dans le répertoire du projet avec "cd ..."
-- Taper et executer la commande "symfony server:start"
+- Taper et exécuter la commande "symfony server:start"
 
 Pour visualiser vos modifications :
 - Ouvrir un terminal,invite de commandes ou powershell
@@ -13,7 +13,7 @@ Pour visualiser vos modifications :
 - Taper et executer la commande "yarn run encore dev --watch"
 - Ouvrir un autre terminal,invite de commandes ou powershell
 - Allez dans le répertoire du projet avec "cd ..."
-- Taper et executer la commande "symfony server:start"
+- Taper et exécuter la commande "symfony server:start"
 
 
 
