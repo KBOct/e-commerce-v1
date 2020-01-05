@@ -24,4 +24,4 @@ Pour visualiser vos modifications :
 - [ ] Finir les formulaires d'inscription et de connexion
 - [ ] Débugger l'authentification
 - [ ] Faire la page des produits
-- [ ] Faire le panier
+- [ ] Intégrer le panier (déjà fait en front)
