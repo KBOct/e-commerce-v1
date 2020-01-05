@@ -9,7 +9,7 @@ Pour visualiser le site :
 
 Pour visualiser vos modifications :
 - Ouvrir un terminal,invite de commandes ou powershell
-- Allez dans le répertoire du projet aevc "cd ..."
+- Allez dans le répertoire du projet avec "cd ..."
 - Taper et executer la commande "yarn run encore dev --watch"
 - Ouvrir un autre terminal,invite de commandes ou powershell
 - Allez dans le répertoire du projet avec "cd ..."
