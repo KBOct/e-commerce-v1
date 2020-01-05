@@ -15,10 +15,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use const E_USER_DEPRECATED;
 use function implode;
 use function sprintf;
-use function trigger_error;
 
 /**
  * Load data fixtures from bundles.
@@ -28,17 +26,9 @@ class LoadDataFixturesDoctrineCommand extends DoctrineCommand
     /** @var SymfonyFixturesLoader */
     private $fixturesLoader;
 
-    public function __construct(SymfonyFixturesLoader $fixturesLoader, ?ManagerRegistry $doctrine = null)
+    public function __construct(SymfonyFixturesLoader $fixturesLoader)
     {
-        if ($doctrine === null) {
-            @trigger_error(sprintf(
-                'The "%s" constructor expects a "%s" instance as second argument, not passing it will throw a \TypeError in DoctrineFixturesBundle 4.0.',
-                static::class,
-                ManagerRegistry::class
-            ), E_USER_DEPRECATED);
-        }
-
-        parent::__construct($doctrine);
+        parent::__construct();
 
         $this->fixturesLoader = $fixturesLoader;
     }
@@ -78,19 +68,18 @@ EOT
         );
     }
 
-    /**
-     * @return int
-     */
     // phpcs:ignore SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingReturnTypeHint
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $ui = new SymfonyStyle($input, $output);
 
-        $em = $this->getDoctrine()->getManager($input->getOption('em'));
+        /** @var ManagerRegistry $doctrine */
+        $doctrine = $this->getContainer()->get('doctrine');
+        $em       = $doctrine->getManager($input->getOption('em'));
 
         if (! $input->getOption('append')) {
             if (! $ui->confirm(sprintf('Careful, database "%s" will be purged. Do you want to continue?', $em->getConnection()->getDatabase()), ! $input->isInteractive())) {
-                return 0;
+                return;
             }
         }
 
@@ -125,7 +114,5 @@ EOT
             $ui->text(sprintf('  <comment>></comment> <info>%s</info>', $message));
         });
         $executor->execute($fixtures, $input->getOption('append'));
-
-        return 0;
     }
 }

@@ -114,7 +114,7 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
         return hash_equals($this->storage->getToken($namespacedId), $token->getValue());
     }
 
-    private function getNamespace(): string
+    private function getNamespace()
     {
         return \is_callable($ns = $this->namespace) ? $ns() : $ns;
     }

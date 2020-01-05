@@ -13,8 +13,6 @@ namespace Symfony\Component\Config\Definition\Exception;
 
 /**
  * @author Roland Franssen <franssen.roland@gmail.com>
- *
- * @internal
  */
 class TreeWithoutRootNodeException extends \RuntimeException
 {

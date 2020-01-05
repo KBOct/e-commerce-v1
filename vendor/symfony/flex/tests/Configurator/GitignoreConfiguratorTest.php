@@ -31,10 +31,10 @@ class GitignoreConfiguratorTest extends TestCase
         $lock = $this->getMockBuilder(Lock::class)->disableOriginalConstructor()->getMock();
 
         $recipe1 = $this->getMockBuilder(Recipe::class)->disableOriginalConstructor()->getMock();
-        $recipe1->expects($this->any())->method('getName')->willReturn('FooBundle');
+        $recipe1->expects($this->any())->method('getName')->will($this->returnValue('FooBundle'));
 
         $recipe2 = $this->getMockBuilder(Recipe::class)->disableOriginalConstructor()->getMock();
-        $recipe2->expects($this->any())->method('getName')->willReturn('BarBundle');
+        $recipe2->expects($this->any())->method('getName')->will($this->returnValue('BarBundle'));
 
         $gitignore = FLEX_TEST_DIR.'/.gitignore';
         @unlink($gitignore);
@@ -90,7 +90,7 @@ EOF;
         );
 
         $recipe = $this->getMockBuilder(Recipe::class)->disableOriginalConstructor()->getMock();
-        $recipe->expects($this->any())->method('getName')->willReturn('FooBundle');
+        $recipe->expects($this->any())->method('getName')->will($this->returnValue('FooBundle'));
 
         $gitignore = FLEX_TEST_DIR.'/.gitignore';
         @unlink($gitignore);

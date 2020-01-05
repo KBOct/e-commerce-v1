@@ -1,7 +1,8 @@
 /vendor
 coverage
-/tests/Fixtures/var
+/Tests/Fixtures/cache
+/Tests/Fixtures/logs
 phpunit.xml
 composer.lock
+/.phpunit
 /.php_cs.cache
-.phpunit.result.cache

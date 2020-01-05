@@ -16,8 +16,6 @@ use Twig\Node\Node;
 
 /**
  * @author Julien Galenski <julien.galenski@gmail.com>
- *
- * @final since Symfony 4.4
  */
 class DumpNode extends Node
 {
@@ -35,7 +33,7 @@ class DumpNode extends Node
     }
 
     /**
-     * @return void
+     * {@inheritdoc}
      */
     public function compile(Compiler $compiler)
     {

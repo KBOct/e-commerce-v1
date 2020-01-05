@@ -54,7 +54,7 @@ EOT
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -65,7 +65,6 @@ EOT
             ['<info>Symfony</>'],
             new TableSeparator(),
             ['Version', Kernel::VERSION],
-            ['Long-Term Support', 4 === Kernel::MINOR_VERSION ? 'Yes' : 'No'],
             ['End of maintenance', Kernel::END_OF_MAINTENANCE.(self::isExpired(Kernel::END_OF_MAINTENANCE) ? ' <error>Expired</>' : '')],
             ['End of life', Kernel::END_OF_LIFE.(self::isExpired(Kernel::END_OF_LIFE) ? ' <error>Expired</>' : '')],
             new TableSeparator(),
@@ -100,8 +99,6 @@ EOT
         }
 
         $io->table([], $rows);
-
-        return 0;
     }
 
     private static function formatPath(string $path, string $baseDir): string
@@ -125,7 +122,7 @@ EOT
 
     private static function isExpired(string $date): bool
     {
-        $date = \DateTime::createFromFormat('d/m/Y', '01/'.$date);
+        $date = \DateTime::createFromFormat('m/Y', $date);
 
         return false !== $date && new \DateTime() > $date->modify('last day of this month 23:59:59');
     }
@@ -133,9 +130,9 @@ EOT
     private static function getDotenvVars(): array
     {
         $vars = [];
-        foreach (explode(',', $_SERVER['SYMFONY_DOTENV_VARS'] ?? $_ENV['SYMFONY_DOTENV_VARS'] ?? '') as $name) {
-            if ('' !== $name && isset($_ENV[$name])) {
-                $vars[$name] = $_ENV[$name];
+        foreach (explode(',', getenv('SYMFONY_DOTENV_VARS')) as $name) {
+            if ('' !== $name && false !== $value = getenv($name)) {
+                $vars[$name] = $value;
             }
         }
 

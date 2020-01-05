@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.47.83",
     "Names": {
         "Arab": "erebî",
         "Armn": "ermenî",
@@ -14,6 +14,7 @@
         "Tibt": "tîbetî",
         "Zsym": "sembol",
         "Zxxx": "ne nivîsandî",
-        "Zyyy": "hevpar"
+        "Zyyy": "hevpar",
+        "Zzzz": "nivîsa nenas"
     }
 }

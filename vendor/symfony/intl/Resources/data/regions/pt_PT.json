@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "AM": "Arménia",
         "AX": "Alanda",
@@ -16,6 +16,7 @@
         "CZ": "Chéquia",
         "DJ": "Jibuti",
         "DM": "Domínica",
+        "EA": "Ceuta e Melilha",
         "EE": "Estónia",
         "EH": "Sara Ocidental",
         "FK": "Ilhas Malvinas (Falkland)",
@@ -48,7 +49,7 @@
         "SM": "São Marinho",
         "SV": "Salvador",
         "SX": "São Martinho (Sint Maarten)",
-        "TF": "Territórios Austrais Franceses",
+        "SZ": "Essuatíni",
         "TJ": "Tajiquistão",
         "TK": "Toquelau",
         "TM": "Turquemenistão",

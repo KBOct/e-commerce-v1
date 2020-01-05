@@ -182,7 +182,7 @@ class YamlReferenceDumper
         $this->reference .= sprintf($format, $text)."\n";
     }
 
-    private function writeArray(array $array, int $depth)
+    private function writeArray(array $array, $depth)
     {
         $isIndexed = array_values($array) === $array;
 

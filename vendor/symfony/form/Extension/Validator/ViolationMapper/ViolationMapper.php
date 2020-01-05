@@ -140,8 +140,13 @@ class ViolationMapper implements ViolationMapperInterface
      *
      * If a matching child is found, it is returned. Otherwise
      * null is returned.
+     *
+     * @param FormInterface                 $form The form to search
+     * @param PropertyPathIteratorInterface $it   The iterator at its current position
+     *
+     * @return FormInterface|null The found match or null
      */
-    private function matchChild(FormInterface $form, PropertyPathIteratorInterface $it): ?FormInterface
+    private function matchChild(FormInterface $form, PropertyPathIteratorInterface $it)
     {
         $target = null;
         $chunk = '';
@@ -206,8 +211,13 @@ class ViolationMapper implements ViolationMapperInterface
 
     /**
      * Reconstructs a property path from a violation path and a form tree.
+     *
+     * @param ViolationPath $violationPath The violation path
+     * @param FormInterface $origin        The root form of the tree
+     *
+     * @return RelativePath The reconstructed path
      */
-    private function reconstructPath(ViolationPath $violationPath, FormInterface $origin): ?RelativePath
+    private function reconstructPath(ViolationPath $violationPath, FormInterface $origin)
     {
         $propertyPathBuilder = new PropertyPathBuilder($violationPath);
         $it = $violationPath->getIterator();
@@ -258,7 +268,10 @@ class ViolationMapper implements ViolationMapperInterface
         return null !== $finalPath ? new RelativePath($origin, $finalPath) : null;
     }
 
-    private function acceptsErrors(FormInterface $form): bool
+    /**
+     * @return bool
+     */
+    private function acceptsErrors(FormInterface $form)
     {
         return $this->allowNonSynchronized || $form->isSynchronized();
     }

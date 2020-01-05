@@ -70,9 +70,6 @@ class Configuration extends \Doctrine\DBAL\Configuration
      * Gets the directory where Doctrine generates any necessary proxy class files.
      *
      * @return string|null
-     *
-     * @deprecated 2.7 We're switch to `ocramius/proxy-manager` and this method isn't applicable any longer
-     * @see https://github.com/Ocramius/ProxyManager
      */
     public function getProxyDir()
     {
@@ -85,9 +82,6 @@ class Configuration extends \Doctrine\DBAL\Configuration
      * Gets the strategy for automatically generating proxy classes.
      *
      * @return int Possible values are constants of Doctrine\Common\Proxy\AbstractProxyFactory.
-     *
-     * @deprecated 2.7 We're switch to `ocramius/proxy-manager` and this method isn't applicable any longer
-     * @see https://github.com/Ocramius/ProxyManager
      */
     public function getAutoGenerateProxyClasses()
     {
@@ -113,9 +107,6 @@ class Configuration extends \Doctrine\DBAL\Configuration
      * Gets the namespace where proxy classes reside.
      *
      * @return string|null
-     *
-     * @deprecated 2.7 We're switch to `ocramius/proxy-manager` and this method isn't applicable any longer
-     * @see https://github.com/Ocramius/ProxyManager
      */
     public function getProxyNamespace()
     {

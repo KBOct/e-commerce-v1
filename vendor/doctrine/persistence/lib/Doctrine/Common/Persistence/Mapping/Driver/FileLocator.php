@@ -2,30 +2,52 @@
 
 namespace Doctrine\Common\Persistence\Mapping\Driver;
 
-use const E_USER_DEPRECATED;
-use function class_alias;
-use function interface_exists;
-use function sprintf;
-use function trigger_error;
-
-if (! interface_exists(\Doctrine\Persistence\Mapping\Driver\FileLocator::class, false)) {
-    @trigger_error(sprintf(
-        'The %s\FileLocator class is deprecated since doctrine/persistence 1.3 and will be removed in 2.0.'
-        . ' Use \Doctrine\Persistence\Mapping\Driver\FileLocator instead.',
-        __NAMESPACE__
-    ), E_USER_DEPRECATED);
-}
-
-class_alias(
-    \Doctrine\Persistence\Mapping\Driver\FileLocator::class,
-    __NAMESPACE__ . '\FileLocator'
-);
-
-if (false) {
+/**
+ * Locates the file that contains the metadata information for a given class name.
+ *
+ * This behavior is independent of the actual content of the file. It just detects
+ * the file which is responsible for the given class name.
+ */
+interface FileLocator
+{
     /**
-     * @deprecated 1.3 Use Doctrine\Persistence\Mapping\Driver\FileLocator
+     * Locates mapping file for the given class name.
+     *
+     * @param string $className
+     *
+     * @return string
      */
-    interface FileLocator extends \Doctrine\Persistence\Mapping\Driver\FileLocator
-    {
-    }
+    public function findMappingFile($className);
+
+    /**
+     * Gets all class names that are found with this file locator.
+     *
+     * @param string $globalBasename Passed to allow excluding the basename.
+     *
+     * @return string[]
+     */
+    public function getAllClassNames($globalBasename);
+
+    /**
+     * Checks if a file can be found for this class name.
+     *
+     * @param string $className
+     *
+     * @return bool
+     */
+    public function fileExists($className);
+
+    /**
+     * Gets all the paths that this file locator looks for mapping files.
+     *
+     * @return string[]
+     */
+    public function getPaths();
+
+    /**
+     * Gets the file extension that mapping files are suffixed with.
+     *
+     * @return string
+     */
+    public function getFileExtension();
 }

@@ -50,7 +50,7 @@ class ConsoleSectionOutput extends StreamOutput
         }
 
         if ($lines) {
-            array_splice($this->content, -($lines * 2)); // Multiply lines by 2 to cater for each new line added between content
+            \array_splice($this->content, -($lines * 2)); // Multiply lines by 2 to cater for each new line added between content
         } else {
             $lines = $this->lines;
             $this->content = [];
@@ -95,9 +95,7 @@ class ConsoleSectionOutput extends StreamOutput
     protected function doWrite($message, $newline)
     {
         if (!$this->isDecorated()) {
-            parent::doWrite($message, $newline);
-
-            return;
+            return parent::doWrite($message, $newline);
         }
 
         $erasedContent = $this->popStreamContentUntilCurrentSection();

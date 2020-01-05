@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\WebProfilerBundle\Controller;
 
-use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
+use Symfony\Component\Debug\ExceptionHandler;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -19,30 +19,25 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Loader\ExistsLoaderInterface;
-use Twig\Loader\SourceContextLoaderInterface;
-
-@trigger_error(sprintf('The "%s" class is deprecated since Symfony 4.4, use "%s" instead.', ExceptionController::class, ExceptionPanelController::class), E_USER_DEPRECATED);
 
 /**
  * ExceptionController.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since Symfony 4.4, use the ExceptionPanelController instead.
  */
 class ExceptionController
 {
     protected $twig;
     protected $debug;
     protected $profiler;
-    private $errorRenderer;
+    private $fileLinkFormat;
 
-    public function __construct(Profiler $profiler = null, Environment $twig, bool $debug, FileLinkFormatter $fileLinkFormat = null, HtmlErrorRenderer $errorRenderer = null)
+    public function __construct(Profiler $profiler = null, Environment $twig, bool $debug, FileLinkFormatter $fileLinkFormat = null)
     {
         $this->profiler = $profiler;
         $this->twig = $twig;
         $this->debug = $debug;
-        $this->errorRenderer = $errorRenderer ?? new HtmlErrorRenderer($debug, $this->twig->getCharset(), $fileLinkFormat);
+        $this->fileLinkFormat = $fileLinkFormat;
     }
 
     /**
@@ -65,8 +60,10 @@ class ExceptionController
         $exception = $this->profiler->loadProfile($token)->getCollector('exception')->getException();
         $template = $this->getTemplate();
 
-        if (!$this->templateExists($template)) {
-            return new Response($this->errorRenderer->getBody($exception), 200, ['Content-Type' => 'text/html']);
+        if (!$this->twig->getLoader()->exists($template)) {
+            $handler = new ExceptionHandler($this->debug, $this->twig->getCharset(), $this->fileLinkFormat);
+
+            return new Response($handler->getContent($exception), 200, ['Content-Type' => 'text/html']);
         }
 
         $code = $exception->getStatusCode();
@@ -100,10 +97,13 @@ class ExceptionController
 
         $this->profiler->disable();
 
+        $exception = $this->profiler->loadProfile($token)->getCollector('exception')->getException();
         $template = $this->getTemplate();
 
         if (!$this->templateExists($template)) {
-            return new Response($this->errorRenderer->getStylesheet(), 200, ['Content-Type' => 'text/css']);
+            $handler = new ExceptionHandler($this->debug, $this->twig->getCharset(), $this->fileLinkFormat);
+
+            return new Response($handler->getStylesheet($exception), 200, ['Content-Type' => 'text/css']);
         }
 
         return new Response($this->twig->render('@WebProfiler/Collector/exception.css.twig'), 200, ['Content-Type' => 'text/css']);
@@ -114,25 +114,21 @@ class ExceptionController
         return '@Twig/Exception/'.($this->debug ? 'exception' : 'error').'.html.twig';
     }
 
+    // to be removed when the minimum required version of Twig is >= 2.0
     protected function templateExists($template)
     {
         $loader = $this->twig->getLoader();
-
-        if (1 === Environment::MAJOR_VERSION && !$loader instanceof ExistsLoaderInterface) {
-            try {
-                if ($loader instanceof SourceContextLoaderInterface) {
-                    $loader->getSourceContext($template);
-                } else {
-                    $loader->getSource($template);
-                }
-
-                return true;
-            } catch (LoaderError $e) {
-            }
-
-            return false;
+        if ($loader instanceof ExistsLoaderInterface) {
+            return $loader->exists($template);
         }
 
-        return $loader->exists($template);
+        try {
+            $loader->getSource($template);
+
+            return true;
+        } catch (LoaderError $e) {
+        }
+
+        return false;
     }
 }

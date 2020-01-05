@@ -251,7 +251,7 @@ class ChoiceType extends AbstractType
     {
         $emptyData = function (Options $options) {
             if ($options['expanded'] && !$options['multiple']) {
-                return null;
+                return;
             }
 
             if ($options['multiple']) {
@@ -268,13 +268,13 @@ class ChoiceType extends AbstractType
         $placeholderNormalizer = function (Options $options, $placeholder) {
             if ($options['multiple']) {
                 // never use an empty value for this case
-                return null;
+                return;
             } elseif ($options['required'] && ($options['expanded'] || isset($options['attr']['size']) && $options['attr']['size'] > 1)) {
                 // placeholder for required radio buttons or a select with size > 1 does not make sense
-                return null;
+                return;
             } elseif (false === $placeholder) {
                 // an empty value should be added but the user decided otherwise
-                return null;
+                return;
             } elseif ($options['expanded'] && '' === $placeholder) {
                 // never use an empty label for radio buttons
                 return 'None';
@@ -362,6 +362,9 @@ class ChoiceType extends AbstractType
         }
     }
 
+    /**
+     * @return mixed
+     */
     private function addSubForm(FormBuilderInterface $builder, string $name, ChoiceView $choiceView, array $options)
     {
         $choiceOpts = [
@@ -373,12 +376,12 @@ class ChoiceType extends AbstractType
         ];
 
         if ($options['multiple']) {
-            $choiceType = CheckboxType::class;
+            $choiceType = __NAMESPACE__.'\CheckboxType';
             // The user can check 0 or more checkboxes. If required
             // is true, they are required to check all of them.
             $choiceOpts['required'] = false;
         } else {
-            $choiceType = RadioType::class;
+            $choiceType = __NAMESPACE__.'\RadioType';
         }
 
         $builder->add($name, $choiceType, $choiceOpts);

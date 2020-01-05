@@ -70,7 +70,7 @@ Suppose that you have the following security configuration in your application:
 security:
     encoders:
         Symfony\Component\Security\Core\User\User: plaintext
-        App\Entity\User: auto
+        App\Entity\User: bcrypt
 </comment>
 
 If you execute the command non-interactively, the first available configured
@@ -101,7 +101,7 @@ EOF
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $errorIo = $output instanceof ConsoleOutputInterface ? new SymfonyStyle($input, $output->getErrorOutput()) : $io;
@@ -162,8 +162,6 @@ EOF
         }
 
         $errorIo->success('Password encoding succeeded');
-
-        return 0;
     }
 
     /**
@@ -182,12 +180,12 @@ EOF
         })->setHidden(true)->setMaxAttempts(20);
     }
 
-    private function generateSalt(): string
+    private function generateSalt()
     {
         return base64_encode(random_bytes(30));
     }
 
-    private function getUserClass(InputInterface $input, SymfonyStyle $io): string
+    private function getUserClass(InputInterface $input, SymfonyStyle $io)
     {
         if (null !== $userClass = $input->getArgument('user-class')) {
             return $userClass;

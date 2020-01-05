@@ -22,8 +22,6 @@ use Twig\NodeVisitor\AbstractNodeVisitor;
  * TranslationNodeVisitor extracts translation messages.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class TranslationNodeVisitor extends AbstractNodeVisitor
 {
@@ -32,18 +30,12 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
     private $enabled = false;
     private $messages = [];
 
-    /**
-     * @return void
-     */
     public function enable()
     {
         $this->enabled = true;
         $this->messages = [];
     }
 
-    /**
-     * @return void
-     */
     public function disable()
     {
         $this->enabled = false;
@@ -57,8 +49,6 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
 
     /**
      * {@inheritdoc}
-     *
-     * @return Node
      */
     protected function doEnterNode(Node $node, Environment $env)
     {
@@ -99,8 +89,6 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
 
     /**
      * {@inheritdoc}
-     *
-     * @return Node|null
      */
     protected function doLeaveNode(Node $node, Environment $env)
     {
@@ -109,8 +97,6 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
 
     /**
      * {@inheritdoc}
-     *
-     * @return int
      */
     public function getPriority()
     {

@@ -21,7 +21,7 @@ use Symfony\Component\Intl\Exception\MissingResourceException;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
- * @internal to be removed in 5.0.
+ * @internal
  */
 class RegionBundle extends RegionDataProvider implements RegionBundleInterface
 {
@@ -42,7 +42,7 @@ class RegionBundle extends RegionDataProvider implements RegionBundleInterface
         try {
             return $this->getName($country, $displayLocale);
         } catch (MissingResourceException $e) {
-            return null;
+            return;
         }
     }
 

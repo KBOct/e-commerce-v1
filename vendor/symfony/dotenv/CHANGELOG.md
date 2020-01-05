@@ -1,11 +1,6 @@
 CHANGELOG
 =========
 
-4.3.0
------
-
- * deprecated use of `putenv()` by default. This feature will be opted-in with a constructor argument to `Dotenv`
-
 4.2.0
 -----
 

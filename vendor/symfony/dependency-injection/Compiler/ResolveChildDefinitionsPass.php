@@ -12,7 +12,6 @@
 namespace Symfony\Component\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ChildDefinition;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\ExceptionInterface;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
@@ -53,9 +52,11 @@ class ResolveChildDefinitionsPass extends AbstractRecursivePass
     /**
      * Resolves the definition.
      *
+     * @return Definition
+     *
      * @throws RuntimeException When the definition is invalid
      */
-    private function resolveDefinition(ChildDefinition $definition): Definition
+    private function resolveDefinition(ChildDefinition $definition)
     {
         try {
             return $this->doResolveDefinition($definition);
@@ -70,7 +71,7 @@ class ResolveChildDefinitionsPass extends AbstractRecursivePass
         }
     }
 
-    private function doResolveDefinition(ChildDefinition $definition): Definition
+    private function doResolveDefinition(ChildDefinition $definition)
     {
         if (!$this->container->has($parent = $definition->getParent())) {
             throw new RuntimeException(sprintf('Parent definition "%s" does not exist.', $parent));
@@ -150,7 +151,7 @@ class ResolveChildDefinitionsPass extends AbstractRecursivePass
             if (null === $decoratedService) {
                 $def->setDecoratedService($decoratedService);
             } else {
-                $def->setDecoratedService($decoratedService[0], $decoratedService[1], $decoratedService[2], $decoratedService[3] ?? ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE);
+                $def->setDecoratedService($decoratedService[0], $decoratedService[1], $decoratedService[2]);
             }
         }
 
@@ -175,8 +176,9 @@ class ResolveChildDefinitionsPass extends AbstractRecursivePass
             $def->setMethodCalls(array_merge($def->getMethodCalls(), $calls));
         }
 
-        $def->addError($parentDef);
-        $def->addError($definition);
+        foreach (array_merge($parentDef->getErrors(), $definition->getErrors()) as $v) {
+            $def->addError($v);
+        }
 
         // these attributes are always taken from the child
         $def->setAbstract($definition->isAbstract());

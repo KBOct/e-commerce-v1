@@ -42,7 +42,7 @@ class FileValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof File) {
-            throw new UnexpectedTypeException($constraint, File::class);
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\File');
         }
 
         if (null === $value || '' === $value) {
@@ -61,53 +61,53 @@ class FileValidator extends ConstraintValidator
                         $binaryFormat = null === $constraint->binaryFormat ? true : $constraint->binaryFormat;
                     }
 
-                    list(, $limitAsString, $suffix) = $this->factorizeSizes(0, $limitInBytes, $binaryFormat);
+                    list($sizeAsString, $limitAsString, $suffix) = $this->factorizeSizes(0, $limitInBytes, $binaryFormat);
                     $this->context->buildViolation($constraint->uploadIniSizeErrorMessage)
                         ->setParameter('{{ limit }}', $limitAsString)
                         ->setParameter('{{ suffix }}', $suffix)
-                        ->setCode((string) UPLOAD_ERR_INI_SIZE)
+                        ->setCode(UPLOAD_ERR_INI_SIZE)
                         ->addViolation();
 
                     return;
                 case UPLOAD_ERR_FORM_SIZE:
                     $this->context->buildViolation($constraint->uploadFormSizeErrorMessage)
-                        ->setCode((string) UPLOAD_ERR_FORM_SIZE)
+                        ->setCode(UPLOAD_ERR_FORM_SIZE)
                         ->addViolation();
 
                     return;
                 case UPLOAD_ERR_PARTIAL:
                     $this->context->buildViolation($constraint->uploadPartialErrorMessage)
-                        ->setCode((string) UPLOAD_ERR_PARTIAL)
+                        ->setCode(UPLOAD_ERR_PARTIAL)
                         ->addViolation();
 
                     return;
                 case UPLOAD_ERR_NO_FILE:
                     $this->context->buildViolation($constraint->uploadNoFileErrorMessage)
-                        ->setCode((string) UPLOAD_ERR_NO_FILE)
+                        ->setCode(UPLOAD_ERR_NO_FILE)
                         ->addViolation();
 
                     return;
                 case UPLOAD_ERR_NO_TMP_DIR:
                     $this->context->buildViolation($constraint->uploadNoTmpDirErrorMessage)
-                        ->setCode((string) UPLOAD_ERR_NO_TMP_DIR)
+                        ->setCode(UPLOAD_ERR_NO_TMP_DIR)
                         ->addViolation();
 
                     return;
                 case UPLOAD_ERR_CANT_WRITE:
                     $this->context->buildViolation($constraint->uploadCantWriteErrorMessage)
-                        ->setCode((string) UPLOAD_ERR_CANT_WRITE)
+                        ->setCode(UPLOAD_ERR_CANT_WRITE)
                         ->addViolation();
 
                     return;
                 case UPLOAD_ERR_EXTENSION:
                     $this->context->buildViolation($constraint->uploadExtensionErrorMessage)
-                        ->setCode((string) UPLOAD_ERR_EXTENSION)
+                        ->setCode(UPLOAD_ERR_EXTENSION)
                         ->addViolation();
 
                     return;
                 default:
                     $this->context->buildViolation($constraint->uploadErrorMessage)
-                        ->setCode((string) $value->getError())
+                        ->setCode($value->getError())
                         ->addViolation();
 
                     return;
@@ -199,16 +199,16 @@ class FileValidator extends ConstraintValidator
         }
     }
 
-    private static function moreDecimalsThan(string $double, int $numberOfDecimals): bool
+    private static function moreDecimalsThan($double, $numberOfDecimals)
     {
-        return \strlen($double) > \strlen(round($double, $numberOfDecimals));
+        return \strlen((string) $double) > \strlen(round($double, $numberOfDecimals));
     }
 
     /**
      * Convert the limit to the smallest possible number
      * (i.e. try "MB", then "kB", then "bytes").
      */
-    private function factorizeSizes(int $size, int $limit, bool $binaryFormat): array
+    private function factorizeSizes($size, $limit, $binaryFormat)
     {
         if ($binaryFormat) {
             $coef = self::MIB_BYTES;

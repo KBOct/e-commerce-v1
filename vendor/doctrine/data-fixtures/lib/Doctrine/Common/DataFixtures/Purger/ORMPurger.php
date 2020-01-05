@@ -7,9 +7,6 @@ use Doctrine\Common\DataFixtures\Sorter\TopologicalSorter;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use function array_search;
-use function is_callable;
-use function preg_match;
 
 /**
  * Class responsible for purging databases of data before reloading data fixtures.
@@ -129,29 +126,13 @@ class ORMPurger implements PurgerInterface
         $connection = $this->em->getConnection();
         $filterExpr = $connection->getConfiguration()->getFilterSchemaAssetsExpression();
         $emptyFilterExpression = empty($filterExpr);
-
-        $schemaAssetsFilter = method_exists($connection->getConfiguration(), 'getSchemaAssetsFilter') ? $connection->getConfiguration()->getSchemaAssetsFilter() : null;
-
         foreach($orderedTables as $tbl) {
-            // If we have a filter expression, check it and skip if necessary
-            if (!$emptyFilterExpression && !preg_match($filterExpr, $tbl)) {
-                continue;
-            }
-
-            // If the table is excluded, skip it as well
-            if (array_search($tbl, $this->excluded) !== false) {
-                continue;
-            }
-
-            // Support schema asset filters as presented in
-            if (is_callable($schemaAssetsFilter) && !$schemaAssetsFilter($tbl)) {
-                continue;
-            }
-
-            if ($this->purgeMode === self::PURGE_MODE_DELETE) {
-                $connection->executeUpdate("DELETE FROM " . $tbl);
-            } else {
-                $connection->executeUpdate($platform->getTruncateTableSQL($tbl, true));
+            if(($emptyFilterExpression||preg_match($filterExpr, $tbl)) && array_search($tbl, $this->excluded) === false){
+                if ($this->purgeMode === self::PURGE_MODE_DELETE) {
+                    $connection->executeUpdate("DELETE FROM " . $tbl);
+                } else {
+                    $connection->executeUpdate($platform->getTruncateTableSQL($tbl, true));
+                }
             }
         }
     }

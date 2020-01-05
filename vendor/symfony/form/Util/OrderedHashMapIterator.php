@@ -128,7 +128,7 @@ class OrderedHashMapIterator implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function valid(): bool
+    public function valid()
     {
         return null !== $this->key;
     }

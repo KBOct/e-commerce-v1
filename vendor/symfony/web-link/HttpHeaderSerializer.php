@@ -26,8 +26,10 @@ final class HttpHeaderSerializer
      * Builds the value of the "Link" HTTP header.
      *
      * @param LinkInterface[]|\Traversable $links
+     *
+     * @return string|null
      */
-    public function serialize(iterable $links): ?string
+    public function serialize(iterable $links)
     {
         $elements = [];
         foreach ($links as $link) {

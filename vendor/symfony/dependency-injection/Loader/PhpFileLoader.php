@@ -23,8 +23,6 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
  */
 class PhpFileLoader extends FileLoader
 {
-    protected $autoRegisterAliasesForSinglyImplementedInterfaces = false;
-
     /**
      * {@inheritdoc}
      */
@@ -43,15 +41,10 @@ class PhpFileLoader extends FileLoader
             return include $path;
         }, $this, ProtectedPhpFileLoader::class);
 
-        try {
-            $callback = $load($path);
+        $callback = $load($path);
 
-            if (\is_object($callback) && \is_callable($callback)) {
-                $callback(new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource), $this->container, $this);
-            }
-        } finally {
-            $this->instanceof = [];
-            $this->registerAliasesForSinglyImplementedInterfaces();
+        if (\is_object($callback) && \is_callable($callback)) {
+            $callback(new ContainerConfigurator($this->container, $this, $this->instanceof, $path, $resource), $this->container, $this);
         }
     }
 

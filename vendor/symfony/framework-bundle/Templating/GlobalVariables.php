@@ -11,8 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating;
 
-@trigger_error('The '.GlobalVariables::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig instead.', E_USER_DEPRECATED);
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -22,8 +20,6 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
  * GlobalVariables is the entry point for Symfony global variables in PHP templates.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class GlobalVariables
 {
@@ -40,7 +36,7 @@ class GlobalVariables
     public function getToken()
     {
         if (!$this->container->has('security.token_storage')) {
-            return null;
+            return;
         }
 
         return $this->container->get('security.token_storage')->getToken();
@@ -49,12 +45,15 @@ class GlobalVariables
     public function getUser()
     {
         if (!$token = $this->getToken()) {
-            return null;
+            return;
         }
 
         $user = $token->getUser();
+        if (!\is_object($user)) {
+            return;
+        }
 
-        return \is_object($user) ? $user : null;
+        return $user;
     }
 
     /**
@@ -62,7 +61,9 @@ class GlobalVariables
      */
     public function getRequest()
     {
-        return $this->container->has('request_stack') ? $this->container->get('request_stack')->getCurrentRequest() : null;
+        if ($this->container->has('request_stack')) {
+            return $this->container->get('request_stack')->getCurrentRequest();
+        }
     }
 
     /**
@@ -70,9 +71,9 @@ class GlobalVariables
      */
     public function getSession()
     {
-        $request = $this->getRequest();
-
-        return $request && $request->hasSession() ? $request->getSession() : null;
+        if ($request = $this->getRequest()) {
+            return $request->getSession();
+        }
     }
 
     /**

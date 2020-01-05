@@ -42,9 +42,7 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
         $this->signalingException = new RuntimeException('Invalid reference.');
 
         try {
-            foreach ($container->getDefinitions() as $this->currentId => $definition) {
-                $this->processValue($definition);
-            }
+            $this->processValue($container->getDefinitions(), 1);
         } finally {
             $this->container = $this->signalingException = null;
         }
@@ -53,11 +51,9 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
     /**
      * Processes arguments to determine invalid references.
      *
-     * @return mixed
-     *
      * @throws RuntimeException When an invalid reference is found
      */
-    private function processValue($value, int $rootLevel = 0, int $level = 0)
+    private function processValue($value, $rootLevel = 0, $level = 0)
     {
         if ($value instanceof ServiceClosureArgument) {
             $value->setValues($this->processValue($value->getValues(), 1, 1));
@@ -74,6 +70,9 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
             $i = 0;
 
             foreach ($value as $k => $v) {
+                if (!$rootLevel) {
+                    $this->currentId = $k;
+                }
                 try {
                     if (false !== $i && $k !== $i++) {
                         $i = false;
@@ -100,14 +99,6 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
             if ($this->container->has($id = (string) $value)) {
                 return $value;
             }
-
-            $currentDefinition = $this->container->getDefinition($this->currentId);
-
-            // resolve decorated service behavior depending on decorator service
-            if ($currentDefinition->innerServiceId === $id && ContainerInterface::NULL_ON_INVALID_REFERENCE === $currentDefinition->decorationOnInvalid) {
-                return null;
-            }
-
             $invalidBehavior = $value->getInvalidBehavior();
 
             if (ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE === $invalidBehavior && $value instanceof TypedReference && !$this->container->has($id)) {

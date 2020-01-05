@@ -99,7 +99,7 @@
             {%- endif -%}
         {%- endif -%}
         <label{% with { attr: label_attr } %}{{ block('attributes') }}{% endwith %}>
-            {{- widget|raw }} {{ label is not same as(false) ? (translation_domain is same as(false) ? label : label|trans(label_translation_parameters, translation_domain)) -}}
+            {{- widget|raw }} {{ label is not same as(false) ? (translation_domain is same as(false) ? label : label|trans({}, translation_domain)) -}}
         </label>
     {%- endif -%}
 {%- endblock checkbox_radio_label %}
@@ -111,16 +111,15 @@
     {%- if help is not empty -%}
         {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
     {%- endif -%}
-    <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' ~ ((not compound or force_error|default(false)) and not valid ? ' has-error'))|trim})} %}{{ block('attributes') }}{% endwith %}>
+    <div class="form-group{% if (not compound or force_error|default(false)) and not valid %} has-error{% endif %}">
         {{- form_label(form) }} {# -#}
         {{ form_widget(form, widget_attr) }} {# -#}
-        {{- form_help(form) -}}
         {{ form_errors(form) }} {# -#}
     </div> {# -#}
 {%- endblock form_row %}
 
 {% block button_row -%}
-    <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group')|trim})} %}{{ block('attributes') }}{% endwith %}>
+    <div class="form-group">
         {{- form_widget(form) -}}
     </div>
 {%- endblock button_row %}
@@ -146,14 +145,14 @@
 {%- endblock datetime_row %}
 
 {% block checkbox_row -%}
-    <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' ~ (not valid ? ' has-error'))|trim})} %}{{ block('attributes') }}{% endwith %}>
+    <div class="form-group{% if not valid %} has-error{% endif %}">
         {{- form_widget(form) -}}
         {{- form_errors(form) -}}
     </div>
 {%- endblock checkbox_row %}
 
 {% block radio_row -%}
-    <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' ~ (not valid ? ' has-error'))|trim})} %}{{ block('attributes') }}{% endwith %}>
+    <div class="form-group{% if not valid %} has-error{% endif %}">
         {{- form_widget(form) -}}
         {{- form_errors(form) -}}
     </div>
@@ -180,17 +179,9 @@
         {%- set help_attr = help_attr|merge({class: (help_attr.class|default('') ~ ' help-block')|trim}) -%}
         <span id="{{ id }}_help"{% with { attr: help_attr } %}{{ block('attributes') }}{% endwith %}>
             {%- if translation_domain is same as(false) -%}
-                {%- if help_html is same as(false) -%}
-                    {{- help -}}
-                {%- else -%}
-                    {{- help|raw -}}
-                {%- endif -%}
+                {{- help -}}
             {%- else -%}
-                {%- if help_html is same as(false) -%}
-                    {{- help|trans(help_translation_parameters, translation_domain) -}}
-                {%- else -%}
-                    {{- help|trans(help_translation_parameters, translation_domain)|raw -}}
-                {%- endif -%}
+                {{- help|trans({}, translation_domain) -}}
             {%- endif -%}
         </span>
     {%- endif -%}

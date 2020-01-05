@@ -53,30 +53,24 @@ class FlexTest extends TestCase
                     'origin' => 'dummy/dummy:1.0@github.com/symfony/recipes:master',
                 ],
             ],
-            'locks' => [
-                'dummy/dummy' => [
-                    'recipe' => [],
-                    'version' => '',
-                ],
-            ],
         ];
 
         $configurator = $this->getMockBuilder(Configurator::class)->disableOriginalConstructor()->getMock();
-        $configurator->expects($this->once())->method('install')->with($this->equalTo(new Recipe($package, 'dummy/dummy', 'install', $data['manifests']['dummy/dummy'], $data['locks']['dummy/dummy'])));
+        $configurator->expects($this->once())->method('install')->with($this->equalTo(new Recipe($package, 'dummy/dummy', 'install', $data['manifests']['dummy/dummy'])));
 
         $downloader = $this->getMockBuilder(Downloader::class)->disableOriginalConstructor()->getMock();
         $downloader->expects($this->once())->method('getRecipes')->willReturn($data);
-        $downloader->expects($this->once())->method('isEnabled')->willReturn(true);
+        $downloader->expects($this->once())->method('getEndpoint')->willReturn('dummy');
 
         $io = new BufferIO('', OutputInterface::VERBOSITY_VERBOSE);
         $locker = $this->getMockBuilder(Locker::class)->disableOriginalConstructor()->getMock();
-        $locker->expects($this->any())->method('getLockData')->willReturn(['content-hash' => 'random']);
+        $locker->expects($this->any())->method('getLockData')->will($this->returnValue(['content-hash' => 'random']));
 
         $package = $this->getMockBuilder(RootPackageInterface::class)->disableOriginalConstructor()->getMock();
-        $package->expects($this->any())->method('getExtra')->willReturn(['symfony' => ['allow-contrib' => true]]);
+        $package->expects($this->any())->method('getExtra')->will($this->returnValue(['symfony' => ['allow-contrib' => true]]));
 
         $lock = $this->getMockBuilder(Lock::class)->disableOriginalConstructor()->getMock();
-        $lock->expects($this->any())->method('has')->willReturn(false);
+        $lock->expects($this->any())->method('has')->will($this->returnValue(false));
 
         $flex = \Closure::bind(function () use ($configurator, $downloader, $io, $locker, $package, $lock) {
             $flex = new Flex();
@@ -127,8 +121,8 @@ EOF
         $composer = new Composer();
         $composer->setConfig(Factory::createConfig($io));
         $package = $this->getMockBuilder(RootPackageInterface::class)->disableOriginalConstructor()->getMock();
-        $package->method('getExtra')->willReturn(['symfony' => ['allow-contrib' => true]]);
-        $package->method('getRequires')->willReturn([new Link('dummy', 'symfony/flex')]);
+        $package->method('getExtra')->will($this->returnValue(['symfony' => ['allow-contrib' => true]]));
+        $package->method('getRequires')->will($this->returnValue([new Link('dummy', 'symfony/flex')]));
         $composer->setPackage($package);
         $localRepo = $this->getMockBuilder(WritableRepositoryInterface::class)->disableOriginalConstructor()->getMock();
         $manager = $this->getMockBuilder(RepositoryManager::class)->disableOriginalConstructor()->getMock();

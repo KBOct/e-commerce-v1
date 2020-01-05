@@ -21,8 +21,6 @@ namespace Doctrine\ORM\Tools\Export\Driver;
 
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Export\ExportException;
-use const E_USER_DEPRECATED;
-use function trigger_error;
 
 /**
  * Abstract base class which is to be used for the Exporter drivers
@@ -31,8 +29,6 @@ use function trigger_error;
  * @link    www.doctrine-project.org
  * @since   2.0
  * @author  Jonathan Wage <jonwage@gmail.com>
- *
- * @deprecated 2.7 This class is being removed from the ORM and won't have any replacement
  */
 abstract class AbstractExporter
 {
@@ -61,8 +57,6 @@ abstract class AbstractExporter
      */
     public function __construct($dir = null)
     {
-        @trigger_error(static::class . ' is deprecated and will be removed in Doctrine ORM 3.0', E_USER_DEPRECATED);
-
         $this->_outputDir = $dir;
     }
 

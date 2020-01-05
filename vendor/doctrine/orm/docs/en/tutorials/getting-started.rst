@@ -19,7 +19,7 @@ installed:
 
 - PHP (latest stable version)
 - Composer Package Manager (`Install Composer
-  <https://getcomposer.org/doc/00-intro.md>`_)
+  <http://getcomposer.org/doc/00-intro.md>`_)
 
 The code of this tutorial is `available on Github <https://github.com/doctrine/doctrine2-orm-tutorial>`_.
 
@@ -31,8 +31,9 @@ The code of this tutorial is `available on Github <https://github.com/doctrine/d
 What is Doctrine?
 -----------------
 
-Doctrine 2 is an `object-relational mapper (ORM) <https://en.wikipedia.org/wiki/Object-relational_mapping>`_
-for PHP 7.1+ that provides transparent persistence for PHP objects. It uses the Data Mapper
+Doctrine 2 is an `object-relational mapper (ORM)
+<http://en.wikipedia.org/wiki/Object-relational_mapping>`_ for PHP 5.4+ that
+provides transparent persistence for PHP objects. It uses the Data Mapper
 pattern at the heart, aiming for a complete separation of your domain/business
 logic from the persistence in a relational database management system.
 
@@ -61,7 +62,7 @@ An Example Model: Bug Tracker
 
 For this Getting Started Guide for Doctrine we will implement the
 Bug Tracker domain model from the
-`Zend_Db_Table <https://framework.zend.com/manual/1.12/en/zend.db.adapter.html>`_
+`Zend\_Db\_Table <http://framework.zend.com/manual/1.12/en/zend.db.adapter.html>`_
 documentation. Reading their documentation we can extract the
 requirements:
 
@@ -138,10 +139,7 @@ step:
     
     // Create a simple "default" Doctrine ORM configuration for Annotations
     $isDevMode = true;
-    $proxyDir = null;
-    $cache = null;
-    $useSimpleAnnotationReader = false;
-    $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src"), $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader);
+    $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src"), $isDevMode);
     // or if you prefer yaml or XML
     //$config = Setup::createXMLMetadataConfiguration(array(__DIR__."/config/xml"), $isDevMode);
     //$config = Setup::createYAMLMetadataConfiguration(array(__DIR__."/config/yaml"), $isDevMode);
@@ -159,10 +157,6 @@ step:
     The YAML driver is deprecated and will be removed in version 3.0.
     It is strongly recommended to switch to one of the other mappings.
 
-.. note::
-    It is recommended not to use the SimpleAnnotationReader because its
-    usage will be removed for version 3.0.
-
 The ``require_once`` statement sets up the class autoloading for Doctrine and
 its dependencies using Composer's autoloader.
 
@@ -175,7 +169,7 @@ read up on the configuration details in the
 The third block shows the configuration options required to connect to
 a database. In this case, we'll use a file-based SQLite database. All the
 configuration options for all the shipped drivers are given in the
-`DBAL Configuration section of the manual <https://www.doctrine-project.org/projects/doctrine-dbal/en/current/>`_.
+`DBAL Configuration section of the manual <http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/>`_.
 
 The last block shows how the ``EntityManager`` is obtained from a
 factory method.
@@ -290,24 +284,14 @@ but you only need to choose one.
 
         <?php
         // src/Product.php
-
-        use Doctrine\ORM\Mapping as ORM;
-
         /**
-         * @ORM\Entity
-         * @ORM\Table(name="products")
-         */
+         * @Entity @Table(name="products")
+         **/
         class Product
         {
-            /** 
-             * @ORM\Id
-             * @ORM\Column(type="integer")
-             * @ORM\GeneratedValue
-             */
+            /** @Id @Column(type="integer") @GeneratedValue **/
             protected $id;
-            /** 
-             * @ORM\Column(type="string") 
-             */
+            /** @Column(type="string") **/
             protected $name;
 
             // .. (other code)
@@ -484,37 +468,28 @@ classes. We'll store them in ``src/Bug.php`` and ``src/User.php``, respectively.
 
     <?php
     // src/Bug.php
-
-    use Doctrine\ORM\Mapping as ORM;
-
     /**
-     * @ORM\Entity(repositoryClass="BugRepository")
-     * @ORM\Table(name="bugs")
+     * @Entity(repositoryClass="BugRepository") @Table(name="bugs")
      */
     class Bug
     {
         /**
-         * @ORM\Id
-         * @ORM\Column(type="integer")
-         * @ORM\GeneratedValue
+         * @Id @Column(type="integer") @GeneratedValue
          * @var int
          */
         protected $id;
-
         /**
-         * @ORM\Column(type="string")
+         * @Column(type="string")
          * @var string
          */
         protected $description;
-
         /**
-         * @ORM\Column(type="datetime")
+         * @Column(type="datetime")
          * @var DateTime
          */
         protected $created;
-
         /**
-         * @ORM\Column(type="string")
+         * @Column(type="string")
          * @var string
          */
         protected $status;
@@ -559,25 +534,18 @@ classes. We'll store them in ``src/Bug.php`` and ``src/User.php``, respectively.
 
     <?php
     // src/User.php
-
-    use Doctrine\ORM\Mapping as ORM;
-
     /**
-     * @ORM\Entity 
-     * @ORM\Table(name="users")
+     * @Entity @Table(name="users")
      */
     class User
     {
         /**
-         * @ORM\Id
-         * @ORM\GeneratedValue
-         * @ORM\Column(type="integer")
+         * @Id @GeneratedValue @Column(type="integer")
          * @var int
          */
         protected $id;
-
         /**
-         * @ORM\Column(type="string")
+         * @Column(type="string")
          * @var string
          */
         protected $name;
@@ -807,7 +775,7 @@ the database that points from Bugs to Products.
     {
         // ... (previous code)
 
-        protected $products;
+        protected $products = null;
 
         public function assignToProduct(Product $product)
         {
@@ -829,50 +797,41 @@ the ``Product`` before:
 
         <?php
         // src/Bug.php
-
-        use Doctrine\ORM\Mapping as ORM;
-
         /**
-         * @ORM\Entity 
-         * @ORM\Table(name="bugs")
-         */
+         * @Entity @Table(name="bugs")
+         **/
         class Bug
         {
             /**
-             * @ORM\Id 
-             * @ORM\Column(type="integer") 
-             * @ORM\GeneratedValue
-             */
+             * @Id @Column(type="integer") @GeneratedValue
+             **/
             protected $id;
-
             /**
-             * @ORM\Column(type="string")
-             */
+             * @Column(type="string")
+             **/
             protected $description;
-
             /**
-             * @ORM\Column(type="datetime")
-             */
+             * @Column(type="datetime")
+             **/
             protected $created;
-
             /**
-             * @ORM\Column(type="string")
-             */
+             * @Column(type="string")
+             **/
             protected $status;
 
             /**
-             * @ORM\ManyToOne(targetEntity="User", inversedBy="assignedBugs")
-             */
+             * @ManyToOne(targetEntity="User", inversedBy="assignedBugs")
+             **/
             protected $engineer;
 
             /**
-             * @ORM\ManyToOne(targetEntity="User", inversedBy="reportedBugs")
-             */
+             * @ManyToOne(targetEntity="User", inversedBy="reportedBugs")
+             **/
             protected $reporter;
 
             /**
-             * @ORM\ManyToMany(targetEntity="Product")
-             */
+             * @ManyToMany(targetEntity="Product")
+             **/
             protected $products;
 
             // ... (other code)
@@ -966,40 +925,34 @@ Finally, we'll add metadata mappings for the ``User`` entity.
 
         <?php
         // src/User.php
-
-        use Doctrine\ORM\Mapping as ORM;
-
         /**
-         * @ORM\Entity
-         * @ORM\Table(name="users")
-         */
+         * @Entity @Table(name="users")
+         **/
         class User
         {
             /**
-             * @ORM\Id 
-             * @ORM\GeneratedValue 
-             * @ORM\Column(type="integer")
+             * @Id @GeneratedValue @Column(type="integer")
              * @var int
-             */
+             **/
             protected $id;
 
             /**
-             * @ORM\Column(type="string")
+             * @Column(type="string")
              * @var string
-             */
+             **/
             protected $name;
 
             /**
-             * @ORM\OneToMany(targetEntity="Bug", mappedBy="reporter")
+             * @OneToMany(targetEntity="Bug", mappedBy="reporter")
              * @var Bug[] An ArrayCollection of Bug objects.
-             */
-            protected $reportedBugs;
+             **/
+            protected $reportedBugs = null;
 
             /**
-             * @ORM\OneToMany(targetEntity="Bug", mappedBy="engineer")
+             * @OneToMany(targetEntity="Bug", mappedBy="engineer")
              * @var Bug[] An ArrayCollection of Bug objects.
-             */
-            protected $assignedBugs;
+             **/
+            protected $assignedBugs = null;
 
             // .. (other code)
         }
@@ -1210,7 +1163,8 @@ The console output of this script is then:
     throw your ORM into the dumpster, because it doesn't support some
     the more powerful SQL concepts.
 
-    If you need to build your query dynamically, you can use the ``QueryBuilder`` retrieved
+
+    Instead of handwriting DQL you can use the ``QueryBuilder`` retrieved
     by calling ``$entityManager->createQueryBuilder()``. There are more
     details about this in the relevant part of the documentation.
 
@@ -1536,12 +1490,9 @@ we have to adjust the metadata slightly.
     .. code-block:: php
 
         <?php
-
-        use Doctrine\ORM\Mapping as ORM;
-
         /**
-         * @ORM\Entity(repositoryClass="BugRepository")
-         * @ORM\Table(name="bugs")
+         * @Entity(repositoryClass="BugRepository")
+         * @Table(name="bugs")
          **/
         class Bug
         {

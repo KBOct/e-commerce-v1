@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  *
  * @internal
  */
-final class VoteEvent extends Event
+class VoteEvent extends Event
 {
     private $voter;
     private $subject;

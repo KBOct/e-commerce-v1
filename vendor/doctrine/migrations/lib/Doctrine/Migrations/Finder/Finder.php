@@ -109,6 +109,10 @@ abstract class Finder implements MigrationFinder
 
     private function isReflectionClassInNamespace(ReflectionClass $reflectionClass, string $namespace) : bool
     {
-        return strncmp($reflectionClass->getName(), $namespace . '\\', strlen($namespace) + 1) === 0;
+        if (strncmp($reflectionClass->getName(), $namespace . '\\', strlen($namespace) + 1) === 0) {
+            return true;
+        }
+
+        return false;
     }
 }

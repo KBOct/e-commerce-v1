@@ -78,7 +78,9 @@ class PropertyAccessDecorator implements ChoiceListFactoryInterface
                 // when such values are passed to
                 // ChoiceListInterface::getValuesForChoices(). Handle this case
                 // so that the call to getValue() doesn't break.
-                return \is_object($choice) || \is_array($choice) ? $accessor->getValue($choice, $value) : null;
+                if (\is_object($choice) || \is_array($choice)) {
+                    return $accessor->getValue($choice, $value);
+                }
             };
         }
 
@@ -88,8 +90,9 @@ class PropertyAccessDecorator implements ChoiceListFactoryInterface
     /**
      * {@inheritdoc}
      *
-     * @param callable|string|PropertyPath|null $value The callable or path for
-     *                                                 generating the choice values
+     * @param ChoiceLoaderInterface             $loader The choice loader
+     * @param callable|string|PropertyPath|null $value  The callable or path for
+     *                                                  generating the choice values
      *
      * @return ChoiceListInterface The choice list
      */
@@ -106,7 +109,9 @@ class PropertyAccessDecorator implements ChoiceListFactoryInterface
                 // when such values are passed to
                 // ChoiceListInterface::getValuesForChoices(). Handle this case
                 // so that the call to getValue() doesn't break.
-                return \is_object($choice) || \is_array($choice) ? $accessor->getValue($choice, $value) : null;
+                if (\is_object($choice) || \is_array($choice)) {
+                    return $accessor->getValue($choice, $value);
+                }
             };
         }
 
@@ -116,6 +121,7 @@ class PropertyAccessDecorator implements ChoiceListFactoryInterface
     /**
      * {@inheritdoc}
      *
+     * @param ChoiceListInterface                     $list             The choice list
      * @param array|callable|string|PropertyPath|null $preferredChoices The preferred choices
      * @param callable|string|PropertyPath|null       $label            The callable or path generating the choice labels
      * @param callable|string|PropertyPath|null       $index            The callable or path generating the view indices
@@ -173,7 +179,6 @@ class PropertyAccessDecorator implements ChoiceListFactoryInterface
                     return $accessor->getValue($choice, $groupBy);
                 } catch (UnexpectedTypeException $e) {
                     // Don't group if path is not readable
-                    return null;
                 }
             };
         }

@@ -1,6 +1,7 @@
 {
-    "Version": "36",
+    "Version": "2.1.47.69",
     "Names": {
+        "ar_001": "modernes Hocharabisch",
         "car": "karibische Sprache",
         "chb": "Chibcha-Sprache",
         "del": "Delawarisch",
@@ -13,8 +14,5 @@
         "pag": "Pangasinensisch",
         "sh": "Serbokroatisch",
         "szl": "Schlesisch"
-    },
-    "LocalizedNames": {
-        "ar_001": "modernes Hocharabisch"
     }
 }

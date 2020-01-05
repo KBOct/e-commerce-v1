@@ -17,10 +17,8 @@ use Symfony\Component\Config\Resource\ResourceInterface;
  * Tracks container parameters.
  *
  * @author Maxime Steinhausser <maxime.steinhausser@gmail.com>
- *
- * @final since Symfony 4.3
  */
-class ContainerParametersResource implements ResourceInterface
+class ContainerParametersResource implements ResourceInterface, \Serializable
 {
     private $parameters;
 
@@ -38,6 +36,22 @@ class ContainerParametersResource implements ResourceInterface
     public function __toString()
     {
         return 'container_parameters_'.md5(serialize($this->parameters));
+    }
+
+    /**
+     * @internal
+     */
+    public function serialize()
+    {
+        return serialize($this->parameters);
+    }
+
+    /**
+     * @internal
+     */
+    public function unserialize($serialized)
+    {
+        $this->parameters = unserialize($serialized);
     }
 
     /**

@@ -69,7 +69,7 @@ EOF
      *
      * @throws \LogicException
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -78,7 +78,7 @@ EOF
             if (!$this->dispatcher->hasListeners($event)) {
                 $io->getErrorStyle()->warning(sprintf('The event "%s" does not have any registered listeners.', $event));
 
-                return 0;
+                return;
             }
 
             $options = ['event' => $event];
@@ -89,7 +89,5 @@ EOF
         $options['raw_text'] = $input->getOption('raw');
         $options['output'] = $io;
         $helper->describe($io, $this->dispatcher, $options);
-
-        return 0;
     }
 }

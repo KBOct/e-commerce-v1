@@ -18,8 +18,6 @@ use Symfony\Component\HttpKernel\Fragment\FragmentHandler;
  * Provides integration with the HttpKernel component.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class HttpKernelRuntime
 {

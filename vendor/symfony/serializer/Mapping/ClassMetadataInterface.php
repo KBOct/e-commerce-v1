@@ -29,7 +29,7 @@ interface ClassMetadataInterface
      *
      * @return string The name of the backing class
      */
-    public function getName(): string;
+    public function getName();
 
     /**
      * Adds an {@link AttributeMetadataInterface}.
@@ -41,7 +41,7 @@ interface ClassMetadataInterface
      *
      * @return AttributeMetadataInterface[]
      */
-    public function getAttributesMetadata(): array;
+    public function getAttributesMetadata();
 
     /**
      * Merges a {@link ClassMetadataInterface} in the current one.
@@ -50,10 +50,18 @@ interface ClassMetadataInterface
 
     /**
      * Returns a {@link \ReflectionClass} instance for this class.
+     *
+     * @return \ReflectionClass
      */
-    public function getReflectionClass(): \ReflectionClass;
+    public function getReflectionClass();
 
-    public function getClassDiscriminatorMapping(): ?ClassDiscriminatorMapping;
+    /**
+     * @return ClassDiscriminatorMapping|null
+     */
+    public function getClassDiscriminatorMapping();
 
+    /**
+     * @param ClassDiscriminatorMapping|null $mapping
+     */
     public function setClassDiscriminatorMapping(ClassDiscriminatorMapping $mapping = null);
 }

@@ -39,7 +39,7 @@ class PersisterHelper
      * @param ClassMetadata          $class
      * @param EntityManagerInterface $em
      *
-     * @return array<int, string>
+     * @return array
      *
      * @throws QueryException
      */

@@ -13,7 +13,6 @@ namespace Symfony\Bridge\PhpUnit\Legacy;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Warning;
-use PHPUnit\Util\Test;
 
 /**
  * PHP 5.3 compatible trait-like shared implementation.
@@ -66,16 +65,21 @@ class CoverageListenerTrait
             return;
         }
 
-        $r = new \ReflectionProperty(Test::class, 'annotationCache');
+        $testClass = \PHPUnit\Util\Test::class;
+        if (!class_exists($testClass, false)) {
+            $testClass = \PHPUnit_Util_Test::class;
+        }
+
+        $r = new \ReflectionProperty($testClass, 'annotationCache');
         $r->setAccessible(true);
 
         $cache = $r->getValue();
         $cache = array_replace_recursive($cache, array(
             \get_class($test) => array(
-                'covers' => \is_array($sutFqcn) ? $sutFqcn : array($sutFqcn),
+                'covers' => array($sutFqcn),
             ),
         ));
-        $r->setValue(Test::class, $cache);
+        $r->setValue($testClass, $cache);
     }
 
     private function findSutFqcn($test)
@@ -91,7 +95,11 @@ class CoverageListenerTrait
         $sutFqcn = str_replace('\\Tests\\', '\\', $class);
         $sutFqcn = preg_replace('{Test$}', '', $sutFqcn);
 
-        return class_exists($sutFqcn) ? $sutFqcn : null;
+        if (!class_exists($sutFqcn)) {
+            return;
+        }
+
+        return $sutFqcn;
     }
 
     public function __sleep()

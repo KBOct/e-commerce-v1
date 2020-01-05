@@ -23,7 +23,7 @@ use Symfony\Contracts\Service\ResetInterface;
  */
 abstract class KernelTestCase extends TestCase
 {
-    use ForwardCompatTestTrait;
+    use KernelShutdownOnTearDownTrait;
 
     protected static $class;
 
@@ -36,16 +36,6 @@ abstract class KernelTestCase extends TestCase
      * @var ContainerInterface
      */
     protected static $container;
-
-    protected static $booted = false;
-
-    private static $kernelContainer;
-
-    private function doTearDown()
-    {
-        static::ensureKernelShutdown();
-        static::$kernel = null;
-    }
 
     /**
      * @return string The Kernel class name
@@ -77,9 +67,8 @@ abstract class KernelTestCase extends TestCase
 
         static::$kernel = static::createKernel($options);
         static::$kernel->boot();
-        static::$booted = true;
 
-        self::$kernelContainer = $container = static::$kernel->getContainer();
+        $container = static::$kernel->getContainer();
         static::$container = $container->has('test.service_container') ? $container->get('test.service_container') : $container;
 
         return static::$kernel;
@@ -130,14 +119,12 @@ abstract class KernelTestCase extends TestCase
     protected static function ensureKernelShutdown()
     {
         if (null !== static::$kernel) {
+            $container = static::$kernel->getContainer();
             static::$kernel->shutdown();
-            static::$booted = false;
+            if ($container instanceof ResetInterface) {
+                $container->reset();
+            }
         }
-
-        if (self::$kernelContainer instanceof ResetInterface) {
-            self::$kernelContainer->reset();
-        }
-
-        static::$container = self::$kernelContainer = null;
+        static::$container = null;
     }
 }

@@ -9,10 +9,9 @@ use function time;
 /**
  * Couchbase cache provider.
  *
+ * @link   www.doctrine-project.org
  * @deprecated Couchbase SDK 1.x is now deprecated. Use \Doctrine\Common\Cache\CouchbaseBucketCache instead.
  * https://developer.couchbase.com/documentation/server/current/sdk/php/compatibility-versions-features.html
- *
- * @link   www.doctrine-project.org
  */
 class CouchbaseCache extends CacheProvider
 {
@@ -63,7 +62,6 @@ class CouchbaseCache extends CacheProvider
         if ($lifeTime > 30 * 24 * 3600) {
             $lifeTime = time() + $lifeTime;
         }
-
         return $this->couchbase->set($id, $data, (int) $lifeTime);
     }
 
@@ -93,7 +91,6 @@ class CouchbaseCache extends CacheProvider
         $server  = explode(':', $servers[0]);
         $key     = $server[0] . ':11210';
         $stats   = $stats[$key];
-
         return [
             Cache::STATS_HITS   => $stats['get_hits'],
             Cache::STATS_MISSES => $stats['get_misses'],

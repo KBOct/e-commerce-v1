@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.47.82",
     "Names": {
         "Arab": "Arabiagbeŋɔŋlɔ",
         "Armn": "armeniagbeŋɔŋlɔ",
@@ -38,6 +38,7 @@
         "Tibt": "tibetgbeŋɔŋlɔ",
         "Zsym": "ŋɔŋlɔdzesiwo",
         "Zxxx": "gbemaŋlɔ",
-        "Zyyy": "gbeŋɔŋlɔ bɔbɔ"
+        "Zyyy": "gbeŋɔŋlɔ bɔbɔ",
+        "Zzzz": "gbeŋɔŋlɔ manya"
     }
 }

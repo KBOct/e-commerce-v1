@@ -19,8 +19,6 @@ use Twig\TwigFilter;
  * Twig extension relate to PHP code and used by the profiler and the default exception templates.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class CodeExtension extends AbstractExtension
 {
@@ -42,8 +40,6 @@ class CodeExtension extends AbstractExtension
 
     /**
      * {@inheritdoc}
-     *
-     * @return TwigFilter[]
      */
     public function getFilters()
     {
@@ -141,7 +137,7 @@ class CodeExtension extends AbstractExtension
     {
         if (is_file($file) && is_readable($file)) {
             // highlight_file could throw warnings
-            // see https://bugs.php.net/25725
+            // see https://bugs.php.net/bug.php?id=25725
             $code = @highlight_file($file, true);
             // remove main code/span tags
             $code = preg_replace('#^<code.*?>\s*<span.*?>(.*)</span>\s*</code>#s', '\\1', $code);
@@ -236,7 +232,7 @@ class CodeExtension extends AbstractExtension
     /**
      * @internal
      */
-    public function formatLogMessage(string $message, array $context): string
+    public function formatLogMessage($message, array $context)
     {
         if ($context && false !== strpos($message, '{')) {
             $replacements = [];

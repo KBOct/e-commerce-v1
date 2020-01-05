@@ -51,8 +51,8 @@ class UnexpectedValueException extends BaseUnexpectedValueException implements P
     }
 
     /**
-     * @param string $className
-     * @param string $methodName
+     * @param $className
+     * @param $methodName
      * @param \Exception|null $previous
      *
      * @return self

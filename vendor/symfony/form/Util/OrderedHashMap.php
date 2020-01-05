@@ -99,7 +99,7 @@ class OrderedHashMap implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * @return bool
+     * {@inheritdoc}
      */
     public function offsetExists($key)
     {
@@ -157,7 +157,7 @@ class OrderedHashMap implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * @return \Traversable
+     * {@inheritdoc}
      */
     public function getIterator()
     {
@@ -165,7 +165,7 @@ class OrderedHashMap implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function count()
     {

@@ -26,11 +26,13 @@ class FirewallMap implements FirewallMapInterface
 {
     private $container;
     private $map;
+    private $contexts;
 
     public function __construct(ContainerInterface $container, iterable $map)
     {
         $this->container = $container;
         $this->map = $map;
+        $this->contexts = new \SplObjectStorage();
     }
 
     public function getListeners(Request $request)
@@ -52,13 +54,16 @@ class FirewallMap implements FirewallMapInterface
         $context = $this->getFirewallContext($request);
 
         if (null === $context) {
-            return null;
+            return;
         }
 
         return $context->getConfig();
     }
 
-    private function getFirewallContext(Request $request): ?FirewallContext
+    /**
+     * @return FirewallContext
+     */
+    private function getFirewallContext(Request $request)
     {
         if ($request->attributes->has('_firewall_context')) {
             $storedContextId = $request->attributes->get('_firewall_context');
@@ -78,7 +83,5 @@ class FirewallMap implements FirewallMapInterface
                 return $this->container->get($contextId);
             }
         }
-
-        return null;
     }
 }

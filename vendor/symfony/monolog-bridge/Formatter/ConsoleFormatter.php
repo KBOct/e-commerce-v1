@@ -133,7 +133,7 @@ class ConsoleFormatter implements FormatterInterface
     /**
      * @internal
      */
-    public function echoLine(string $line, int $depth, string $indentPad)
+    public function echoLine($line, $depth, $indentPad)
     {
         if (-1 !== $depth) {
             fwrite($this->outputBuffer, $line);
@@ -143,7 +143,7 @@ class ConsoleFormatter implements FormatterInterface
     /**
      * @internal
      */
-    public function castObject($v, array $a, Stub $s, bool $isNested): array
+    public function castObject($v, array $a, Stub $s, $isNested)
     {
         if ($this->options['multiline']) {
             return $a;
@@ -157,7 +157,7 @@ class ConsoleFormatter implements FormatterInterface
         return $a;
     }
 
-    private function replacePlaceHolder(array $record): array
+    private function replacePlaceHolder(array $record)
     {
         $message = $record['message'];
 
@@ -180,7 +180,7 @@ class ConsoleFormatter implements FormatterInterface
         return $record;
     }
 
-    private function dumpData($data, bool $colors = null): string
+    private function dumpData($data, $colors = null)
     {
         if (null === $this->dumper) {
             return '';

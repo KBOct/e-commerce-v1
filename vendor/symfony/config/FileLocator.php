@@ -76,8 +76,12 @@ class FileLocator implements FileLocatorInterface
 
     /**
      * Returns whether the file path is an absolute path.
+     *
+     * @param string $file A file path
+     *
+     * @return bool
      */
-    private function isAbsolutePath(string $file): bool
+    private function isAbsolutePath($file)
     {
         if ('/' === $file[0] || '\\' === $file[0]
             || (\strlen($file) > 3 && ctype_alpha($file[0])

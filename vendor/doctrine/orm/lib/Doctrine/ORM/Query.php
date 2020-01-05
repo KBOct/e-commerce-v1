@@ -19,18 +19,15 @@
 
 namespace Doctrine\ORM;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\LockMode;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Exec\AbstractSqlExecutor;
-use Doctrine\ORM\Query\Parameter;
-use Doctrine\ORM\Query\ParameterTypeInferer;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\ParserResult;
 use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Query\ParameterTypeInferer;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Utility\HierarchyDiscriminatorResolver;
-use function array_keys;
-use function assert;
 
 /**
  * A Query object represents a DQL query.
@@ -145,7 +142,7 @@ final class Query extends AbstractQuery
     /**
      * Cached DQL query.
      *
-     * @var string|null
+     * @var string
      */
     private $_dql = null;
 
@@ -159,7 +156,7 @@ final class Query extends AbstractQuery
     /**
      * The first result to return (the "offset").
      *
-     * @var int|null
+     * @var integer
      */
     private $_firstResult = null;
 
@@ -390,13 +387,26 @@ final class Query extends AbstractQuery
         $types     = [];
 
         foreach ($this->parameters as $parameter) {
-            $key = $parameter->getName();
+            $key    = $parameter->getName();
+            $value  = $parameter->getValue();
+            $rsm    = $this->getResultSetMapping();
 
             if ( ! isset($paramMappings[$key])) {
                 throw QueryException::unknownParameter($key);
             }
 
-            [$value, $type] = $this->resolveParameterValue($parameter);
+            if (isset($rsm->metadataParameterMapping[$key]) && $value instanceof ClassMetadata) {
+                $value = $value->getMetadataValue($rsm->metadataParameterMapping[$key]);
+            }
+
+            if (isset($rsm->discriminatorParameters[$key]) && $value instanceof ClassMetadata) {
+                $value = array_keys(HierarchyDiscriminatorResolver::resolveDiscriminatorsForClass($value, $this->_em));
+            }
+
+            $value = $this->processParameterValue($value);
+            $type  = ($parameter->getValue() === $value)
+                ? $parameter->getType()
+                : ParameterTypeInferer::inferType($value);
 
             foreach ($paramMappings[$key] as $position) {
                 $types[$position] = $type;
@@ -427,38 +437,6 @@ final class Query extends AbstractQuery
         }
 
         return [$sqlParams, $types];
-    }
-
-    /** @return mixed[] tuple of (value, type) */
-    private function resolveParameterValue(Parameter $parameter) : array
-    {
-        if ($parameter->typeWasSpecified()) {
-            return [$parameter->getValue(), $parameter->getType()];
-        }
-
-        $key           = $parameter->getName();
-        $originalValue = $parameter->getValue();
-        $value         = $originalValue;
-        $rsm           = $this->getResultSetMapping();
-
-        assert($rsm !== null);
-
-        if ($value instanceof ClassMetadata && isset($rsm->metadataParameterMapping[$key])) {
-            $value = $value->getMetadataValue($rsm->metadataParameterMapping[$key]);
-        }
-
-        if ($value instanceof ClassMetadata && isset($rsm->discriminatorParameters[$key])) {
-            $value = array_keys(HierarchyDiscriminatorResolver::resolveDiscriminatorsForClass($value, $this->_em));
-        }
-
-        $processedValue = $this->processParameterValue($value);
-
-        return [
-            $processedValue,
-            $originalValue === $processedValue
-                ? $parameter->getType()
-                : ParameterTypeInferer::inferType($processedValue),
-        ];
     }
 
     /**
@@ -587,7 +565,7 @@ final class Query extends AbstractQuery
     /**
      * Returns the DQL query that is represented by this query object.
      *
-     * @return string|null
+     * @return string DQL query.
      */
     public function getDQL()
     {
@@ -640,7 +618,7 @@ final class Query extends AbstractQuery
      * Gets the position of the first result the query object was set to retrieve (the "offset").
      * Returns NULL if {@link setFirstResult} was not applied to this query.
      *
-     * @return int|null The position of the first result.
+     * @return integer The position of the first result.
      */
     public function getFirstResult()
     {

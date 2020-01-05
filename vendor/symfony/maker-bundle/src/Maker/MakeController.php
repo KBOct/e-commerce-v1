@@ -66,8 +66,8 @@ final class MakeController extends AbstractMaker
         );
 
         if ($this->isTwigInstalled() && !$noTemplate) {
-            $generator->generateTemplate(
-                $templateName,
+            $generator->generateFile(
+                'templates/'.$templateName,
                 'controller/twig_template.tpl.php',
                 [
                     'controller_path' => $controllerPath,
@@ -86,8 +86,10 @@ final class MakeController extends AbstractMaker
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
+            // we only need doctrine/annotations, which contains
+            // the recipe that loads annotation routes
             Annotation::class,
-            'doctrine/annotations'
+            'annotations'
         );
     }
 

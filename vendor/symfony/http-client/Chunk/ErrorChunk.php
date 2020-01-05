@@ -26,19 +26,11 @@ class ErrorChunk implements ChunkInterface
     private $errorMessage;
     private $error;
 
-    /**
-     * @param \Throwable|string $error
-     */
-    public function __construct(int $offset, $error)
+    public function __construct(int $offset, \Throwable $error = null)
     {
         $this->offset = $offset;
-
-        if (\is_string($error)) {
-            $this->errorMessage = $error;
-        } else {
-            $this->error = $error;
-            $this->errorMessage = $error->getMessage();
-        }
+        $this->error = $error;
+        $this->errorMessage = null !== $error ? $error->getMessage() : 'Reading from the response stream reached the inactivity timeout.';
     }
 
     /**
@@ -68,15 +60,6 @@ class ErrorChunk implements ChunkInterface
      * {@inheritdoc}
      */
     public function isLast(): bool
-    {
-        $this->didThrow = true;
-        throw new TransportException($this->errorMessage, 0, $this->error);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getInformationalStatus(): ?array
     {
         $this->didThrow = true;
         throw new TransportException($this->errorMessage, 0, $this->error);

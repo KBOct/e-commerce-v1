@@ -154,7 +154,7 @@ class TwigRendererEngine extends AbstractRendererEngine
     {
         if (!$theme instanceof Template) {
             /* @var Template $theme */
-            $theme = $this->environment->load($theme)->unwrap();
+            $theme = $this->environment->loadTemplate($theme);
         }
 
         if (null === $this->template) {

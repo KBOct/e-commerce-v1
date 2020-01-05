@@ -19,8 +19,6 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  * ChromePhpHandler.
  *
  * @author Christophe Coevoet <stof@notk.org>
- *
- * @final since Symfony 4.3
  */
 class ChromePhpHandler extends BaseChromePhpHandler
 {
@@ -41,7 +39,7 @@ class ChromePhpHandler extends BaseChromePhpHandler
         }
 
         if (!preg_match(static::USER_AGENT_REGEX, $event->getRequest()->headers->get('User-Agent'))) {
-            self::$sendHeaders = false;
+            $this->sendHeaders = false;
             $this->headers = [];
 
             return;
@@ -59,7 +57,7 @@ class ChromePhpHandler extends BaseChromePhpHandler
      */
     protected function sendHeader($header, $content)
     {
-        if (!self::$sendHeaders) {
+        if (!$this->sendHeaders) {
             return;
         }
 
@@ -72,8 +70,6 @@ class ChromePhpHandler extends BaseChromePhpHandler
 
     /**
      * Override default behavior since we check it in onKernelResponse.
-     *
-     * @return bool
      */
     protected function headersAccepted()
     {

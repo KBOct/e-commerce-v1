@@ -2,30 +2,29 @@
 
 namespace Doctrine\Common\Persistence\Event;
 
-use const E_USER_DEPRECATED;
-use function class_alias;
-use function class_exists;
-use function sprintf;
-use function trigger_error;
+use Doctrine\Common\EventArgs;
+use Doctrine\Common\Persistence\ObjectManager;
 
-if (! class_exists(\Doctrine\Persistence\Event\ManagerEventArgs::class, false)) {
-    @trigger_error(sprintf(
-        'The %s\ManagerEventArgs class is deprecated since doctrine/persistence 1.3 and will be removed in 2.0.'
-        . ' Use \Doctrine\Persistence\Event\ManagerEventArgs instead.',
-        __NAMESPACE__
-    ), E_USER_DEPRECATED);
-}
+/**
+ * Provides event arguments for the preFlush event.
+ */
+class ManagerEventArgs extends EventArgs
+{
+    /** @var ObjectManager */
+    private $objectManager;
 
-class_alias(
-    \Doctrine\Persistence\Event\ManagerEventArgs::class,
-    __NAMESPACE__ . '\ManagerEventArgs'
-);
-
-if (false) {
-    /**
-     * @deprecated 1.3 Use Doctrine\Persistence\Event\ManagerEventArgs
-     */
-    class ManagerEventArgs extends \Doctrine\Persistence\Event\ManagerEventArgs
+    public function __construct(ObjectManager $objectManager)
     {
+        $this->objectManager = $objectManager;
+    }
+
+    /**
+     * Retrieves the associated ObjectManager.
+     *
+     * @return ObjectManager
+     */
+    public function getObjectManager()
+    {
+        return $this->objectManager;
     }
 }

@@ -13,8 +13,6 @@ namespace Symfony\Bundle\WebServerBundle;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since Symfony 4.4, to be removed in 5.0; the new Symfony local server has more features, you can use it instead.
  */
 class WebServerConfig
 {
@@ -119,7 +117,7 @@ class WebServerConfig
         return gethostbyname($localHostname).':'.$this->port;
     }
 
-    private function findFrontController(string $documentRoot, string $env): ?string
+    private function findFrontController($documentRoot, $env)
     {
         $fileNames = $this->getFrontControllerFileNames($env);
 
@@ -128,16 +126,14 @@ class WebServerConfig
                 return $fileName;
             }
         }
-
-        return null;
     }
 
-    private function getFrontControllerFileNames(string $env): array
+    private function getFrontControllerFileNames($env)
     {
         return ['app_'.$env.'.php', 'app.php', 'index_'.$env.'.php', 'index.php'];
     }
 
-    private function findBestPort(): int
+    private function findBestPort()
     {
         $port = 8000;
         while (false !== $fp = @fsockopen($this->hostname, $port, $errno, $errstr, 1)) {

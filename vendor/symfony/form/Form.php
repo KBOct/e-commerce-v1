@@ -11,12 +11,6 @@
 
 namespace Symfony\Component\Form;
 
-use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
-use Symfony\Component\Form\Event\PostSetDataEvent;
-use Symfony\Component\Form\Event\PostSubmitEvent;
-use Symfony\Component\Form\Event\PreSetDataEvent;
-use Symfony\Component\Form\Event\PreSubmitEvent;
-use Symfony\Component\Form\Event\SubmitEvent;
 use Symfony\Component\Form\Exception\AlreadySubmittedException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\OutOfBoundsException;
@@ -95,7 +89,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
     private $submitted = false;
 
     /**
-     * @var FormInterface|ClickableInterface|null The button that was used to submit the form
+     * @var ClickableInterface|null The button that was used to submit the form
      */
     private $clickedButton;
 
@@ -146,9 +140,9 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
     private $lockSetData = false;
 
     /**
-     * @var string
+     * @var string|int|null
      */
-    private $name = '';
+    private $name;
 
     /**
      * @var bool Whether the form inherits its underlying data from its parent
@@ -217,7 +211,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
             return $this->propertyPath;
         }
 
-        if ('' === $this->name) {
+        if (null === $this->name || '' === $this->name) {
             return null;
         }
 
@@ -334,12 +328,12 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
         }
 
         $this->lockSetData = true;
-        $dispatcher = LegacyEventDispatcherProxy::decorate($this->config->getEventDispatcher());
+        $dispatcher = $this->config->getEventDispatcher();
 
         // Hook to change content of the model data before transformation and mapping children
         if ($dispatcher->hasListeners(FormEvents::PRE_SET_DATA)) {
-            $event = new PreSetDataEvent($this, $modelData);
-            $dispatcher->dispatch($event, FormEvents::PRE_SET_DATA);
+            $event = new FormEvent($this, $modelData);
+            $dispatcher->dispatch(FormEvents::PRE_SET_DATA, $event);
             $modelData = $event->getData();
         }
 
@@ -379,8 +373,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
         }
 
         if ($dispatcher->hasListeners(FormEvents::POST_SET_DATA)) {
-            $event = new PostSetDataEvent($this, $modelData);
-            $dispatcher->dispatch($event, FormEvents::POST_SET_DATA);
+            $event = new FormEvent($this, $modelData);
+            $dispatcher->dispatch(FormEvents::POST_SET_DATA, $event);
         }
 
         return $this;
@@ -541,7 +535,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
             $this->transformationFailure = new TransformationFailedException('Submitted data was expected to be text or number, array given.');
         }
 
-        $dispatcher = LegacyEventDispatcherProxy::decorate($this->config->getEventDispatcher());
+        $dispatcher = $this->config->getEventDispatcher();
 
         $modelData = null;
         $normData = null;
@@ -554,8 +548,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
             // Hook to change content of the data submitted by the browser
             if ($dispatcher->hasListeners(FormEvents::PRE_SUBMIT)) {
-                $event = new PreSubmitEvent($this, $submittedData);
-                $dispatcher->dispatch($event, FormEvents::PRE_SUBMIT);
+                $event = new FormEvent($this, $submittedData);
+                $dispatcher->dispatch(FormEvents::PRE_SUBMIT, $event);
                 $submittedData = $event->getData();
             }
 
@@ -640,8 +634,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
                 // Hook to change content of the data in the normalized
                 // representation
                 if ($dispatcher->hasListeners(FormEvents::SUBMIT)) {
-                    $event = new SubmitEvent($this, $normData);
-                    $dispatcher->dispatch($event, FormEvents::SUBMIT);
+                    $event = new FormEvent($this, $normData);
+                    $dispatcher->dispatch(FormEvents::SUBMIT, $event);
                     $normData = $event->getData();
                 }
 
@@ -667,8 +661,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
         $this->viewData = $viewData;
 
         if ($dispatcher->hasListeners(FormEvents::POST_SUBMIT)) {
-            $event = new PostSubmitEvent($this, $viewData);
-            $dispatcher->dispatch($event, FormEvents::POST_SUBMIT);
+            $event = new FormEvent($this, $viewData);
+            $dispatcher->dispatch(FormEvents::POST_SUBMIT, $event);
         }
 
         return $this;
@@ -753,7 +747,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
     /**
      * Returns the button that was used to submit the form.
      *
-     * @return FormInterface|ClickableInterface|null
+     * @return ClickableInterface|null
      */
     public function getClickedButton()
     {
@@ -761,7 +755,9 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
             return $this->clickedButton;
         }
 
-        return $this->parent && method_exists($this->parent, 'getClickedButton') ? $this->parent->getClickedButton() : null;
+        if ($this->parent && method_exists($this->parent, 'getClickedButton')) {
+            return $this->parent->getClickedButton();
+        }
     }
 
     /**
@@ -842,13 +838,11 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
         if (!$child instanceof FormInterface) {
             if (!\is_string($child) && !\is_int($child)) {
-                throw new UnexpectedTypeException($child, 'string or Symfony\Component\Form\FormInterface');
+                throw new UnexpectedTypeException($child, 'string, integer or Symfony\Component\Form\FormInterface');
             }
 
-            $child = (string) $child;
-
-            if (null !== $type && !\is_string($type)) {
-                throw new UnexpectedTypeException($type, 'string or null');
+            if (null !== $type && !\is_string($type) && !$type instanceof FormTypeInterface) {
+                throw new UnexpectedTypeException($type, 'string or Symfony\Component\Form\FormTypeInterface');
             }
 
             // Never initialize child forms automatically
@@ -1043,6 +1037,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
     /**
      * Normalizes the underlying data if a model transformer is set.
      *
+     * @param mixed $value The value to transform
+     *
      * @return mixed
      *
      * @throws TransformationFailedException If the underlying data cannot be transformed to "normalized" format
@@ -1054,7 +1050,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
                 $value = $transformer->transform($value);
             }
         } catch (TransformationFailedException $exception) {
-            throw new TransformationFailedException('Unable to transform data for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception, $exception->getInvalidMessage(), $exception->getInvalidMessageParameters());
+            throw new TransformationFailedException('Unable to transform data for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $value;
@@ -1062,6 +1058,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
     /**
      * Reverse transforms a value if a model transformer is set.
+     *
+     * @param string $value The value to reverse transform
      *
      * @return mixed
      *
@@ -1076,7 +1074,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
                 $value = $transformers[$i]->reverseTransform($value);
             }
         } catch (TransformationFailedException $exception) {
-            throw new TransformationFailedException('Unable to reverse value for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception, $exception->getInvalidMessage(), $exception->getInvalidMessageParameters());
+            throw new TransformationFailedException('Unable to reverse value for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $value;
@@ -1084,6 +1082,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
     /**
      * Transforms the value if a view transformer is set.
+     *
+     * @param mixed $value The value to transform
      *
      * @return mixed
      *
@@ -1105,7 +1105,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
                 $value = $transformer->transform($value);
             }
         } catch (TransformationFailedException $exception) {
-            throw new TransformationFailedException('Unable to transform value for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception, $exception->getInvalidMessage(), $exception->getInvalidMessageParameters());
+            throw new TransformationFailedException('Unable to transform value for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $value;
@@ -1113,6 +1113,8 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
 
     /**
      * Reverse transforms a value if a view transformer is set.
+     *
+     * @param string $value The value to reverse transform
      *
      * @return mixed
      *
@@ -1129,7 +1131,7 @@ class Form implements \IteratorAggregate, FormInterface, ClearableErrorsInterfac
                 $value = $transformers[$i]->reverseTransform($value);
             }
         } catch (TransformationFailedException $exception) {
-            throw new TransformationFailedException('Unable to reverse value for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception, $exception->getInvalidMessage(), $exception->getInvalidMessageParameters());
+            throw new TransformationFailedException('Unable to reverse value for property path "'.$this->getPropertyPath().'": '.$exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $value;

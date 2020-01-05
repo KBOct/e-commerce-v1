@@ -8,9 +8,9 @@ use function time;
 /**
  * Memcache cache provider.
  *
- * @deprecated
- *
  * @link   www.doctrine-project.org
+ *
+ * @deprecated
  */
 class MemcacheCache extends CacheProvider
 {
@@ -65,7 +65,6 @@ class MemcacheCache extends CacheProvider
         if ($lifeTime > 30 * 24 * 3600) {
             $lifeTime = time() + $lifeTime;
         }
-
         return $this->memcache->set($id, $data, 0, (int) $lifeTime);
     }
 
@@ -92,7 +91,6 @@ class MemcacheCache extends CacheProvider
     protected function doGetStats()
     {
         $stats = $this->memcache->getStats();
-
         return [
             Cache::STATS_HITS   => $stats['get_hits'],
             Cache::STATS_MISSES => $stats['get_misses'],

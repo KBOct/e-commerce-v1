@@ -117,7 +117,6 @@ abstract class AbstractMigration
     }
 
     abstract public function up(Schema $schema) : void;
-
     abstract public function down(Schema $schema) : void;
 
     /**

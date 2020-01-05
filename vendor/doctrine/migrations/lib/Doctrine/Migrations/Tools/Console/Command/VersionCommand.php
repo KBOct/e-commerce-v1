@@ -19,15 +19,13 @@ use function sprintf;
  */
 class VersionCommand extends AbstractCommand
 {
-    /** @var string */
-    protected static $defaultName = 'migrations:version';
-
     /** @var bool */
     private $markMigrated;
 
     protected function configure() : void
     {
         $this
+            ->setName('migrations:version')
             ->setAliases(['version'])
             ->setDescription('Manually add and delete migration versions from the version table.')
             ->addArgument(
@@ -148,7 +146,7 @@ EOT
             $availableVersions = $this->migrationRepository->getAvailableVersions();
 
             foreach ($availableVersions as $version) {
-                $this->mark($input, $output, $version, true);
+                $this->mark($output, $version, true);
             }
         } elseif ($rangeFromOption !== null && $rangeToOption !== null) {
             $availableVersions = $this->migrationRepository->getAvailableVersions();
@@ -158,10 +156,10 @@ EOT
                     continue;
                 }
 
-                $this->mark($input, $output, $version, true);
+                $this->mark($output, $version, true);
             }
         } else {
-            $this->mark($input, $output, $affectedVersion);
+            $this->mark($output, $affectedVersion);
         }
     }
 
@@ -170,29 +168,10 @@ EOT
      * @throws VersionDoesNotExist
      * @throws UnknownMigrationVersion
      */
-    private function mark(InputInterface $input, OutputInterface $output, string $version, bool $all = false) : void
+    private function mark(OutputInterface $output, string $version, bool $all = false) : void
     {
         if (! $this->migrationRepository->hasVersion($version)) {
-            if ((bool) $input->getOption('delete') === false) {
-                throw UnknownMigrationVersion::new($version);
-            }
-
-            $question =
-                'WARNING! You are about to delete a migration version from the version table that has no corresponding migration file.' .
-                'Do you want to delete this migration from the migrations table? (y/n)';
-
-            $confirmation = $this->askConfirmation($question, $input, $output);
-
-            if ($confirmation) {
-                $this->migrationRepository->removeMigrationVersionFromDatabase($version);
-
-                $output->writeln(sprintf(
-                    '<info>%s</info> deleted from the version table.',
-                    $version
-                ));
-
-                return;
-            }
+            throw UnknownMigrationVersion::new($version);
         }
 
         $version = $this->migrationRepository->getVersion($version);

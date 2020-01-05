@@ -1,0 +1,28 @@
+{
+  "devDependencies": {
+    "@babel/preset-react": "^7.7.4",
+    "@symfony/webpack-encore": "^0.27.0",
+    "core-js": "^3.6.1",
+    "webpack-notifier": "^1.8.0"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev-server": "encore dev-server --port 8080",
+    "dev": "encore dev",
+    "watch": "encore dev --watch",
+    "build": "encore production --progress"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "dotenv": "^8.2.0",
+    "fs": "0.0.1-security",
+    "jwt-decode": "^2.2.0",
+    "moment": "^2.24.0",
+    "react": "^16.12.0",
+    "react-content-loader": "^4.3.4",
+    "react-dom": "^16.12.0",
+    "react-router-dom": "^5.1.2",
+    "react-toastify": "^5.5.0"
+  }
+}

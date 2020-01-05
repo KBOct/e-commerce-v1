@@ -29,7 +29,8 @@ final class ParameterBagUtils
      *
      * Paths like foo[bar] will be evaluated to find deeper items in nested data structures.
      *
-     * @param string $path The key
+     * @param ParameterBag $parameters The parameter bag
+     * @param string       $path       The key
      *
      * @return mixed
      *
@@ -44,7 +45,7 @@ final class ParameterBagUtils
         $root = substr($path, 0, $pos);
 
         if (null === $value = $parameters->get($root)) {
-            return null;
+            return;
         }
 
         if (null === self::$propertyAccessor) {
@@ -54,7 +55,7 @@ final class ParameterBagUtils
         try {
             return self::$propertyAccessor->getValue($value, substr($path, $pos));
         } catch (AccessException $e) {
-            return null;
+            return;
         }
     }
 
@@ -63,7 +64,8 @@ final class ParameterBagUtils
      *
      * Paths like foo[bar] will be evaluated to find deeper items in nested data structures.
      *
-     * @param string $path The key
+     * @param Request $request The request
+     * @param string  $path    The key
      *
      * @return mixed
      *
@@ -78,7 +80,7 @@ final class ParameterBagUtils
         $root = substr($path, 0, $pos);
 
         if (null === $value = $request->get($root)) {
-            return null;
+            return;
         }
 
         if (null === self::$propertyAccessor) {
@@ -88,7 +90,7 @@ final class ParameterBagUtils
         try {
             return self::$propertyAccessor->getValue($value, substr($path, $pos));
         } catch (AccessException $e) {
-            return null;
+            return;
         }
     }
 }

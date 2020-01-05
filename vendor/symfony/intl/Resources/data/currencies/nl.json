@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "ADP": [
             "ADP",
@@ -263,7 +263,7 @@
         ],
         "CNH": [
             "CNH",
-            "Chinese yuan (offshore)"
+            "Chinese renminbi (offshore)"
         ],
         "CNX": [
             "CNX",

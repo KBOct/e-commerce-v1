@@ -84,7 +84,7 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
             }
 
             if (!($normalizer instanceof NormalizerInterface || $normalizer instanceof DenormalizerInterface)) {
-                @trigger_error(sprintf('Passing normalizers ("%s") which do not implement either "%s" or "%s" has been deprecated since Symfony 4.2.', \get_class($normalizer), NormalizerInterface::class, DenormalizerInterface::class), E_USER_DEPRECATED);
+                @trigger_error(\sprintf('Passing normalizers ("%s") which do not implement either "%s" or "%s" has been deprecated since Symfony 4.2.', \get_class($normalizer), NormalizerInterface::class, DenormalizerInterface::class), E_USER_DEPRECATED);
                 // throw new \InvalidArgumentException(\sprintf('The class "%s" does not implement "%s" or "%s".', \get_class($normalizer), NormalizerInterface::class, DenormalizerInterface::class));
             }
         }
@@ -104,7 +104,7 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
             }
 
             if (!($encoder instanceof EncoderInterface || $encoder instanceof DecoderInterface)) {
-                @trigger_error(sprintf('Passing encoders ("%s") which do not implement either "%s" or "%s" has been deprecated since Symfony 4.2.', \get_class($encoder), EncoderInterface::class, DecoderInterface::class), E_USER_DEPRECATED);
+                @trigger_error(\sprintf('Passing encoders ("%s") which do not implement either "%s" or "%s" has been deprecated since Symfony 4.2.', \get_class($encoder), EncoderInterface::class, DecoderInterface::class), E_USER_DEPRECATED);
                 // throw new \InvalidArgumentException(\sprintf('The class "%s" does not implement "%s" or "%s".', \get_class($normalizer), EncoderInterface::class, DecoderInterface::class));
             }
         }
@@ -115,7 +115,7 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
     /**
      * {@inheritdoc}
      */
-    final public function serialize($data, $format, array $context = []): string
+    final public function serialize($data, $format, array $context = [])
     {
         if (!$this->supportsEncoding($format, $context)) {
             throw new NotEncodableValueException(sprintf('Serialization for the format %s is not supported', $format));
@@ -173,7 +173,7 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
             throw new NotNormalizableValueException(sprintf('Could not normalize object of type %s, no supporting normalizer found.', \get_class($data)));
         }
 
-        throw new NotNormalizableValueException(sprintf('An unexpected value could not be normalized: %s', !\is_resource($data) ? var_export($data, true) : sprintf('%s resource', get_resource_type($data))));
+        throw new NotNormalizableValueException(sprintf('An unexpected value could not be normalized: %s', var_export($data, true)));
     }
 
     /**
@@ -216,8 +216,10 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
      * @param mixed  $data    Data to get the serializer for
      * @param string $format  Format name, present to give the option to normalizers to act differently based on formats
      * @param array  $context Options available to the normalizer
+     *
+     * @return NormalizerInterface|null
      */
-    private function getNormalizer($data, ?string $format, array $context): ?NormalizerInterface
+    private function getNormalizer($data, ?string $format, array $context)
     {
         if ($this->cachedNormalizers !== $this->normalizers) {
             $this->cachedNormalizers = $this->normalizers;
@@ -248,8 +250,6 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
                 return $normalizer;
             }
         }
-
-        return null;
     }
 
     /**
@@ -259,8 +259,10 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
      * @param string $class   The expected class to instantiate
      * @param string $format  Format name, present to give the option to normalizers to act differently based on formats
      * @param array  $context Options available to the denormalizer
+     *
+     * @return DenormalizerInterface|null
      */
-    private function getDenormalizer($data, string $class, ?string $format, array $context): ?DenormalizerInterface
+    private function getDenormalizer($data, string $class, ?string $format, array $context)
     {
         if ($this->cachedNormalizers !== $this->normalizers) {
             $this->cachedNormalizers = $this->normalizers;
@@ -289,8 +291,6 @@ class Serializer implements SerializerInterface, ContextAwareNormalizerInterface
                 return $normalizer;
             }
         }
-
-        return null;
     }
 
     /**

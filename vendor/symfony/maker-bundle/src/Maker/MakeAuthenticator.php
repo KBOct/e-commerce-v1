@@ -33,9 +33,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Form\Form;
 
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>
@@ -164,15 +164,6 @@ final class MakeAuthenticator extends AbstractMaker
                 'username-field',
                 $interactiveSecurityHelper->guessUserNameField($io, $userClass, $securityData['security']['providers'])
             );
-
-            $command->addArgument('logout-setup', InputArgument::REQUIRED);
-            $input->setArgument(
-                'logout-setup',
-                $io->confirm(
-                    'Do you want to generate a \'/logout\' URL?',
-                    true
-                )
-            );
         }
     }
 
@@ -196,8 +187,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $this->fileManager->getFileContents($path = 'config/packages/security.yaml'),
                 $input->getOption('firewall-name'),
                 $input->getOption('entry-point'),
-                $input->getArgument('authenticator-class'),
-                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false
+                $input->getArgument('authenticator-class')
             );
             $generator->dumpFile($path, $newYaml);
             $securityYamlUpdated = true;
@@ -205,11 +195,7 @@ final class MakeAuthenticator extends AbstractMaker
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
-            $this->generateFormLoginFiles(
-                $input->getArgument('controller-class'),
-                $input->getArgument('username-field'),
-                $input->getArgument('logout-setup')
-            );
+            $this->generateFormLoginFiles($input->getArgument('controller-class'), $input->getArgument('username-field'));
         }
 
         $generator->writeChanges();
@@ -259,7 +245,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup)
+    private function generateFormLoginFiles(string $controllerClass, string $userNameField)
     {
         $controllerClassNameDetails = $this->generator->createClassNameDetails(
             $controllerClass,
@@ -287,21 +273,17 @@ final class MakeAuthenticator extends AbstractMaker
 
         $securityControllerBuilder = new SecurityControllerBuilder();
         $securityControllerBuilder->addLoginMethod($manipulator);
-        if ($logoutSetup) {
-            $securityControllerBuilder->addLogoutMethod($manipulator);
-        }
 
         $this->generator->dumpFile($controllerPath, $manipulator->getSourceCode());
 
         // create login form template
-        $this->generator->generateTemplate(
-            'security/login.html.twig',
+        $this->generator->generateFile(
+            'templates/security/login.html.twig',
             'authenticator/login_form.tpl.php',
             [
                 'username_field' => $userNameField,
                 'username_is_email' => false !== stripos($userNameField, 'email'),
                 'username_label' => ucfirst(Str::asHumanWords($userNameField)),
-                'logout_setup' => $logoutSetup,
             ]
         );
     }
@@ -332,7 +314,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $nextTexts[] = sprintf('- Check the user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
             }
 
-            $nextTexts[] = '- Review & adapt the login template: <info>'.$this->fileManager->getPathForTemplate('security/login.html.twig').'</info>.';
+            $nextTexts[] = '- Review & adapt the login template: <info>templates/security/login.html.twig</info>.';
         }
 
         return $nextTexts;

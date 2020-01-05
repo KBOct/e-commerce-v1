@@ -90,12 +90,9 @@ class Configuration
      */
     public function tolerates(array $deprecations)
     {
-        $deprecationCounts = [];
-        foreach ($deprecations as $key => $deprecation) {
-            if (false !== strpos($key, 'Count') && false === strpos($key, 'legacy')) {
-                $deprecationCounts[$key] = $deprecation;
-            }
-        }
+        $deprecationCounts = array_filter($deprecations, function ($key) {
+            return false !== strpos($key, 'Count') && false === strpos($key, 'legacy');
+        }, ARRAY_FILTER_USE_KEY);
 
         if (array_sum($deprecationCounts) > $this->thresholds['total']) {
             return false;

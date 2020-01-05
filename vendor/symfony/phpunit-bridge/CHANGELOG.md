@@ -1,18 +1,6 @@
 CHANGELOG
 =========
 
-5.0.0
------
-
- * removed `weak_vendor` mode, use `max[self]=0` instead
-
-4.4.0
------
-
- * made the bridge act as a polyfill for newest PHPUnit features
- * added `SetUpTearDownTrait` to allow working around the `void` return-type added by PHPUnit 8
- * added namespace aliases for PHPUnit < 6
-
 4.3.0
 -----
 

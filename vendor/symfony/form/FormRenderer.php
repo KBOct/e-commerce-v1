@@ -290,7 +290,7 @@ class FormRenderer implements FormRendererInterface
     /**
      * @internal
      */
-    public function encodeCurrency(Environment $environment, string $text, string $widget = ''): string
+    public function encodeCurrency(Environment $environment, $text, $widget = '')
     {
         if ('UTF-8' === $charset = $environment->getCharset()) {
             $text = htmlspecialchars($text, ENT_QUOTES | (\defined('ENT_SUBSTITUTE') ? ENT_SUBSTITUTE : 0), 'UTF-8');

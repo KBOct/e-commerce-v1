@@ -18,10 +18,6 @@ use Symfony\Component\Security\Core\Role\Role;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
- *
- * @method array    __serialize()                                                                             Returns all the necessary state of the object for serialization purposes - not implementing it is deprecated since Symfony 4.3
- * @method void     __unserialize(array $data) Restores the object state from an array given by __serialize() - not implementing it is deprecated since Symfony 4.3
- * @method string[] getRoleNames()                                                                            The associated roles - not implementing it is deprecated since Symfony 4.3
  */
 interface TokenInterface extends \Serializable
 {
@@ -38,8 +34,6 @@ interface TokenInterface extends \Serializable
      * Returns the user roles.
      *
      * @return Role[] An array of Role instances
-     *
-     * @deprecated since Symfony 4.3, use the getRoleNames() method instead
      */
     public function getRoles();
 

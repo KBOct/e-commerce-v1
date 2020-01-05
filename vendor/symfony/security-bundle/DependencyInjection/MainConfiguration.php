@@ -218,26 +218,9 @@ class MainConfiguration implements ConfigurationInterface
                 ->fixXmlConfig('delete_cookie')
                 ->children()
                     ->arrayNode('delete_cookies')
-                        ->normalizeKeys(false)
                         ->beforeNormalization()
                             ->ifTrue(function ($v) { return \is_array($v) && \is_int(key($v)); })
                             ->then(function ($v) { return array_map(function ($v) { return ['name' => $v]; }, $v); })
-                        ->end()
-                        ->beforeNormalization()
-                            ->ifArray()->then(function ($v) {
-                                foreach ($v as $originalName => $cookieConfig) {
-                                    if (false !== strpos($originalName, '-')) {
-                                        $normalizedName = str_replace('-', '_', $originalName);
-                                        @trigger_error(sprintf('Normalization of cookie names is deprecated since Symfony 4.3. Starting from Symfony 5.0, the "%s" cookie configured in "logout.delete_cookies" will delete the "%s" cookie instead of the "%s" cookie.', $originalName, $originalName, $normalizedName), E_USER_DEPRECATED);
-
-                                        // normalize cookie names manually for BC reasons. Remove it in Symfony 5.0.
-                                        $v[$normalizedName] = $cookieConfig;
-                                        unset($v[$originalName]);
-                                    }
-                                }
-
-                                return $v;
-                            })
                         ->end()
                         ->useAttributeAsKey('name')
                         ->prototype('array')
@@ -253,6 +236,12 @@ class MainConfiguration implements ConfigurationInterface
                     ->arrayNode('handlers')
                         ->prototype('scalar')->end()
                     ->end()
+                ->end()
+            ->end()
+            ->arrayNode('anonymous')
+                ->canBeUnset()
+                ->children()
+                    ->scalarNode('secret')->defaultNull()->end()
                 ->end()
             ->end()
             ->arrayNode('switch_user')
@@ -379,10 +368,9 @@ class MainConfiguration implements ConfigurationInterface
             ->children()
                 ->arrayNode('encoders')
                     ->example([
-                        'App\Entity\User1' => 'auto',
+                        'App\Entity\User1' => 'bcrypt',
                         'App\Entity\User2' => [
-                            'algorithm' => 'auto',
-                            'time_cost' => 8,
+                            'algorithm' => 'bcrypt',
                             'cost' => 13,
                         ],
                     ])
@@ -393,17 +381,7 @@ class MainConfiguration implements ConfigurationInterface
                         ->performNoDeepMerging()
                         ->beforeNormalization()->ifString()->then(function ($v) { return ['algorithm' => $v]; })->end()
                         ->children()
-                            ->scalarNode('algorithm')
-                                ->cannotBeEmpty()
-                                ->validate()
-                                    ->ifTrue(function ($v) { return !\is_string($v); })
-                                    ->thenInvalid('You must provide a string value.')
-                                ->end()
-                            ->end()
-                            ->arrayNode('migrate_from')
-                                ->prototype('scalar')->end()
-                                ->beforeNormalization()->castToArray()->end()
-                            ->end()
+                            ->scalarNode('algorithm')->cannotBeEmpty()->end()
                             ->scalarNode('hash_algorithm')->info('Name of hashing algorithm for PBKDF2 (i.e. sha256, sha512, etc..) See hash_algos() for a list of supported algorithms.')->defaultValue('sha512')->end()
                             ->scalarNode('key_length')->defaultValue(40)->end()
                             ->booleanNode('ignore_case')->defaultFalse()->end()
@@ -412,14 +390,11 @@ class MainConfiguration implements ConfigurationInterface
                             ->integerNode('cost')
                                 ->min(4)
                                 ->max(31)
-                                ->defaultNull()
+                                ->defaultValue(13)
                             ->end()
                             ->scalarNode('memory_cost')->defaultNull()->end()
                             ->scalarNode('time_cost')->defaultNull()->end()
-                            ->scalarNode('threads')
-                                ->defaultNull()
-                                ->setDeprecated('The "%path%.%node%" configuration key has no effect since Symfony 4.3 and will be removed in 5.0.')
-                            ->end()
+                            ->scalarNode('threads')->defaultNull()->end()
                             ->scalarNode('id')->end()
                         ->end()
                     ->end()

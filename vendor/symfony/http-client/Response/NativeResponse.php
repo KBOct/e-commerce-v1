@@ -35,7 +35,6 @@ final class NativeResponse implements ResponseInterface
     private $inflate;
     private $multi;
     private $debugBuffer;
-    private $shouldBuffer;
 
     /**
      * @internal
@@ -51,8 +50,7 @@ final class NativeResponse implements ResponseInterface
         $this->info = &$info;
         $this->resolveRedirect = $resolveRedirect;
         $this->onProgress = $onProgress;
-        $this->content = true === $options['buffer'] ? fopen('php://temp', 'w+') : (\is_resource($options['buffer']) ? $options['buffer'] : null);
-        $this->shouldBuffer = $options['buffer'] instanceof \Closure ? $options['buffer'] : null;
+        $this->content = $options['buffer'] ? fopen('php://temp', 'w+') : null;
 
         // Temporary resources to dechunk/inflate the response stream
         $this->buffer = fopen('php://temp', 'w+');
@@ -67,11 +65,7 @@ final class NativeResponse implements ResponseInterface
             }
 
             if (null === $response->remaining) {
-                foreach (self::stream([$response]) as $chunk) {
-                    if ($chunk->isFirst()) {
-                        break;
-                    }
-                }
+                self::stream([$response])->current();
             }
         };
     }
@@ -82,12 +76,20 @@ final class NativeResponse implements ResponseInterface
     public function getInfo(string $type = null)
     {
         if (!$info = $this->finalInfo) {
+            self::perform($this->multi);
+
+            if ('debug' === $type) {
+                return $this->info['debug'];
+            }
+
             $info = $this->info;
             $info['url'] = implode('', $info['url']);
-            unset($info['size_body'], $info['request_header']);
+            unset($info['fopen_time'], $info['size_body'], $info['request_header']);
 
             if (null === $this->buffer) {
                 $this->finalInfo = $info;
+            } else {
+                unset($info['debug']);
             }
         }
 
@@ -96,8 +98,6 @@ final class NativeResponse implements ResponseInterface
 
     public function __destruct()
     {
-        $this->shouldBuffer = null;
-
         try {
             $this->doDestruct();
         } finally {
@@ -113,18 +113,11 @@ final class NativeResponse implements ResponseInterface
 
     private function open(): void
     {
-        $url = $this->url;
-
-        set_error_handler(function ($type, $msg) use (&$url) {
-            if (E_NOTICE !== $type || 'fopen(): Content-type not specified assuming application/x-www-form-urlencoded' !== $msg) {
-                throw new TransportException($msg);
-            }
-
-            $this->logger && $this->logger->info(sprintf('%s for "%s".', $msg, $url ?? $this->url));
-        });
+        set_error_handler(function ($type, $msg) { throw new TransportException($msg); });
 
         try {
             $this->info['start_time'] = microtime(true);
+            $url = $this->url;
 
             while (true) {
                 $context = stream_context_get_options($this->context);
@@ -141,6 +134,7 @@ final class NativeResponse implements ResponseInterface
                 $this->info['request_header'] .= implode("\r\n", $context['http']['header'])."\r\n\r\n";
 
                 // Send request and follow redirects when needed
+                $this->info['fopen_time'] = microtime(true);
                 $this->handle = $h = fopen($url, 'r', false, $this->context);
                 self::addResponseHeaders($http_response_header, $this->info, $this->headers, $this->info['debug']);
                 $url = ($this->resolveRedirect)($this->multi, $this->headers['location'][0] ?? null, $this->context);
@@ -158,7 +152,7 @@ final class NativeResponse implements ResponseInterface
 
             return;
         } finally {
-            $this->info['pretransfer_time'] = $this->info['total_time'] = microtime(true) - $this->info['start_time'];
+            $this->info['starttransfer_time'] = $this->info['total_time'] = microtime(true) - $this->info['start_time'];
             restore_error_handler();
         }
 
@@ -183,33 +177,8 @@ final class NativeResponse implements ResponseInterface
             $this->inflate = null;
         }
 
-        try {
-            if (null !== $this->shouldBuffer && null === $this->content && $this->content = ($this->shouldBuffer)($this->headers) ?: null) {
-                $this->content = \is_resource($this->content) ? $this->content : fopen('php://temp', 'w+');
-            }
-
-            if (null !== $this->info['error']) {
-                throw new TransportException($this->info['error']);
-            }
-        } catch (\Throwable $e) {
-            $this->close();
-            $this->multi->handlesActivity[$this->id] = [new FirstChunk()];
-            $this->multi->handlesActivity[$this->id][] = null;
-            $this->multi->handlesActivity[$this->id][] = $e;
-
-            return;
-        }
-
-        $this->multi->handlesActivity[$this->id] = [new FirstChunk()];
-
-        if ('HEAD' === $context['http']['method'] || \in_array($this->info['http_code'], [204, 304], true)) {
-            $this->multi->handlesActivity[$this->id][] = null;
-            $this->multi->handlesActivity[$this->id][] = null;
-
-            return;
-        }
-
         $this->multi->openHandles[$this->id] = [$h, $this->buffer, $this->inflate, $this->content, $this->onProgress, &$this->remaining, &$this->info];
+        $this->multi->handlesActivity[$this->id] = [new FirstChunk()];
     }
 
     /**
@@ -279,7 +248,6 @@ final class NativeResponse implements ResponseInterface
                     try {
                         // Notify the progress callback so that it can e.g. cancel
                         // the request if the stream is inactive for too long
-                        $info['total_time'] = microtime(true) - $info['start_time'];
                         $onProgress();
                     } catch (\Throwable $e) {
                         // no-op
@@ -305,7 +273,6 @@ final class NativeResponse implements ResponseInterface
             if (null !== $e || !$remaining || feof($h)) {
                 // Stream completed
                 $info['total_time'] = microtime(true) - $info['start_time'];
-                $info['starttransfer_time'] = $info['starttransfer_time'] ?: $info['total_time'];
 
                 if ($onProgress) {
                     try {

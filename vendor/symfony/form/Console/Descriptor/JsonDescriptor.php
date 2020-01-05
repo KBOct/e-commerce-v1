@@ -87,15 +87,14 @@ class JsonDescriptor extends Descriptor
                 }
             }
         }
-        $data['has_normalizer'] = isset($definition['normalizers']);
+        $data['has_normalizer'] = isset($definition['normalizer']);
 
         $this->writeData($data, $options);
     }
 
     private function writeData(array $data, array $options)
     {
-        $flags = isset($options['json_encoding']) ? $options['json_encoding'] : 0;
-
+        $flags = $options['json_encoding'] ?? 0;
         $this->output->write(json_encode($data, $flags | JSON_PRETTY_PRINT)."\n");
     }
 

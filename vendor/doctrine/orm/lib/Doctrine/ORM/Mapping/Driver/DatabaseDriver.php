@@ -29,7 +29,6 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\MappingException;
-use function preg_replace;
 
 /**
  * The DatabaseDriver reverse engineers the mapping metadata from a database.
@@ -549,7 +548,7 @@ class DatabaseDriver implements MappingDriver
 
         // Replace _id if it is a foreignkey column
         if ($fk) {
-            $columnName = preg_replace('/_id$/', '', $columnName);
+            $columnName = str_replace('_id', '', $columnName);
         }
 
         return Inflector::camelize($columnName);

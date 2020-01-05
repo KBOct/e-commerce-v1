@@ -32,7 +32,7 @@ class PhpFileCache extends FileCache
     {
         parent::__construct($directory, $extension, $umask);
 
-        self::$emptyErrorHandler = static function () {
+        self::$emptyErrorHandler = function () {
         };
     }
 

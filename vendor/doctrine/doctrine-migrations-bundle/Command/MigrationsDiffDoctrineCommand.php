@@ -10,8 +10,6 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use function assert;
 
 /**
  * Command for generate migration classes by comparing your current database schema
@@ -19,14 +17,12 @@ use function assert;
  */
 class MigrationsDiffDoctrineCommand extends DiffCommand
 {
-    /** @var string */
-    protected static $defaultName = 'doctrine:migrations:diff';
-
     protected function configure() : void
     {
         parent::configure();
 
         $this
+            ->setName('doctrine:migrations:diff')
             ->addOption('db', null, InputOption::VALUE_REQUIRED, 'The database connection to use for this command.')
             ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command.')
             ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection to use for this command.');
@@ -40,9 +36,7 @@ class MigrationsDiffDoctrineCommand extends DiffCommand
         Helper\DoctrineCommandHelper::setApplicationHelper($application, $input);
 
         $configuration = $this->getMigrationConfiguration($input, $output);
-        $container     = $application->getKernel()->getContainer();
-        assert($container instanceof ContainerInterface);
-        DoctrineCommand::configureMigrations($container, $configuration);
+        DoctrineCommand::configureMigrations($application->getKernel()->getContainer(), $configuration);
 
         parent::initialize($input, $output);
     }

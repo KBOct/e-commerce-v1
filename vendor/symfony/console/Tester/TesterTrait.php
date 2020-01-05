@@ -110,7 +110,7 @@ trait TesterTrait
      * @param array $inputs An array of strings representing each input
      *                      passed to the command input stream
      *
-     * @return $this
+     * @return self
      */
     public function setInputs(array $inputs)
     {
@@ -162,9 +162,6 @@ trait TesterTrait
         }
     }
 
-    /**
-     * @return resource
-     */
     private static function createStream(array $inputs)
     {
         $stream = fopen('php://memory', 'r+', false);

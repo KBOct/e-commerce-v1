@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\File\Exception\IniSizeFileException;
 use Symfony\Component\HttpFoundation\File\Exception\NoFileException;
 use Symfony\Component\HttpFoundation\File\Exception\NoTmpDirFileException;
 use Symfony\Component\HttpFoundation\File\Exception\PartialFileException;
-use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\HttpFoundation\File\MimeType\ExtensionGuesser;
 
 /**
  * A file uploaded through a form.
@@ -140,7 +140,10 @@ class UploadedFile extends File
      */
     public function guessClientExtension()
     {
-        return MimeTypes::getDefault()->getExtensions($this->getClientMimeType())[0] ?? null;
+        $type = $this->getClientMimeType();
+        $guesser = ExtensionGuesser::getInstance();
+
+        return $guesser->guess($type);
     }
 
     /**
@@ -243,24 +246,13 @@ class UploadedFile extends File
      */
     public static function getMaxFilesize()
     {
-        $sizePostMax = self::parseFilesize(ini_get('post_max_size'));
-        $sizeUploadMax = self::parseFilesize(ini_get('upload_max_filesize'));
+        $iniMax = strtolower(ini_get('upload_max_filesize'));
 
-        return min($sizePostMax ?: PHP_INT_MAX, $sizeUploadMax ?: PHP_INT_MAX);
-    }
-
-    /**
-     * Returns the given size from an ini value in bytes.
-     */
-    private static function parseFilesize($size): int
-    {
-        if ('' === $size) {
-            return 0;
+        if ('' === $iniMax) {
+            return PHP_INT_MAX;
         }
 
-        $size = strtolower($size);
-
-        $max = ltrim($size, '+');
+        $max = ltrim($iniMax, '+');
         if (0 === strpos($max, '0x')) {
             $max = \intval($max, 16);
         } elseif (0 === strpos($max, '0')) {
@@ -269,7 +261,7 @@ class UploadedFile extends File
             $max = (int) $max;
         }
 
-        switch (substr($size, -1)) {
+        switch (substr($iniMax, -1)) {
             case 't': $max *= 1024;
             // no break
             case 'g': $max *= 1024;

@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
-
 /**
  * Validates that values are a multiple of the given number.
  *
@@ -25,14 +23,6 @@ class DivisibleByValidator extends AbstractComparisonValidator
      */
     protected function compareValues($value1, $value2)
     {
-        if (!is_numeric($value1)) {
-            throw new UnexpectedValueException($value1, 'numeric');
-        }
-
-        if (!is_numeric($value2)) {
-            throw new UnexpectedValueException($value2, 'numeric');
-        }
-
         if (!$value2 = abs($value2)) {
             return false;
         }

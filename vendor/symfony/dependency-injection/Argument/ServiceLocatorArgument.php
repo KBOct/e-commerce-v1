@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Argument;
 
-use Symfony\Component\DependencyInjection\Reference;
-
 /**
  * Represents a closure acting as a service locator.
  *
@@ -21,24 +19,4 @@ use Symfony\Component\DependencyInjection\Reference;
 class ServiceLocatorArgument implements ArgumentInterface
 {
     use ReferenceSetArgumentTrait;
-
-    private $taggedIteratorArgument;
-
-    /**
-     * @param Reference[]|TaggedIteratorArgument $values
-     */
-    public function __construct($values = [])
-    {
-        if ($values instanceof TaggedIteratorArgument) {
-            $this->taggedIteratorArgument = $values;
-            $this->values = [];
-        } else {
-            $this->setValues($values);
-        }
-    }
-
-    public function getTaggedIteratorArgument(): ?TaggedIteratorArgument
-    {
-        return $this->taggedIteratorArgument;
-    }
 }

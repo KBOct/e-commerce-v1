@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Security\Core\Authentication\Token;
 
+use Symfony\Component\Security\Core\Role\Role;
+
 /**
  * UsernamePasswordToken implements a username and password token.
  *
@@ -22,10 +24,10 @@ class UsernamePasswordToken extends AbstractToken
     private $providerKey;
 
     /**
-     * @param string|object $user        The username (like a nickname, email address, etc.), or a UserInterface instance or an object implementing a __toString method
-     * @param mixed         $credentials This usually is the password of the user
-     * @param string        $providerKey The provider key
-     * @param string[]      $roles       An array of roles
+     * @param string|object   $user        The username (like a nickname, email address, etc.), or a UserInterface instance or an object implementing a __toString method
+     * @param mixed           $credentials This usually is the password of the user
+     * @param string          $providerKey The provider key
+     * @param (Role|string)[] $roles       An array of roles
      *
      * @throws \InvalidArgumentException
      */
@@ -87,17 +89,19 @@ class UsernamePasswordToken extends AbstractToken
     /**
      * {@inheritdoc}
      */
-    public function __serialize(): array
+    public function serialize()
     {
-        return [$this->credentials, $this->providerKey, parent::__serialize()];
+        $serialized = [$this->credentials, $this->providerKey, parent::serialize(true)];
+
+        return $this->doSerialize($serialized, \func_num_args() ? \func_get_arg(0) : null);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function __unserialize(array $data): void
+    public function unserialize($serialized)
     {
-        [$this->credentials, $this->providerKey, $parentData] = $data;
-        parent::__unserialize($parentData);
+        list($this->credentials, $this->providerKey, $parentStr) = \is_array($serialized) ? $serialized : unserialize($serialized);
+        parent::unserialize($parentStr);
     }
 }

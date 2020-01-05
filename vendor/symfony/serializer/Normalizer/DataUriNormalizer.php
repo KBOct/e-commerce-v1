@@ -13,9 +13,7 @@ namespace Symfony\Component\Serializer\Normalizer;
 
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
-use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface as DeprecatedMimeTypeGuesserInterface;
-use Symfony\Component\Mime\MimeTypeGuesserInterface;
-use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
@@ -34,26 +32,14 @@ class DataUriNormalizer implements NormalizerInterface, DenormalizerInterface, C
     ];
 
     /**
-     * @var MimeTypeGuesserInterface|null
+     * @var MimeTypeGuesserInterface
      */
     private $mimeTypeGuesser;
 
-    /**
-     * @param MimeTypeGuesserInterface|null $mimeTypeGuesser
-     */
-    public function __construct($mimeTypeGuesser = null)
+    public function __construct(MimeTypeGuesserInterface $mimeTypeGuesser = null)
     {
-        if ($mimeTypeGuesser instanceof DeprecatedMimeTypeGuesserInterface) {
-            @trigger_error(sprintf('Passing a %s to "%s()" is deprecated since Symfony 4.3, pass a "%s" instead.', DeprecatedMimeTypeGuesserInterface::class, __METHOD__, MimeTypeGuesserInterface::class), E_USER_DEPRECATED);
-        } elseif (null === $mimeTypeGuesser) {
-            if (class_exists(MimeTypes::class)) {
-                $mimeTypeGuesser = MimeTypes::getDefault();
-            } elseif (class_exists(MimeTypeGuesser::class)) {
-                @trigger_error(sprintf('Passing null to "%s()" to use a default MIME type guesser without Symfony Mime installed is deprecated since Symfony 4.3. Try running "composer require symfony/mime".', __METHOD__), E_USER_DEPRECATED);
-                $mimeTypeGuesser = MimeTypeGuesser::getInstance();
-            }
-        } elseif (!$mimeTypeGuesser instanceof MimeTypes) {
-            throw new \TypeError(sprintf('Argument 1 passed to "%s()" must be an instance of "%s" or null, %s given.', __METHOD__, MimeTypes::class, \is_object($mimeTypeGuesser) ? \get_class($mimeTypeGuesser) : \gettype($mimeTypeGuesser)));
+        if (null === $mimeTypeGuesser && class_exists('Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser')) {
+            $mimeTypeGuesser = MimeTypeGuesser::getInstance();
         }
 
         $this->mimeTypeGuesser = $mimeTypeGuesser;
@@ -103,14 +89,14 @@ class DataUriNormalizer implements NormalizerInterface, DenormalizerInterface, C
      * @throws InvalidArgumentException
      * @throws NotNormalizableValueException
      */
-    public function denormalize($data, $type, $format = null, array $context = [])
+    public function denormalize($data, $class, $format = null, array $context = [])
     {
         if (!preg_match('/^data:([a-z0-9][a-z0-9\!\#\$\&\-\^\_\+\.]{0,126}\/[a-z0-9][a-z0-9\!\#\$\&\-\^\_\+\.]{0,126}(;[a-z0-9\-]+\=[a-z0-9\-]+)?)?(;base64)?,[a-z0-9\!\$\&\\\'\,\(\)\*\+\,\;\=\-\.\_\~\:\@\/\?\%\s]*\s*$/i', $data)) {
             throw new NotNormalizableValueException('The provided "data:" URI is not valid.');
         }
 
         try {
-            switch ($type) {
+            switch ($class) {
                 case 'Symfony\Component\HttpFoundation\File\File':
                     return new File($data, false);
 
@@ -122,7 +108,7 @@ class DataUriNormalizer implements NormalizerInterface, DenormalizerInterface, C
             throw new NotNormalizableValueException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        throw new InvalidArgumentException(sprintf('The class parameter "%s" is not supported. It must be one of "SplFileInfo", "SplFileObject" or "Symfony\Component\HttpFoundation\File\File".', $type));
+        throw new InvalidArgumentException(sprintf('The class parameter "%s" is not supported. It must be one of "SplFileInfo", "SplFileObject" or "Symfony\Component\HttpFoundation\File\File".', $class));
     }
 
     /**
@@ -143,18 +129,18 @@ class DataUriNormalizer implements NormalizerInterface, DenormalizerInterface, C
 
     /**
      * Gets the mime type of the object. Defaults to application/octet-stream.
+     *
+     * @param \SplFileInfo $object
+     *
+     * @return string
      */
-    private function getMimeType(\SplFileInfo $object): string
+    private function getMimeType(\SplFileInfo $object)
     {
         if ($object instanceof File) {
             return $object->getMimeType();
         }
 
-        if ($this->mimeTypeGuesser instanceof DeprecatedMimeTypeGuesserInterface && $mimeType = $this->mimeTypeGuesser->guess($object->getPathname())) {
-            return $mimeType;
-        }
-
-        if ($this->mimeTypeGuesser && $mimeType = $this->mimeTypeGuesser->guessMimeType($object->getPathname())) {
+        if ($this->mimeTypeGuesser && $mimeType = $this->mimeTypeGuesser->guess($object->getPathname())) {
             return $mimeType;
         }
 
@@ -163,8 +149,12 @@ class DataUriNormalizer implements NormalizerInterface, DenormalizerInterface, C
 
     /**
      * Returns the \SplFileObject instance associated with the given \SplFileInfo instance.
+     *
+     * @param \SplFileInfo $object
+     *
+     * @return \SplFileObject
      */
-    private function extractSplFileObject(\SplFileInfo $object): \SplFileObject
+    private function extractSplFileObject(\SplFileInfo $object)
     {
         if ($object instanceof \SplFileObject) {
             return $object;

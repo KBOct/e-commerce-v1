@@ -98,14 +98,6 @@ class MigrationRepository
         }
     }
 
-    public function removeMigrationVersionFromDatabase(string $version) : void
-    {
-        $this->connection->delete(
-            $this->configuration->getMigrationsTableName(),
-            [$this->configuration->getMigrationsColumnName() => $version]
-        );
-    }
-
     /** @throws MigrationException */
     public function registerMigration(string $version, string $migrationClassName) : Version
     {

@@ -77,9 +77,8 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
     protected $roundingMode;
 
     private $scale;
-    private $locale;
 
-    public function __construct(int $scale = null, ?bool $grouping = false, ?int $roundingMode = self::ROUND_HALF_UP, string $locale = null)
+    public function __construct(int $scale = null, ?bool $grouping = false, ?int $roundingMode = self::ROUND_HALF_UP)
     {
         if (null === $grouping) {
             $grouping = false;
@@ -92,7 +91,6 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
         $this->scale = $scale;
         $this->grouping = $grouping;
         $this->roundingMode = $roundingMode;
-        $this->locale = $locale;
     }
 
     /**
@@ -145,7 +143,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
         }
 
         if ('' === $value) {
-            return null;
+            return;
         }
 
         if (\in_array($value, ['NaN', 'NAN', 'nan'], true)) {
@@ -216,7 +214,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
      */
     protected function getNumberFormatter()
     {
-        $formatter = new \NumberFormatter($this->locale ?? \Locale::getDefault(), \NumberFormatter::DECIMAL);
+        $formatter = new \NumberFormatter(\Locale::getDefault(), \NumberFormatter::DECIMAL);
 
         if (null !== $this->scale) {
             $formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $this->scale);

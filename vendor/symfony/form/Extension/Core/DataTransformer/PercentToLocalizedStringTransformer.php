@@ -112,7 +112,7 @@ class PercentToLocalizedStringTransformer implements DataTransformerInterface
         }
 
         if ('' === $value) {
-            return null;
+            return;
         }
 
         $position = 0;

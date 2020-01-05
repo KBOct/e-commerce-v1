@@ -29,16 +29,14 @@ class FileManager
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
-    private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath = null)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory)
     {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
-        $this->twigDefaultPath = $twigDefaultPath ? rtrim($this->relativizePath($twigDefaultPath), '/') : null;
     }
 
     public function setIO(SymfonyStyle $io)
@@ -61,16 +59,16 @@ class FileManager
         $newFile = !$this->fileExists($filename);
         $existingContent = $newFile ? '' : file_get_contents($absolutePath);
 
-        $comment = $newFile ? '<fg=blue>created</>' : '<fg=yellow>updated</>';
+        $comment = $newFile ? 'created' : 'updated';
         if ($existingContent === $content) {
-            $comment = '<fg=green>no change</>';
+            $comment = 'no change';
         }
 
         $this->fs->dumpFile($absolutePath, $content);
 
         if ($this->io) {
             $this->io->comment(sprintf(
-                '%s: %s',
+                '<fg=green>%s</>: %s',
                 $comment,
                 $this->relativizePath($filename)
             ));
@@ -120,7 +118,7 @@ class FileManager
         return file_get_contents($this->absolutizePath($path));
     }
 
-    public function createFinder(string $in): Finder
+    public function createFinder(string $in)
     {
         $finder = new Finder();
         $finder->in($this->absolutizePath($in));
@@ -174,15 +172,6 @@ class FileManager
     public function getRootDirectory(): string
     {
         return $this->rootDirectory;
-    }
-
-    public function getPathForTemplate(string $filename): string
-    {
-        if (null === $this->twigDefaultPath) {
-            throw new \RuntimeException('Cannot get path for template: is Twig installed?');
-        }
-
-        return $this->twigDefaultPath.'/'.$filename;
     }
 
     /**

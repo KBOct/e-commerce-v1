@@ -2,13 +2,14 @@
 
 namespace Doctrine\Bundle\DoctrineBundle\Command;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Sharding\PoolingShardConnection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\EntityGenerator;
-use Doctrine\Persistence\ManagerRegistry;
 use LogicException;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for Doctrine console commands to extend from.
@@ -17,14 +18,58 @@ use Symfony\Component\Console\Command\Command;
  */
 abstract class DoctrineCommand extends Command
 {
-    /** @var ManagerRegistry */
+    /** @var ManagerRegistry|null */
     private $doctrine;
 
-    public function __construct(ManagerRegistry $doctrine)
+    /** @var ContainerInterface|null */
+    private $container;
+
+    public function __construct(ManagerRegistry $doctrine = null)
     {
         parent::__construct();
 
+        if ($doctrine === null) {
+            @trigger_error(sprintf(
+                'The "%s" constructor expects a "%s" instance as first argument, not passing it will throw a \TypeError in DoctrineBundle 2.0.',
+                static::class,
+                ManagerRegistry::class
+            ), E_USER_DEPRECATED);
+        }
+
         $this->doctrine = $doctrine;
+    }
+
+    /**
+     * @deprecated
+     */
+    public function setContainer(ContainerInterface $container = null)
+    {
+        @trigger_error(sprintf('The "%s()" method is deprecated and will be removed in DoctrineBundle 2.0.', __METHOD__), E_USER_DEPRECATED);
+
+        $this->container = $container;
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return ContainerInterface
+     *
+     * @throws LogicException
+     */
+    protected function getContainer()
+    {
+        @trigger_error(sprintf('The "%s()" method is deprecated and will be removed in DoctrineBundle 2.0.', __METHOD__), E_USER_DEPRECATED);
+
+        if ($this->container === null) {
+            $application = $this->getApplication();
+            if ($application === null) {
+                throw new LogicException('The container cannot be retrieved as the application instance is not yet set.');
+            }
+
+            $this->container = $application->getKernel()->getContainer();
+        }
+
+        return $this->container;
     }
 
     /**
@@ -85,6 +130,6 @@ abstract class DoctrineCommand extends Command
      */
     protected function getDoctrine()
     {
-        return $this->doctrine;
+        return $this->doctrine ?: $this->doctrine = $this->getContainer()->get('doctrine');
     }
 }

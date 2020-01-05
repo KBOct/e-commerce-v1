@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "Arab": "Arap elipbiýi",
         "Armn": "Ermeni elipbiýi",
@@ -43,6 +43,7 @@
         "Zsye": "Emoji",
         "Zsym": "Nyşanlar",
         "Zxxx": "Ýazuwsyz",
-        "Zyyy": "Umumy"
+        "Zyyy": "Umumy",
+        "Zzzz": "Näbelli elipbiý"
     }
 }

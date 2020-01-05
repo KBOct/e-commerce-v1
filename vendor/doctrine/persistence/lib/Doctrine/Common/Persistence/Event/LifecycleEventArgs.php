@@ -2,30 +2,59 @@
 
 namespace Doctrine\Common\Persistence\Event;
 
-use const E_USER_DEPRECATED;
-use function class_alias;
-use function class_exists;
-use function sprintf;
-use function trigger_error;
+use Doctrine\Common\EventArgs;
+use Doctrine\Common\Persistence\ObjectManager;
 
-if (! class_exists(\Doctrine\Persistence\Event\LifecycleEventArgs::class, false)) {
-    @trigger_error(sprintf(
-        'The %s\LifecycleEventArgs class is deprecated since doctrine/persistence 1.3 and will be removed in 2.0.'
-        . ' Use \Doctrine\Persistence\Event\LifecycleEventArgs instead.',
-        __NAMESPACE__
-    ), E_USER_DEPRECATED);
-}
+/**
+ * Lifecycle Events are triggered by the UnitOfWork during lifecycle transitions
+ * of entities.
+ */
+class LifecycleEventArgs extends EventArgs
+{
+    /** @var ObjectManager */
+    private $objectManager;
 
-class_alias(
-    \Doctrine\Persistence\Event\LifecycleEventArgs::class,
-    __NAMESPACE__ . '\LifecycleEventArgs'
-);
+    /** @var object */
+    private $object;
 
-if (false) {
     /**
-     * @deprecated 1.3 Use Doctrine\Persistence\Event\LifecycleEventArgs
+     * @param object $object
      */
-    class LifecycleEventArgs extends \Doctrine\Persistence\Event\LifecycleEventArgs
+    public function __construct($object, ObjectManager $objectManager)
     {
+        $this->object        = $object;
+        $this->objectManager = $objectManager;
+    }
+
+    /**
+     * Retrieves the associated entity.
+     *
+     * @deprecated
+     *
+     * @return object
+     */
+    public function getEntity()
+    {
+        return $this->object;
+    }
+
+    /**
+     * Retrieves the associated object.
+     *
+     * @return object
+     */
+    public function getObject()
+    {
+        return $this->object;
+    }
+
+    /**
+     * Retrieves the associated ObjectManager.
+     *
+     * @return ObjectManager
+     */
+    public function getObjectManager()
+    {
+        return $this->objectManager;
     }
 }

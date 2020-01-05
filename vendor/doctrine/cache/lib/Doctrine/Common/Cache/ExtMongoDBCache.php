@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+
 namespace Doctrine\Common\Cache;
 
-use DateTime;
 use MongoDB\BSON\Binary;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Collection;
@@ -62,7 +62,6 @@ class ExtMongoDBCache extends CacheProvider
         if ($this->isExpired($document)) {
             $this->createExpirationIndex();
             $this->doDelete($id);
-
             return false;
         }
 
@@ -83,7 +82,6 @@ class ExtMongoDBCache extends CacheProvider
         if ($this->isExpired($document)) {
             $this->createExpirationIndex();
             $this->doDelete($id);
-
             return false;
         }
 
@@ -184,7 +182,7 @@ class ExtMongoDBCache extends CacheProvider
     {
         return isset($document[MongoDBCache::EXPIRATION_FIELD]) &&
             $document[MongoDBCache::EXPIRATION_FIELD] instanceof UTCDateTime &&
-            $document[MongoDBCache::EXPIRATION_FIELD]->toDateTime() < new DateTime();
+            $document[MongoDBCache::EXPIRATION_FIELD]->toDateTime() < new \DateTime();
     }
 
     private function createExpirationIndex() : void

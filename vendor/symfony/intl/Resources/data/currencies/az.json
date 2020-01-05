@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "ADP": [
             "ADP",
@@ -171,7 +171,7 @@
         ],
         "BSD": [
             "BSD",
-            "Baham Dolları"
+            "Bahama Dolları"
         ],
         "BTN": [
             "BTN",
@@ -347,7 +347,7 @@
         ],
         "GBP": [
             "£",
-            "Britaniya Funtu"
+            "Britaniya Funt"
         ],
         "GEK": [
             "GEK",
@@ -367,7 +367,7 @@
         ],
         "GIP": [
             "GIP",
-            "Cəbəli-Tariq Funtu"
+            "Gibraltar Funtu"
         ],
         "GMD": [
             "GMD",
@@ -491,7 +491,7 @@
         ],
         "KGS": [
             "KGS",
-            "Qırğızıstan Somu"
+            "Kırğızıstan Somu"
         ],
         "KHR": [
             "KHR",

@@ -12,7 +12,7 @@
 namespace Symfony\Bundle\SecurityBundle\Debug;
 
 use Symfony\Bundle\SecurityBundle\EventListener\FirewallListener;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 /**
  * Firewall collecting called listeners.
@@ -28,11 +28,11 @@ final class TraceableFirewallListener extends FirewallListener
         return $this->wrappedListeners;
     }
 
-    protected function callListeners(RequestEvent $event, iterable $listeners)
+    protected function handleRequest(GetResponseEvent $event, $listeners)
     {
         foreach ($listeners as $listener) {
             $wrappedListener = new WrappedListener($listener);
-            $wrappedListener($event);
+            $wrappedListener->handle($event);
             $this->wrappedListeners[] = $wrappedListener->getInfo();
 
             if ($event->hasResponse()) {

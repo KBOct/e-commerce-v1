@@ -11,8 +11,6 @@
 
 namespace Symfony\Bridge\Twig;
 
-@trigger_error('The '.TwigEngine::class.' class is deprecated since version 4.3 and will be removed in 5.0; use \Twig\Environment instead.', E_USER_DEPRECATED);
-
 use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\Templating\StreamingEngineInterface;
 use Symfony\Component\Templating\TemplateNameParserInterface;
@@ -21,15 +19,12 @@ use Twig\Environment;
 use Twig\Error\Error;
 use Twig\Error\LoaderError;
 use Twig\Loader\ExistsLoaderInterface;
-use Twig\Loader\SourceContextLoaderInterface;
 use Twig\Template;
 
 /**
  * This engine knows how to render Twig templates.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class TwigEngine implements EngineInterface, StreamingEngineInterface
 {
@@ -79,24 +74,19 @@ class TwigEngine implements EngineInterface, StreamingEngineInterface
 
         $loader = $this->environment->getLoader();
 
-        if (1 === Environment::MAJOR_VERSION && !$loader instanceof ExistsLoaderInterface) {
-            try {
-                // cast possible TemplateReferenceInterface to string because the
-                // EngineInterface supports them but LoaderInterface does not
-                if ($loader instanceof SourceContextLoaderInterface) {
-                    $loader->getSourceContext((string) $name);
-                } else {
-                    $loader->getSource((string) $name);
-                }
+        if ($loader instanceof ExistsLoaderInterface || method_exists($loader, 'exists')) {
+            return $loader->exists((string) $name);
+        }
 
-                return true;
-            } catch (LoaderError $e) {
-            }
-
+        try {
+            // cast possible TemplateReferenceInterface to string because the
+            // EngineInterface supports them but LoaderInterface does not
+            $loader->getSourceContext((string) $name)->getCode();
+        } catch (LoaderError $e) {
             return false;
         }
 
-        return $loader->exists((string) $name);
+        return true;
     }
 
     /**
@@ -132,7 +122,7 @@ class TwigEngine implements EngineInterface, StreamingEngineInterface
         }
 
         try {
-            return $this->environment->load((string) $name)->unwrap();
+            return $this->environment->loadTemplate((string) $name);
         } catch (LoaderError $e) {
             throw new \InvalidArgumentException($e->getMessage(), $e->getCode(), $e);
         }

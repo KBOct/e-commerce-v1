@@ -54,7 +54,7 @@ interface UserInterface
      * This should be the encoded password. On authentication, a plain-text
      * password will be salted, encoded, and then compared to this value.
      *
-     * @return string|null The encoded password if any
+     * @return string The password
      */
     public function getPassword();
 

@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\Form\Console\Descriptor;
 
-use Symfony\Component\Console\Helper\Dumper;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Form\ResolvedFormTypeInterface;
-use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\VarDumper\Caster\Caster;
+use Symfony\Component\VarDumper\Cloner\VarCloner;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
 
 /**
  * @author Yonel Ceruto <yonelceruto@gmail.com>
@@ -24,20 +25,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class TextDescriptor extends Descriptor
 {
-    private $fileLinkFormatter;
-
-    public function __construct(FileLinkFormatter $fileLinkFormatter = null)
-    {
-        $this->fileLinkFormatter = $fileLinkFormatter;
-    }
-
     protected function describeDefaults(array $options)
     {
         if ($options['core_types']) {
             $this->output->section('Built-in form types (Symfony\Component\Form\Extension\Core\Type)');
-            $shortClassNames = array_map(function ($fqcn) {
-                return $this->formatClassLink($fqcn, \array_slice(explode('\\', $fqcn), -1)[0]);
-            }, $options['core_types']);
+            $shortClassNames = array_map(function ($fqcn) { return \array_slice(explode('\\', $fqcn), -1)[0]; }, $options['core_types']);
             for ($i = 0, $loopsMax = \count($shortClassNames); $i * 5 < $loopsMax; ++$i) {
                 $this->output->writeln(' '.implode(', ', \array_slice($shortClassNames, $i * 5, 5)));
             }
@@ -45,18 +37,18 @@ class TextDescriptor extends Descriptor
 
         if ($options['service_types']) {
             $this->output->section('Service form types');
-            $this->output->listing(array_map([$this, 'formatClassLink'], $options['service_types']));
+            $this->output->listing($options['service_types']);
         }
 
         if (!$options['show_deprecated']) {
             if ($options['extensions']) {
                 $this->output->section('Type extensions');
-                $this->output->listing(array_map([$this, 'formatClassLink'], $options['extensions']));
+                $this->output->listing($options['extensions']);
             }
 
             if ($options['guessers']) {
                 $this->output->section('Type guessers');
-                $this->output->listing(array_map([$this, 'formatClassLink'], $options['guessers']));
+                $this->output->listing($options['guessers']);
             }
         }
     }
@@ -92,12 +84,12 @@ class TextDescriptor extends Descriptor
 
         if ($this->parents) {
             $this->output->section('Parent types');
-            $this->output->listing(array_map([$this, 'formatClassLink'], $this->parents));
+            $this->output->listing($this->parents);
         }
 
         if ($this->extensions) {
             $this->output->section('Type extensions');
-            $this->output->listing(array_map([$this, 'formatClassLink'], $this->extensions));
+            $this->output->listing($this->extensions);
         }
     }
 
@@ -105,7 +97,7 @@ class TextDescriptor extends Descriptor
     {
         $definition = $this->getOptionDefinition($optionsResolver, $options['option']);
 
-        $dump = new Dumper($this->output);
+        $dump = $this->getDumpFunction();
         $map = [];
         if ($definition['deprecated']) {
             $map = [
@@ -118,7 +110,7 @@ class TextDescriptor extends Descriptor
             'Default' => 'default',
             'Allowed types' => 'allowedTypes',
             'Allowed values' => 'allowedValues',
-            'Normalizers' => 'normalizers',
+            'Normalizer' => 'normalizer',
         ];
         $rows = [];
         foreach ($map as $label => $name) {
@@ -155,7 +147,7 @@ class TextDescriptor extends Descriptor
         return $tableRows;
     }
 
-    private function normalizeAndSortOptionsColumns(array $options): array
+    private function normalizeAndSortOptionsColumns(array $options)
     {
         foreach ($options as $group => $opts) {
             $sorted = false;
@@ -189,31 +181,23 @@ class TextDescriptor extends Descriptor
         return $options;
     }
 
-    private function formatClassLink(string $class, string $text = null): string
+    private function getDumpFunction()
     {
-        if (null === $text) {
-            $text = $class;
-        }
+        $cloner = new VarCloner();
+        $cloner->addCasters(['Closure' => function ($c, $a) {
+            $prefix = Caster::PREFIX_VIRTUAL;
 
-        if ('' === $fileLink = $this->getFileLink($class)) {
-            return $text;
-        }
+            return [
+                $prefix.'parameters' => isset($a[$prefix.'parameters']) ? \count($a[$prefix.'parameters']->value) : 0,
+                $prefix.'file' => $a[$prefix.'file'],
+                $prefix.'line' => $a[$prefix.'line'],
+            ];
+        }]);
+        $dumper = new CliDumper(null, null, CliDumper::DUMP_LIGHT_ARRAY | CliDumper::DUMP_COMMA_SEPARATOR);
+        $dumper->setColors($this->output->isDecorated());
 
-        return sprintf('<href=%s>%s</>', $fileLink, $text);
-    }
-
-    private function getFileLink(string $class): string
-    {
-        if (null === $this->fileLinkFormatter) {
-            return '';
-        }
-
-        try {
-            $r = new \ReflectionClass($class);
-        } catch (\ReflectionException $e) {
-            return '';
-        }
-
-        return (string) $this->fileLinkFormatter->format($r->getFileName(), $r->getStartLine());
+        return function ($value) use ($dumper, $cloner) {
+            return rtrim($dumper->dump($cloner->cloneVar($value)->withRefHandles(false), true));
+        };
     }
 }

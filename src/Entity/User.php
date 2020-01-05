@@ -2,119 +2,77 @@
 
 namespace App\Entity;
 
-//use Serializable;
-use Cocur\Slugify\Slugify;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity
- * @ORM\HasLifecycleCallbacks
- * @UniqueEntity(
- *  fields={"email"},
- *  message="Un autre utilisateur s'est déjà inscrit avec cette adresse email, merci de la modifier"
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ApiResource(
+ *  normalizationContext={"groups"={"users_read"}}
  * )
+ * @UniqueEntity("email", message="Un utilisateur ayant cette adresse email existe déjà")
  */
-
-
 class User implements UserInterface
 {
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
      */
     private $id;
 
-    // /**
-    //  * @ORM\Column(type="string", length=180, unique=true)
-    //  */
-    // private $login;
-
     /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
-     */
-    private $password;
-
-    /**
-     * @Assert\EqualTo(propertyPath="password", message="Vous n'avez pas correctement confirmé votre mot de passe !")
-     */
-    public $passwordConfirm;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Email(message="Veuillez renseigner un email valide !")
+     * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
+     * @Assert\NotBlank(message="L'email doit être renseigné !")
+     * @Assert\Email(message="L'adresse email doit avoir un format valide !")
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Assert\Url(message="Veuillez donner une URL valide pour votre avatar !")
+     * @ORM\Column(type="json")
      */
-    private $picture;
+    private $roles = [];
+
+    /**
+     * @var string The hashed password
+     * @ORM\Column(type="string")
+     * @Assert\NotBlank(message="Le mot de passe est obligatoire")
+     */
+    private $password;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez renseigner votre prénom")
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
+     * @Assert\NotBlank(message="Le prénom est obligatoire")
+     * @Assert\Length(min=3, minMessage="Le prénom doit faire entre 3 et 255 caractères", max=255, maxMessage="Le prénom doit faire entre 3 et 255 caractères")
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez renseigner votre nom de famille")
+     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
+     * @Assert\NotBlank(message="Le nom de famille est obligatoire")
+     * @Assert\Length(min=3, minMessage="Le nom de famille doit faire entre 3 et 255 caractères", max=255, maxMessage="Le nom de famille doit faire entre 3 et 255 caractères")
      */
     private $lastName;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Commande", mappedBy="buyer")
+     * @ORM\OneToMany(targetEntity="App\Entity\Customer", mappedBy="user")
      */
-    private $commandes;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $deliveryAddress;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $billingAddress;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $slug;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Role", mappedBy="users")
-     */
-    private $userRoles;
-
-    /**
-     * @author BAZILE-OCTUVON Kenny <kennybazileoctuvon@gmail.com>
-     * 
-     * Permet d'initialiser le slug
-     * 
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     * 
-     */  
-    public function initializeSlug(){
-        if(empty($this->slug)){
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->firstName.' '.$this->lastName);
-        }
-    }
+    private $customers;
 
     public function __construct()
     {
-        $this->commandes = new ArrayCollection();
-        $this->userRoles = new ArrayCollection();
+        $this->customers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -122,49 +80,17 @@ class User implements UserInterface
         return $this->id;
     }
 
-    /**
-     * @return Collection|Commande[]
-     */
-    public function getCommandes(): Collection
+    public function getEmail(): ?string
     {
-        return $this->commandes;
+        return $this->email;
     }
 
-    public function addCommande(Commande $commande): self
+    public function setEmail(string $email): self
     {
-        if (!$this->commandes->contains($commande)) {
-            $this->commandes[] = $commande;
-            $commande->setUser($this);
-        }
+        $this->email = $email;
 
         return $this;
     }
-
-    public function removeCommande(Commande $commande): self
-    {
-        if ($this->commandes->contains($commande)) {
-            $this->commandes->removeElement($commande);
-            // set the owning side to null (unless already changed)
-            if ($commande->getUser() === $this) {
-                $commande->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    // public function getLogin(): ?string
-    // {
-    //     return $this->login;
-    // }
-
-    // public function setLogin(string $login): self
-    // {
-    //     $this->login = $login;
-
-    //     return $this;
-    // }
-    
 
     /**
      * A visual identifier that represents this user.
@@ -173,7 +99,7 @@ class User implements UserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -181,22 +107,26 @@ class User implements UserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->userRoles->map(function ($role){
-            return $role->getTitle();
-        })->toArray();
-
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return $roles;
+        return array_unique($roles);
     }
 
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
 
     /**
      * @see UserInterface
      */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
-        return $this->password;
+        return (string)$this->password;
     }
 
     public function setPassword(string $password): self
@@ -223,30 +153,6 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function getPicture(): ?string
-    {
-        return $this->picture;
-    }
-
-    public function setPicture(?string $picture): self
-    {
-        $this->picture = $picture;
-
-        return $this;
-    }
-
     public function getFirstName(): ?string
     {
         return $this->firstName;
@@ -271,69 +177,34 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getDeliveryAddress(): ?string
-    {
-        return $this->deliveryAddress;
-    }
-
-    public function setDeliveryAddress(string $deliveryAddress): self
-    {
-        $this->deliveryAddress = $deliveryAddress;
-
-        return $this;
-    }
-
-    public function getBillingAddress(): ?string
-    {
-        return $this->billingAddress;
-    }
-
-    public function setBillingAddress(string $billingAddress): self
-    {
-        $this->billingAddress = $billingAddress;
-
-        return $this;
-    }
-
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
-
-    public function setSlug(string $slug): self
-    {
-        $this->slug = $slug;
-
-        return $this;
-    }
-
     /**
-     * @return Collection|Role[]
+     * @return Collection|Customer[]
      */
-    public function getUserRoles(): Collection
+    public function getCustomers(): Collection
     {
-        return $this->userRoles;
+        return $this->customers;
     }
 
-    public function addUserRole(Role $userRole): self
+    public function addCustomer(Customer $customer): self
     {
-        if (!$this->userRoles->contains($userRole)) {
-            $this->userRoles[] = $userRole;
-            $userRole->addUser($this);
+        if (!$this->customers->contains($customer)) {
+            $this->customers[] = $customer;
+            $customer->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeUserRole(Role $userRole): self
+    public function removeCustomer(Customer $customer): self
     {
-        if ($this->userRoles->contains($userRole)) {
-            $this->userRoles->removeElement($userRole);
-            $userRole->removeUser($this);
+        if ($this->customers->contains($customer)) {
+            $this->customers->removeElement($customer);
+            // set the owning side to null (unless already changed)
+            if ($customer->getUser() === $this) {
+                $customer->setUser(null);
+            }
         }
 
         return $this;
     }
-
 }
-

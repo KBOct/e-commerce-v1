@@ -30,7 +30,7 @@ class IpValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof Ip) {
-            throw new UnexpectedTypeException($constraint, Ip::class);
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Ip');
         }
 
         if (null === $value || '' === $value) {
@@ -42,10 +42,6 @@ class IpValidator extends ConstraintValidator
         }
 
         $value = (string) $value;
-
-        if (null !== $constraint->normalizer) {
-            $value = ($constraint->normalizer)($value);
-        }
 
         switch ($constraint->version) {
             case Ip::V4:

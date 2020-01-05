@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Console\Descriptor;
 
-use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\ArgumentInterface;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
@@ -100,9 +99,7 @@ class JsonDescriptor extends Descriptor
      */
     protected function describeContainerServices(ContainerBuilder $builder, array $options = [])
     {
-        $serviceIds = isset($options['tag']) && $options['tag']
-            ? $this->sortTaggedServicesByPriority($builder->findTaggedServiceIds($options['tag']))
-            : $this->sortServiceIds($builder->getServiceIds());
+        $serviceIds = isset($options['tag']) && $options['tag'] ? array_keys($builder->findTaggedServiceIds($options['tag'])) : $builder->getServiceIds();
         $showHidden = isset($options['show_hidden']) && $options['show_hidden'];
         $omitTags = isset($options['omit_tags']) && $options['omit_tags'];
         $showArguments = isset($options['show_arguments']) && $options['show_arguments'];
@@ -112,7 +109,7 @@ class JsonDescriptor extends Descriptor
             $serviceIds = array_filter($serviceIds, $options['filter']);
         }
 
-        foreach ($serviceIds as $serviceId) {
+        foreach ($this->sortServiceIds($serviceIds) as $serviceId) {
             $service = $this->resolveServiceDefinition($builder, $serviceId);
 
             if ($showHidden xor '.' === ($serviceId[0] ?? null)) {
@@ -145,9 +142,7 @@ class JsonDescriptor extends Descriptor
     protected function describeContainerAlias(Alias $alias, array $options = [], ContainerBuilder $builder = null)
     {
         if (!$builder) {
-            $this->writeData($this->getContainerAliasData($alias), $options);
-
-            return;
+            return $this->writeData($this->getContainerAliasData($alias), $options);
         }
 
         $this->writeData(
@@ -169,7 +164,7 @@ class JsonDescriptor extends Descriptor
      */
     protected function describeCallable($callable, array $options = [])
     {
-        $this->writeData($this->getCallableData($callable), $options);
+        $this->writeData($this->getCallableData($callable, $options), $options);
     }
 
     /**
@@ -183,26 +178,22 @@ class JsonDescriptor extends Descriptor
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function describeContainerEnvVars(array $envs, array $options = [])
-    {
-        throw new LogicException('Using the JSON format to debug environment variables is not supported.');
-    }
-
-    /**
      * Writes data as json.
+     *
+     * @return array|string
      */
     private function writeData(array $data, array $options)
     {
         $flags = isset($options['json_encoding']) ? $options['json_encoding'] : 0;
-
         $this->write(json_encode($data, $flags | JSON_PRETTY_PRINT)."\n");
     }
 
-    protected function getRouteData(Route $route): array
+    /**
+     * @return array
+     */
+    protected function getRouteData(Route $route)
     {
-        $data = [
+        return [
             'path' => $route->getPath(),
             'pathRegex' => $route->compile()->getRegex(),
             'host' => '' !== $route->getHost() ? $route->getHost() : 'ANY',
@@ -214,12 +205,6 @@ class JsonDescriptor extends Descriptor
             'requirements' => $route->getRequirements() ?: 'NO CUSTOM',
             'options' => $route->getOptions(),
         ];
-
-        if ('' !== $route->getCondition()) {
-            $data['condition'] = $route->getCondition();
-        }
-
-        return $data;
     }
 
     private function getContainerDefinitionData(Definition $definition, bool $omitTags = false, bool $showArguments = false): array
@@ -270,7 +255,7 @@ class JsonDescriptor extends Descriptor
 
         if (!$omitTags) {
             $data['tags'] = [];
-            foreach ($this->sortTagsByPriority($definition->getTags()) as $tagName => $tagData) {
+            foreach ($definition->getTags() as $tagName => $tagData) {
                 foreach ($tagData as $parameters) {
                     $data['tags'][] = ['name' => $tagName, 'parameters' => $parameters];
                 }
@@ -314,7 +299,7 @@ class JsonDescriptor extends Descriptor
         return $data;
     }
 
-    private function getCallableData($callable): array
+    private function getCallableData($callable, array $options = []): array
     {
         $data = [];
 
@@ -385,7 +370,7 @@ class JsonDescriptor extends Descriptor
         throw new \InvalidArgumentException('Callable is not describable.');
     }
 
-    private function describeValue($value, bool $omitTags, bool $showArguments)
+    private function describeValue($value, $omitTags, $showArguments)
     {
         if (\is_array($value)) {
             $data = [];

@@ -26,32 +26,29 @@ class TypeValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof Type) {
-            throw new UnexpectedTypeException($constraint, Type::class);
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Type');
         }
 
         if (null === $value) {
             return;
         }
 
-        $types = (array) $constraint->type;
+        $type = strtolower($constraint->type);
+        $type = 'boolean' == $type ? 'bool' : $constraint->type;
+        $isFunction = 'is_'.$type;
+        $ctypeFunction = 'ctype_'.$type;
 
-        foreach ($types as $type) {
-            $type = strtolower($type);
-            $type = 'boolean' === $type ? 'bool' : $type;
-            $isFunction = 'is_'.$type;
-            $ctypeFunction = 'ctype_'.$type;
-            if (\function_exists($isFunction) && $isFunction($value)) {
-                return;
-            } elseif (\function_exists($ctypeFunction) && $ctypeFunction($value)) {
-                return;
-            } elseif ($value instanceof $type) {
-                return;
-            }
+        if (\function_exists($isFunction) && $isFunction($value)) {
+            return;
+        } elseif (\function_exists($ctypeFunction) && $ctypeFunction($value)) {
+            return;
+        } elseif ($value instanceof $constraint->type) {
+            return;
         }
 
         $this->context->buildViolation($constraint->message)
             ->setParameter('{{ value }}', $this->formatValue($value))
-            ->setParameter('{{ type }}', implode('|', $types))
+            ->setParameter('{{ type }}', $constraint->type)
             ->setCode(Type::INVALID_TYPE_ERROR)
             ->addViolation();
     }

@@ -1,10 +1,9 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "Adlm": "Adlam",
         "Afak": "Defaka",
         "Aghb": "Kaukasisch Albanees",
-        "Ahom": "Ahom",
         "Arab": "Arabisch",
         "Armi": "Keizerlijk Aramees",
         "Armn": "Armeens",
@@ -24,7 +23,6 @@
         "Cakm": "Chakma",
         "Cans": "Verenigde Canadese Aboriginal-symbolen",
         "Cari": "Carisch",
-        "Cham": "Cham",
         "Cher": "Cherokee",
         "Cirt": "Cirth",
         "Copt": "Koptisch",
@@ -104,7 +102,6 @@
         "Merc": "Meroitisch cursief",
         "Mero": "Meroïtisch",
         "Mlym": "Malayalam",
-        "Modi": "Modi",
         "Mong": "Mongools",
         "Moon": "Moon",
         "Mroo": "Mro",
@@ -134,7 +131,6 @@
         "Phnx": "Foenicisch",
         "Plrd": "Pollard-fonetisch",
         "Prti": "Inscriptioneel Parthisch",
-        "Qaag": "Qaag",
         "Rjng": "Rejang",
         "Rohg": "Hanifi Rohingya",
         "Roro": "Rongorongo",
@@ -189,6 +185,7 @@
         "Zsye": "emoji",
         "Zsym": "Symbolen",
         "Zxxx": "ongeschreven",
-        "Zyyy": "algemeen"
+        "Zyyy": "algemeen",
+        "Zzzz": "onbekend schriftsysteem"
     }
 }

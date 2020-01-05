@@ -85,7 +85,8 @@ class Parser
      * variable 'container' can be used in the expression
      * but the compiled code will use 'this'.
      *
-     * @param array $names An array of valid names
+     * @param TokenStream $stream A token stream instance
+     * @param array       $names  An array of valid names
      *
      * @return Node\Node A node tree
      *

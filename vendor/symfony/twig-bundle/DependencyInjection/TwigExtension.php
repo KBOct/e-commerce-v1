@@ -19,7 +19,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Translation\Translator;
 use Twig\Extension\ExtensionInterface;
 use Twig\Extension\RuntimeExtensionInterface;
@@ -48,10 +47,6 @@ class TwigExtension extends Extension
 
         if (class_exists(Application::class)) {
             $loader->load('console.xml');
-        }
-
-        if (class_exists(Mailer::class)) {
-            $loader->load('mailer.xml');
         }
 
         if (!class_exists(Translator::class)) {
@@ -145,20 +140,18 @@ class TwigExtension extends Extension
             }
         }
 
+        unset(
+            $config['form'],
+            $config['globals'],
+            $config['extensions']
+        );
+
         if (isset($config['autoescape_service']) && isset($config['autoescape_service_method'])) {
             $config['autoescape'] = [new Reference($config['autoescape_service']), $config['autoescape_service_method']];
         }
+        unset($config['autoescape_service'], $config['autoescape_service_method']);
 
-        $container->getDefinition('twig')->replaceArgument(1, array_intersect_key($config, [
-            'debug' => true,
-            'charset' => true,
-            'base_template_class' => true,
-            'strict_variables' => true,
-            'autoescape' => true,
-            'cache' => true,
-            'auto_reload' => true,
-            'optimizations' => true,
-        ]));
+        $container->getDefinition('twig')->replaceArgument(1, $config);
 
         $container->registerForAutoconfiguration(\Twig_ExtensionInterface::class)->addTag('twig.extension');
         $container->registerForAutoconfiguration(\Twig_LoaderInterface::class)->addTag('twig.loader');
@@ -172,7 +165,7 @@ class TwigExtension extends Extension
         }
     }
 
-    private function getBundleTemplatePaths(ContainerBuilder $container, array $config): array
+    private function getBundleTemplatePaths(ContainerBuilder $container, array $config)
     {
         $bundleHierarchy = [];
         foreach ($container->getParameter('kernel.bundles_metadata') as $name => $bundle) {
@@ -190,7 +183,7 @@ class TwigExtension extends Extension
             }
             $container->addResource(new FileExistenceResource($defaultOverrideBundlePath));
 
-            if (file_exists($dir = $bundle['path'].'/Resources/views') || file_exists($dir = $bundle['path'].'/templates')) {
+            if (file_exists($dir = $bundle['path'].'/Resources/views')) {
                 $bundleHierarchy[$name][] = $dir;
             }
             $container->addResource(new FileExistenceResource($dir));
@@ -199,7 +192,7 @@ class TwigExtension extends Extension
         return $bundleHierarchy;
     }
 
-    private function normalizeBundleName(string $name): string
+    private function normalizeBundleName($name)
     {
         if ('Bundle' === substr($name, -6)) {
             $name = substr($name, 0, -6);
@@ -209,7 +202,9 @@ class TwigExtension extends Extension
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the base path for the XSD files.
+     *
+     * @return string The XSD base path
      */
     public function getXsdValidationBasePath()
     {

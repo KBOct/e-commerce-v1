@@ -20,13 +20,11 @@ use Twig\TokenParser\AbstractTokenParser;
  * Token Parser for the 'trans_default_domain' tag.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class TransDefaultDomainTokenParser extends AbstractTokenParser
 {
     /**
-     * {@inheritdoc}
+     * Parses a token and returns a node.
      *
      * @return Node
      */
@@ -40,9 +38,9 @@ class TransDefaultDomainTokenParser extends AbstractTokenParser
     }
 
     /**
-     * {@inheritdoc}
+     * Gets the tag name associated with this token parser.
      *
-     * @return string
+     * @return string The tag name
      */
     public function getTag()
     {

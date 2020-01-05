@@ -15,7 +15,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
-use Symfony\Component\Intl\Locales;
+use Symfony\Component\Intl\Intl;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -44,7 +44,7 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
                 $choiceTranslationLocale = $options['choice_translation_locale'];
 
                 return new IntlCallbackChoiceLoader(function () use ($choiceTranslationLocale) {
-                    return array_flip(Locales::getNames($choiceTranslationLocale));
+                    return array_flip(Intl::getLocaleBundle()->getLocaleNames($choiceTranslationLocale));
                 });
             },
             'choice_translation_domain' => false,
@@ -59,7 +59,7 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
      */
     public function getParent()
     {
-        return ChoiceType::class;
+        return __NAMESPACE__.'\ChoiceType';
     }
 
     /**
@@ -83,7 +83,7 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
             return $this->choiceList;
         }
 
-        return $this->choiceList = new ArrayChoiceList(array_flip(Locales::getNames()), $value);
+        return $this->choiceList = new ArrayChoiceList(array_flip(Intl::getLocaleBundle()->getLocaleNames()), $value);
     }
 
     /**

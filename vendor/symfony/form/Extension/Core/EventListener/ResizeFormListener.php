@@ -32,6 +32,8 @@ class ResizeFormListener implements EventSubscriberInterface
     private $deleteEmpty;
 
     /**
+     * @param string        $type
+     * @param array         $options
      * @param bool          $allowAdd    Whether children could be added to the group
      * @param bool          $allowDelete Whether children could be removed from the group
      * @param bool|callable $deleteEmpty

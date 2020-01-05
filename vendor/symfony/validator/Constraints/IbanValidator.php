@@ -143,7 +143,7 @@ class IbanValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof Iban) {
-            throw new UnexpectedTypeException($constraint, Iban::class);
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Iban');
         }
 
         if (null === $value || '' === $value) {
@@ -225,7 +225,7 @@ class IbanValidator extends ConstraintValidator
         }
     }
 
-    private static function toBigInt(string $string): string
+    private static function toBigInt($string)
     {
         $chars = str_split($string);
         $bigInt = '';
@@ -245,7 +245,7 @@ class IbanValidator extends ConstraintValidator
         return $bigInt;
     }
 
-    private static function bigModulo97(string $bigInt): int
+    private static function bigModulo97($bigInt)
     {
         $parts = str_split($bigInt, 7);
         $rest = 0;

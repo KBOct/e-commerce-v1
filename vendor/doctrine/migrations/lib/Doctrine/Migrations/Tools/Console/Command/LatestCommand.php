@@ -13,12 +13,10 @@ use function sprintf;
  */
 class LatestCommand extends AbstractCommand
 {
-    /** @var string */
-    protected static $defaultName = 'migrations:latest';
-
     protected function configure() : void
     {
         $this
+            ->setName('migrations:latest')
             ->setAliases(['latest'])
             ->setDescription('Outputs the latest version number');
 

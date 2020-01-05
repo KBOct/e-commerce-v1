@@ -11,7 +11,7 @@
 
 namespace Symfony\Bridge\Doctrine;
 
-use Doctrine\Persistence\AbstractManagerRegistry;
+use Doctrine\Common\Persistence\AbstractManagerRegistry;
 use ProxyManager\Proxy\LazyLoadingInterface;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -29,8 +29,6 @@ abstract class ManagerRegistry extends AbstractManagerRegistry
 
     /**
      * {@inheritdoc}
-     *
-     * @return object
      */
     protected function getService($name)
     {
@@ -39,8 +37,6 @@ abstract class ManagerRegistry extends AbstractManagerRegistry
 
     /**
      * {@inheritdoc}
-     *
-     * @return void
      */
     protected function resetService($name)
     {

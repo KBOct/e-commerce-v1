@@ -14,7 +14,6 @@ namespace Symfony\Bundle\FrameworkBundle\Command;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
@@ -27,9 +26,6 @@ use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
  */
 abstract class AbstractConfigCommand extends ContainerDebugCommand
 {
-    /**
-     * @param OutputInterface|StyleInterface $output
-     */
     protected function listBundles($output)
     {
         $title = 'Available registered bundles with their extension alias if available';
@@ -56,9 +52,6 @@ abstract class AbstractConfigCommand extends ContainerDebugCommand
         }
     }
 
-    /**
-     * @return ExtensionInterface
-     */
     protected function findExtension($name)
     {
         $bundles = $this->initializeBundles();

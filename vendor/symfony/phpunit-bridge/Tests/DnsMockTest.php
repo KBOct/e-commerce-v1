@@ -16,7 +16,7 @@ use Symfony\Bridge\PhpUnit\DnsMock;
 
 class DnsMockTest extends TestCase
 {
-    protected function tearDown(): void
+    protected function tearDown()
     {
         DnsMock::withMockedHosts(array());
     }

@@ -1,9 +1,10 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "Arab": "Carabi",
         "Armn": "Armeeniyaan",
         "Beng": "Baangla",
+        "Bopo": "Bopo",
         "Brai": "Qoraalka Indhoolaha",
         "Cyrl": "Siriylik",
         "Deva": "Dhefangaari",
@@ -11,7 +12,10 @@
         "Geor": "Jiyoorjoyaan",
         "Grek": "Giriik",
         "Gujr": "Gujaraati",
+        "Guru": "Guru",
+        "Hanb": "Hanb",
         "Hang": "Hanguul",
+        "Hani": "Hani",
         "Hans": "La fududeeyay",
         "Hant": "Hore",
         "Hebr": "Cibraani",
@@ -23,6 +27,7 @@
         "Khmr": "Khamer",
         "Knda": "Kanada",
         "Kore": "Kuuriyaan",
+        "Laoo": "Laoo",
         "Latn": "Laatiin",
         "Mlym": "Maalayalam",
         "Mong": "Mongooliyaan",
@@ -38,6 +43,7 @@
         "Zsye": "Calaamad Dareen Muujin",
         "Zsym": "Calaamado",
         "Zxxx": "Aan la qorin",
-        "Zyyy": "Caadi ahaan"
+        "Zyyy": "Caadi ahaan",
+        "Zzzz": "Far aan la aqoon amase aan saxnayn"
     }
 }

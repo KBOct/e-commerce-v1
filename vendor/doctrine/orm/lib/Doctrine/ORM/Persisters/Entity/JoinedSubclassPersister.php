@@ -278,25 +278,22 @@ class JoinedSubclassPersister extends AbstractEntityInheritancePersister
         // If the database platform supports FKs, just
         // delete the row from the root table. Cascades do the rest.
         if ($this->platform->supportsForeignKeyConstraints()) {
-            $rootClass = $this->em->getClassMetadata($this->class->rootEntityName);
-            $rootTable = $this->quoteStrategy->getTableName($rootClass, $this->platform);
-            $rootTypes = $this->getClassIdentifiersTypes($rootClass);
+            $rootClass  = $this->em->getClassMetadata($this->class->rootEntityName);
+            $rootTable  = $this->quoteStrategy->getTableName($rootClass, $this->platform);
 
-            return (bool) $this->conn->delete($rootTable, $id, $rootTypes);
+            return (bool) $this->conn->delete($rootTable, $id);
         }
 
         // Delete from all tables individually, starting from this class' table up to the root table.
         $rootTable = $this->quoteStrategy->getTableName($this->class, $this->platform);
-        $rootTypes = $this->getClassIdentifiersTypes($this->class);
 
-        $affectedRows = $this->conn->delete($rootTable, $id, $rootTypes);
+        $affectedRows = $this->conn->delete($rootTable, $id);
 
         foreach ($this->class->parentClasses as $parentClass) {
             $parentMetadata = $this->em->getClassMetadata($parentClass);
             $parentTable    = $this->quoteStrategy->getTableName($parentMetadata, $this->platform);
-            $parentTypes    = $this->getClassIdentifiersTypes($parentMetadata);
 
-            $this->conn->delete($parentTable, $id, $parentTypes);
+            $this->conn->delete($parentTable, $id);
         }
 
         return (bool) $affectedRows;

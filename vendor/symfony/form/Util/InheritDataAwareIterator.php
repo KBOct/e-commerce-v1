@@ -34,7 +34,7 @@ class InheritDataAwareIterator extends \IteratorIterator implements \RecursiveIt
     }
 
     /**
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasChildren()
     {

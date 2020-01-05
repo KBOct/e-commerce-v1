@@ -74,7 +74,7 @@ EOF
      *
      * @throws \LogicException
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $errorIo = $io->getErrorStyle();
@@ -86,7 +86,7 @@ EOF
                 'For dumping a specific option, add its path as the second argument of this command. (e.g. <comment>config:dump-reference FrameworkBundle profiler.matcher</comment> to dump the <comment>framework.profiler.matcher</comment> configuration)',
             ]);
 
-            return 0;
+            return;
         }
 
         $extension = $this->findExtension($name);
@@ -129,7 +129,5 @@ EOF
         }
 
         $io->writeln(null === $path ? $dumper->dump($configuration, $extension->getNamespace()) : $dumper->dumpAtPath($configuration, $path));
-
-        return 0;
     }
 }

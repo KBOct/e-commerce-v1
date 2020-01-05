@@ -24,8 +24,10 @@ interface AttributeMetadataInterface
 {
     /**
      * Gets the attribute name.
+     *
+     * @return string
      */
-    public function getName(): string;
+    public function getName();
 
     /**
      * Adds this attribute to the given group.
@@ -39,7 +41,7 @@ interface AttributeMetadataInterface
      *
      * @return string[]
      */
-    public function getGroups(): array;
+    public function getGroups();
 
     /**
      * Sets the serialization max depth for this attribute.

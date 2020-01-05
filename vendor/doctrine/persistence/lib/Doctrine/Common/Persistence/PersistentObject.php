@@ -5,10 +5,9 @@ namespace Doctrine\Common\Persistence;
 use BadMethodCallException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
 use RuntimeException;
-use function class_exists;
 use function lcfirst;
 use function substr;
 
@@ -28,9 +27,6 @@ use function substr;
  * 4. Slower than handcoded implementations: An average of 7 method calls per access to a field and 11 for an association.
  * 5. Only the inverse side associations get autoset on the owning side as well. Setting objects on the owning side
  *    will not set the inverse side associations.
- *
- * @deprecated Deprecated `PersistentObject` class in 1.2. Please implement this functionality
- *             directly in your application if you want ActiveRecord style functionality.
  *
  * @example
  *
@@ -231,5 +227,3 @@ abstract class PersistentObject implements ObjectManagerAware
         }
     }
 }
-
-class_exists(\Doctrine\Common\Persistence\PersistentObject::class);

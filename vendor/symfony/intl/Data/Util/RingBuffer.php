@@ -42,7 +42,7 @@ class RingBuffer implements \ArrayAccess
     /**
      * {@inheritdoc}
      */
-    public function offsetExists($key): bool
+    public function offsetExists($key)
     {
         return isset($this->indices[$key]);
     }

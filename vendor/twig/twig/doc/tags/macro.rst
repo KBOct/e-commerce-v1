@@ -171,10 +171,12 @@ Named Macro End-Tags
 --------------------
 
 Twig allows you to put the name of the macro after the end tag for better
-readability (the name after the ``endmacro`` word must match the macro name):
+readability:
 
 .. code-block:: twig
 
     {% macro input() %}
         ...
     {% endmacro input %}
+
+Of course, the name after the ``endmacro`` word must match the macro name.

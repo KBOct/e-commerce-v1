@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.44",
     "Names": {
         "Afak": "afaka",
         "Aghb": "kavkazskoalbánské",
@@ -165,6 +165,7 @@
         "Zsye": "emodži",
         "Zsym": "symboly",
         "Zxxx": "bez zápisu",
-        "Zyyy": "obecné"
+        "Zyyy": "obecné",
+        "Zzzz": "neznámé písmo"
     }
 }

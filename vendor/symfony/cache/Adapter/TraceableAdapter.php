@@ -45,10 +45,10 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
         }
 
         $isHit = true;
-        $callback = function (CacheItem $item, bool &$save) use ($callback, &$isHit) {
+        $callback = function (CacheItem $item) use ($callback, &$isHit) {
             $isHit = $item->isHit();
 
-            return $callback($item, $save);
+            return $callback($item);
         };
 
         $event = $this->start(__FUNCTION__);
@@ -89,8 +89,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function hasItem($key)
     {
@@ -104,8 +102,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function deleteItem($key)
     {
@@ -119,8 +115,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function save(CacheItemInterface $item)
     {
@@ -134,8 +128,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function saveDeferred(CacheItemInterface $item)
     {
@@ -175,20 +167,11 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @param string $prefix
-     *
-     * @return bool
      */
-    public function clear(/*string $prefix = ''*/)
+    public function clear()
     {
-        $prefix = 0 < \func_num_args() ? (string) func_get_arg(0) : '';
         $event = $this->start(__FUNCTION__);
         try {
-            if ($this->pool instanceof AdapterInterface) {
-                return $event->result = $this->pool->clear($prefix);
-            }
-
             return $event->result = $this->pool->clear();
         } finally {
             $event->end = microtime(true);
@@ -197,8 +180,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function deleteItems(array $keys)
     {
@@ -213,8 +194,6 @@ class TraceableAdapter implements AdapterInterface, CacheInterface, PruneableInt
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function commit()
     {

@@ -91,7 +91,7 @@ class GenerateProxiesCommand extends Command
 
         if (empty($metadatas)) {
             $ui->success('No Metadata Classes to process.');
-            return 0;
+            return;
         }
 
         foreach ($metadatas as $metadata) {
@@ -104,7 +104,5 @@ class GenerateProxiesCommand extends Command
         // Outputting information message
         $ui->newLine();
         $ui->text(sprintf('Proxy classes generated to "<info>%s</info>"', $destPath));
-
-        return 0;
     }
 }

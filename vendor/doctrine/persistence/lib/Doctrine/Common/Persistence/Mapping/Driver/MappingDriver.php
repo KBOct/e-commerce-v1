@@ -2,30 +2,36 @@
 
 namespace Doctrine\Common\Persistence\Mapping\Driver;
 
-use const E_USER_DEPRECATED;
-use function class_alias;
-use function interface_exists;
-use function sprintf;
-use function trigger_error;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
-if (! interface_exists(\Doctrine\Persistence\Mapping\Driver\MappingDriver::class, false)) {
-    @trigger_error(sprintf(
-        'The %s\MappingDriver class is deprecated since doctrine/persistence 1.3 and will be removed in 2.0.'
-        . ' Use \Doctrine\Persistence\Mapping\Driver\MappingDriver instead.',
-        __NAMESPACE__
-    ), E_USER_DEPRECATED);
-}
-
-class_alias(
-    \Doctrine\Persistence\Mapping\Driver\MappingDriver::class,
-    __NAMESPACE__ . '\MappingDriver'
-);
-
-if (false) {
+/**
+ * Contract for metadata drivers.
+ */
+interface MappingDriver
+{
     /**
-     * @deprecated 1.3 Use Doctrine\Persistence\Mapping\Driver\MappingDriver
+     * Loads the metadata for the specified class into the provided container.
+     *
+     * @param string $className
+     *
+     * @return void
      */
-    interface MappingDriver extends \Doctrine\Persistence\Mapping\Driver\MappingDriver
-    {
-    }
+    public function loadMetadataForClass($className, ClassMetadata $metadata);
+
+    /**
+     * Gets the names of all mapped classes known to this driver.
+     *
+     * @return string[] The names of all mapped classes known to this driver.
+     */
+    public function getAllClassNames();
+
+    /**
+     * Returns whether the class with the specified name should have its metadata loaded.
+     * This is only the case if it is either mapped as an Entity or a MappedSuperclass.
+     *
+     * @param string $className
+     *
+     * @return bool
+     */
+    public function isTransient($className);
 }

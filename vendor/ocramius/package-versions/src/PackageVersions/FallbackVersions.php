@@ -9,10 +9,8 @@ use OutOfBoundsException;
 use UnexpectedValueException;
 use function array_key_exists;
 use function array_merge;
-use function basename;
 use function file_exists;
 use function file_get_contents;
-use function getcwd;
 use function iterator_to_array;
 use function json_decode;
 use function json_encode;
@@ -40,11 +38,11 @@ final class FallbackVersions
      */
     public static function getVersion(string $packageName) : string
     {
-        $versions = iterator_to_array(self::getVersions(self::getPackageData()));
+        $versions = iterator_to_array(self::getVersions(self::getComposerLockPath()));
 
         if (! array_key_exists($packageName, $versions)) {
             throw new OutOfBoundsException(
-                'Required package "' . $packageName . '" is not installed: check your ./vendor/composer/installed.json and/or ./composer.lock files'
+                'Required package "' . $packageName . '" is not installed: cannot detect its version'
             );
         }
 
@@ -52,70 +50,39 @@ final class FallbackVersions
     }
 
     /**
-     * @return mixed[]
-     *
      * @throws UnexpectedValueException
      */
-    private static function getPackageData() : array
+    private static function getComposerLockPath() : string
     {
-        $checkedPaths = [
-            // The top-level project's ./vendor/composer/installed.json
-            getcwd() . '/vendor/composer/installed.json',
-            __DIR__ . '/../../../../composer/installed.json',
-            // The top-level project's ./composer.lock
-            getcwd() . '/composer.lock',
-            __DIR__ . '/../../../../../composer.lock',
-            // This package's composer.lock
-            __DIR__ . '/../../composer.lock',
-        ];
+        // bold assumption, but there's not here to fix everyone's problems.
+        $checkedPaths = [__DIR__ . '/../../../../../composer.lock', __DIR__ . '/../../composer.lock'];
 
-        $packageData = [];
         foreach ($checkedPaths as $path) {
-            if (! file_exists($path)) {
-                continue;
+            if (file_exists($path)) {
+                return $path;
             }
-
-            $data = json_decode(file_get_contents($path), true);
-            switch (basename($path)) {
-                case 'installed.json':
-                    $packageData[] = $data;
-                    break;
-                case 'composer.lock':
-                    $packageData[] = $data['packages'] + ($data['packages-dev'] ?? []);
-                    break;
-                default:
-                    // intentionally left blank
-            }
-        }
-
-        if ($packageData !== []) {
-            return array_merge(...$packageData);
         }
 
         throw new UnexpectedValueException(sprintf(
-            'PackageVersions could not locate the `vendor/composer/installed.json` or your `composer.lock` '
-            . 'location. This is assumed to be in %s. If you customized your composer vendor directory and ran composer '
-            . 'installation with --no-scripts or if you deployed without the required composer files, then you are on '
-            . 'your own, and we can\'t really help you. Fix your shit and cut the tooling some slack.',
+            'PackageVersions could not locate your `composer.lock` location. This is assumed to be in %s. '
+            . 'If you customized your composer vendor directory and ran composer installation with --no-scripts, '
+            . 'then you are on your own, and we can\'t really help you. Fix your shit and cut the tooling some slack.',
             json_encode($checkedPaths)
         ));
     }
 
-    /**
-     * @param mixed[] $packageData
-     *
-     * @return Generator&string[]
-     *
-     * @psalm-return Generator<string, string>
-     */
-    private static function getVersions(array $packageData) : Generator
+    private static function getVersions(string $composerLockFile) : Generator
     {
-        foreach ($packageData as $package) {
+        $lockData = json_decode(file_get_contents($composerLockFile), true);
+
+        $lockData['packages-dev'] = $lockData['packages-dev'] ?? [];
+
+        foreach (array_merge($lockData['packages'], $lockData['packages-dev']) as $package) {
             yield $package['name'] => $package['version'] . '@' . (
-                $package['source']['reference'] ?? $package['dist']['reference'] ?? ''
+                $package['source']['reference']?? $package['dist']['reference'] ?? ''
             );
         }
 
-        yield self::ROOT_PACKAGE_NAME => self::ROOT_PACKAGE_NAME;
+        yield self::ROOT_PACKAGE_NAME;
     }
 }

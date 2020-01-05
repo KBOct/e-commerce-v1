@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.90",
     "Names": {
         "ADP": [
             "ADP",
@@ -263,7 +263,7 @@
         ],
         "CNH": [
             "CNH",
-            "kinesisk yuan (offshore)"
+            "CNH"
         ],
         "CNX": [
             "CNX",
@@ -971,7 +971,7 @@
         ],
         "TPE": [
             "TPE",
-            "östtimoresisk escudo"
+            "timoriansk escudo"
         ],
         "TRL": [
             "TRL",

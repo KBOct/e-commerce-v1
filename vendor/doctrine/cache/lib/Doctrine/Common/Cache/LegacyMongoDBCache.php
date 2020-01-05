@@ -55,7 +55,6 @@ class LegacyMongoDBCache extends CacheProvider
         if ($this->isExpired($document)) {
             $this->createExpirationIndex();
             $this->doDelete($id);
-
             return false;
         }
 
@@ -76,7 +75,6 @@ class LegacyMongoDBCache extends CacheProvider
         if ($this->isExpired($document)) {
             $this->createExpirationIndex();
             $this->doDelete($id);
-
             return false;
         }
 
@@ -162,6 +160,7 @@ class LegacyMongoDBCache extends CacheProvider
             $document[MongoDBCache::EXPIRATION_FIELD] instanceof MongoDate &&
             $document[MongoDBCache::EXPIRATION_FIELD]->sec < time();
     }
+
 
     private function createExpirationIndex() : void
     {

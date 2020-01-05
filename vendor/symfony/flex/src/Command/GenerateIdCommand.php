@@ -33,10 +33,8 @@ class GenerateIdCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->flex->generateFlexId();
-
-        return 0;
     }
 }

@@ -39,6 +39,7 @@ class FormErrorIterator implements \RecursiveIterator, \SeekableIterator, \Array
     private $errors;
 
     /**
+     * @param FormInterface      $form   The erroneous form
      * @param FormError[]|self[] $errors An array of form errors and instances
      *                                   of FormErrorIterator
      *
@@ -69,7 +70,7 @@ class FormErrorIterator implements \RecursiveIterator, \SeekableIterator, \Array
             if ($error instanceof FormError) {
                 $string .= 'ERROR: '.$error->getMessage()."\n";
             } else {
-                /* @var self $error */
+                /** @var self $error */
                 $string .= $error->form->getName().":\n";
                 $string .= self::indent((string) $error);
             }
@@ -271,8 +272,12 @@ class FormErrorIterator implements \RecursiveIterator, \SeekableIterator, \Array
 
     /**
      * Utility function for indenting multi-line strings.
+     *
+     * @param string $string The string
+     *
+     * @return string The indented string
      */
-    private static function indent(string $string): string
+    private static function indent($string)
     {
         return rtrim(self::INDENTATION.str_replace("\n", "\n".self::INDENTATION, $string), ' ');
     }

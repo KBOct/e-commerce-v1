@@ -25,21 +25,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * the background.
  *
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
- *
- * @deprecated since Symfony 4.4, to be removed in 5.0; the new Symfony local server has more features, you can use it instead.
  */
 class ServerStatusCommand extends Command
 {
     protected static $defaultName = 'server:status';
-
-    private $pidFileDirectory;
-
-    public function __construct(string $pidFileDirectory = null)
-    {
-        $this->pidFileDirectory = $pidFileDirectory;
-
-        parent::__construct();
-    }
 
     /**
      * {@inheritdoc}
@@ -74,10 +63,8 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        @trigger_error('Using the WebserverBundle is deprecated since Symfony 4.4. The new Symfony local server has more features, you can use it instead.', E_USER_DEPRECATED);
-
         $io = new SymfonyStyle($input, $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output);
-        $server = new WebServer($this->pidFileDirectory);
+        $server = new WebServer();
         if ($filter = $input->getOption('filter')) {
             if ($server->isRunning($input->getOption('pidfile'))) {
                 list($host, $port) = explode(':', $address = $server->getAddress($input->getOption('pidfile')));
@@ -102,7 +89,5 @@ EOF
                 return 1;
             }
         }
-
-        return 0;
     }
 }

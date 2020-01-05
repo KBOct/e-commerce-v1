@@ -12,8 +12,6 @@
 namespace Symfony\Component\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
-use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
-use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
@@ -41,39 +39,8 @@ class ResolveBindingsPass extends AbstractRecursivePass
         try {
             parent::process($container);
 
-            foreach ($this->unusedBindings as list($key, $serviceId, $bindingType, $file)) {
-                $argumentType = $argumentName = $message = null;
-
-                if (false !== strpos($key, ' ')) {
-                    list($argumentType, $argumentName) = explode(' ', $key, 2);
-                } elseif ('$' === $key[0]) {
-                    $argumentName = $key;
-                } else {
-                    $argumentType = $key;
-                }
-
-                if ($argumentType) {
-                    $message .= sprintf('of type "%s" ', $argumentType);
-                }
-
-                if ($argumentName) {
-                    $message .= sprintf('named "%s" ', $argumentName);
-                }
-
-                if (BoundArgument::DEFAULTS_BINDING === $bindingType) {
-                    $message .= 'under "_defaults"';
-                } elseif (BoundArgument::INSTANCEOF_BINDING === $bindingType) {
-                    $message .= 'under "_instanceof"';
-                } else {
-                    $message .= sprintf('for service "%s"', $serviceId);
-                }
-
-                if ($file) {
-                    $message .= sprintf(' in file "%s"', $file);
-                }
-
-                $message = sprintf('A binding is configured for an argument %s, but no corresponding argument has been found. It may be unused and should be removed, or it may have a typo.', $message);
-
+            foreach ($this->unusedBindings as list($key, $serviceId)) {
+                $message = sprintf('Unused binding "%s" in service "%s".', $key, $serviceId);
                 if ($this->errorMessages) {
                     $message .= sprintf("\nCould be related to%s:", 1 < \count($this->errorMessages) ? ' one of' : '');
                 }
@@ -97,11 +64,6 @@ class ResolveBindingsPass extends AbstractRecursivePass
         if ($value instanceof TypedReference && $value->getType() === (string) $value) {
             // Already checked
             $bindings = $this->container->getDefinition($this->currentId)->getBindings();
-            $name = $value->getName();
-
-            if (isset($name, $bindings[$name = $value.' $'.$name])) {
-                return $this->getBindingValue($bindings[$name]);
-            }
 
             if (isset($bindings[$value->getType()])) {
                 return $this->getBindingValue($bindings[$value->getType()]);
@@ -115,20 +77,20 @@ class ResolveBindingsPass extends AbstractRecursivePass
         }
 
         foreach ($bindings as $key => $binding) {
-            list($bindingValue, $bindingId, $used, $bindingType, $file) = $binding->getValues();
+            list($bindingValue, $bindingId, $used) = $binding->getValues();
             if ($used) {
                 $this->usedBindings[$bindingId] = true;
                 unset($this->unusedBindings[$bindingId]);
             } elseif (!isset($this->usedBindings[$bindingId])) {
-                $this->unusedBindings[$bindingId] = [$key, $this->currentId, $bindingType, $file];
+                $this->unusedBindings[$bindingId] = [$key, $this->currentId];
             }
 
             if (preg_match('/^(?:(?:array|bool|float|int|string) )?\$/', $key)) {
                 continue;
             }
 
-            if (null !== $bindingValue && !$bindingValue instanceof Reference && !$bindingValue instanceof Definition && !$bindingValue instanceof TaggedIteratorArgument && !$bindingValue instanceof ServiceLocatorArgument) {
-                throw new InvalidArgumentException(sprintf('Invalid value for binding key "%s" for service "%s": expected null, %s, %s, %s or ServiceLocatorArgument, %s given.', $key, $this->currentId, Reference::class, Definition::class, TaggedIteratorArgument::class, \gettype($bindingValue)));
+            if (null !== $bindingValue && !$bindingValue instanceof Reference && !$bindingValue instanceof Definition) {
+                throw new InvalidArgumentException(sprintf('Invalid value for binding key "%s" for service "%s": expected null, an instance of %s or an instance of %s, %s given.', $key, $this->currentId, Reference::class, Definition::class, \gettype($bindingValue)));
             }
         }
 
@@ -212,9 +174,6 @@ class ResolveBindingsPass extends AbstractRecursivePass
         return parent::processValue($value, $isRoot);
     }
 
-    /**
-     * @return mixed
-     */
     private function getBindingValue(BoundArgument $binding)
     {
         list($bindingValue, $bindingId) = $binding->getValues();

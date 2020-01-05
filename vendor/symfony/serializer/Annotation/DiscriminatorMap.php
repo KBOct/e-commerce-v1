@@ -34,6 +34,8 @@ class DiscriminatorMap
     private $mapping;
 
     /**
+     * @param array $data
+     *
      * @throws InvalidArgumentException
      */
     public function __construct(array $data)

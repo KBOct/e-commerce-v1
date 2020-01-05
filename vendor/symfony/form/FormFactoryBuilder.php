@@ -47,7 +47,10 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
      */
     private $typeGuessers = [];
 
-    public function __construct(bool $forceCoreExtension = false)
+    /**
+     * @param bool $forceCoreExtension
+     */
+    public function __construct($forceCoreExtension = false)
     {
         $this->forceCoreExtension = $forceCoreExtension;
     }

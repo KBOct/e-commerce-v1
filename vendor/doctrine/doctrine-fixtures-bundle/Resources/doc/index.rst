@@ -9,26 +9,22 @@ supports the `ORM`_ (MySQL, PostgreSQL, SQLite, etc.).
 Installation
 ------------
 
-In Symfony 4 or higher applications that use `Symfony Flex`_, open a command
-console, enter your project directory and run the following command:
+Open a command console, enter your project directory and run the
+following command to download the latest stable version of this bundle:
 
-.. code-block:: terminal
+.. code-block:: bash
 
-    $ composer require --dev orm-fixtures
+    composer require --dev doctrine/doctrine-fixtures-bundle
 
-Starting from Symfony 4.0, Flex should be used by default and register the
-bundle for you, and in that case you can skip to the next section and start
-writing fixtures.
+.. tip::
 
-In Symfony 3 applications (or when not using Symfony Flex), run this other
-command instead:
+    If you are using flex you just need to do:
+    ``composer req --dev orm-fixtures``
 
-.. code-block:: terminal
+If you're *not* using Symfony Flex (i.e. Symfony 3 and lower), you will
+also need to enable the bundle in your ``AppKernel`` class:
 
-    $ composer require --dev doctrine/doctrine-fixtures-bundle
-
-You will also need to enable the bundle. In Symfony 3 and earlier applications,
-update the ``AppKernel`` class::
+.. code-block:: php
 
     // app/AppKernel.php
 
@@ -46,7 +42,9 @@ Data fixtures are PHP classes where you create objects and persist them to the
 database.
 
 Imagine that you want to add some ``Product`` objects to your database. No problem!
-Create a fixtures class and start adding products::
+Just create a fixtures class and start adding products!
+
+.. code-block:: php
 
     // src/DataFixtures/AppFixtures.php
     namespace App\DataFixtures;
@@ -80,7 +78,7 @@ Loading Fixtures
 
 Once your fixtures have been written, load them by executing this command:
 
-.. code-block:: terminal
+.. code-block:: bash
 
     # when using the ORM
     $ php bin/console doctrine:fixtures:load
@@ -106,7 +104,9 @@ Accessing Services from the Fixtures
 
 In some cases you may need to access your application's services inside a fixtures
 class. No problem! Your fixtures class is a service, so you can use normal dependency
-injection::
+injection:
+
+.. code-block:: php
 
     // src/DataFixtures/AppFixtures.php
     use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -155,7 +155,9 @@ Sharing Objects between Fixtures
 When using multiple fixtures files, you can reuse PHP objects across different
 files thanks to the **object references**. Use the ``addReference()`` method to
 give a name to any object and then, use the ``getReference()`` method to get the
-exact same object via its name::
+exact same object via its name:
+
+.. code-block:: php
 
     // src/DataFixtures/UserFixtures.php
     // ...
@@ -202,7 +204,9 @@ Instead of defining the exact order in which all fixture files must be loaded,
 Doctrine uses a smarter approach to ensure that some fixtures are loaded before
 others. Implement the ``DependentFixtureInterface`` and add a new
 ``getDependencies()`` method to your fixtures class. This will return
-an array of the fixture classes that must be loaded before this one::
+an array of the fixture classes that must be loaded before this one:
+
+.. code-block:: php
 
     // src/DataFixtures/UserFixtures.php
     namespace App\DataFixtures;
@@ -245,9 +249,7 @@ to execute *some* of your fixture classes, you can organize them into
 groups.
 
 The simplest way to organize a fixture class into a group is to
-make your fixture implement ``FixtureGroupInterface``:
-
-.. code-block:: diff
+make your fixture implement ``FixtureGroupInterface``::
 
     // src/DataFixtures/UserFixtures.php
 
@@ -267,7 +269,7 @@ make your fixture implement ``FixtureGroupInterface``:
 To execute all of your fixtures for a given group, pass the ``--group``
 option:
 
-.. code-block:: terminal
+.. code-block:: bash
 
     $ php bin/console doctrine:fixtures:load --group=group1
 
@@ -283,11 +285,10 @@ fixture loader always adds the short name of the class as a separate group so
 you can load a single fixture at a time. In the example above, you can load the
 fixture using the ``UserFixtures`` group:
 
-.. code-block:: terminal
+.. code-block:: bash
 
     $ php bin/console doctrine:fixtures:load --group=UserFixtures
 
 .. _`ORM`: https://symfony.com/doc/current/doctrine.html
 .. _`installation chapter`: https://getcomposer.org/doc/00-intro.md
-.. _`Symfony Flex`: https://symfony.com/doc/current/setup/flex.html
 .. _`default service configuration`: https://symfony.com/doc/current/service_container.html#service-container-services-load-example

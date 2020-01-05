@@ -26,12 +26,11 @@ abstract class AbstractToken implements TokenInterface
 {
     private $user;
     private $roles = [];
-    private $roleNames = [];
     private $authenticated = false;
     private $attributes = [];
 
     /**
-     * @param string[] $roles An array of roles
+     * @param (Role|string)[] $roles An array of roles
      *
      * @throws \InvalidArgumentException
      */
@@ -39,19 +38,13 @@ abstract class AbstractToken implements TokenInterface
     {
         foreach ($roles as $role) {
             if (\is_string($role)) {
-                $role = new Role($role, false);
+                $role = new Role($role);
             } elseif (!$role instanceof Role) {
                 throw new \InvalidArgumentException(sprintf('$roles must be an array of strings, or Role instances, but got %s.', \gettype($role)));
             }
 
             $this->roles[] = $role;
-            $this->roleNames[] = (string) $role;
         }
-    }
-
-    public function getRoleNames(): array
-    {
-        return $this->roleNames;
     }
 
     /**
@@ -59,10 +52,6 @@ abstract class AbstractToken implements TokenInterface
      */
     public function getRoles()
     {
-        if (0 === \func_num_args() || func_get_arg(0)) {
-            @trigger_error(sprintf('The %s() method is deprecated since Symfony 4.3. Use the getRoleNames() method instead.', __METHOD__), E_USER_DEPRECATED);
-        }
-
         return $this->roles;
     }
 
@@ -143,83 +132,21 @@ abstract class AbstractToken implements TokenInterface
     }
 
     /**
-     * Returns all the necessary state of the object for serialization purposes.
-     *
-     * There is no need to serialize any entry, they should be returned as-is.
-     * If you extend this method, keep in mind you MUST guarantee parent data is present in the state.
-     * Here is an example of how to extend this method:
-     * <code>
-     *     public function __serialize(): array
-     *     {
-     *         return [$this->childAttribute, parent::__serialize()];
-     *     }
-     * </code>
-     *
-     * @see __unserialize()
-     */
-    public function __serialize(): array
-    {
-        return [$this->user, $this->authenticated, $this->roles, $this->attributes, $this->roleNames];
-    }
-
-    /**
-     * @return string
-     *
-     * @final since Symfony 4.3, use __serialize() instead
-     *
-     * @internal since Symfony 4.3, use __serialize() instead
+     * {@inheritdoc}
      */
     public function serialize()
     {
-        $serialized = $this->__serialize();
+        $serialized = [$this->user, $this->authenticated, $this->roles, $this->attributes];
 
-        if (null === $isCalledFromOverridingMethod = \func_num_args() ? func_get_arg(0) : null) {
-            $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
-            $isCalledFromOverridingMethod = isset($trace[1]['function'], $trace[1]['object']) && 'serialize' === $trace[1]['function'] && $this === $trace[1]['object'];
-        }
-
-        return $isCalledFromOverridingMethod ? $serialized : serialize($serialized);
-    }
-
-    /**
-     * Restores the object state from an array given by __serialize().
-     *
-     * There is no need to unserialize any entry in $data, they are already ready-to-use.
-     * If you extend this method, keep in mind you MUST pass the parent data to its respective class.
-     * Here is an example of how to extend this method:
-     * <code>
-     *     public function __unserialize(array $data): void
-     *     {
-     *         [$this->childAttribute, $parentData] = $data;
-     *         parent::__unserialize($parentData);
-     *     }
-     * </code>
-     *
-     * @see __serialize()
-     */
-    public function __unserialize(array $data): void
-    {
-        [$this->user, $this->authenticated, $this->roles, $this->attributes] = $data;
-
-        // migration path to 4.3+
-        if (null === $this->roleNames = $data[4] ?? null) {
-            $this->roleNames = [];
-            foreach ($this->roles as $role) {
-                $this->roleNames[] = (string) $role;
-            }
-        }
+        return $this->doSerialize($serialized, \func_num_args() ? \func_get_arg(0) : null);
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @final since Symfony 4.3, use __unserialize() instead
-     *
-     * @internal since Symfony 4.3, use __unserialize() instead
      */
     public function unserialize($serialized)
     {
-        $this->__unserialize(\is_array($serialized) ? $serialized : unserialize($serialized));
+        list($this->user, $this->authenticated, $this->roles, $this->attributes) = \is_array($serialized) ? $serialized : unserialize($serialized);
     }
 
     /**
@@ -299,7 +226,20 @@ abstract class AbstractToken implements TokenInterface
         return sprintf('%s(user="%s", authenticated=%s, roles="%s")', $class, $this->getUsername(), json_encode($this->authenticated), implode(', ', $roles));
     }
 
-    private function hasUserChanged(UserInterface $user): bool
+    /**
+     * @internal
+     */
+    protected function doSerialize($serialized, $isCalledFromOverridingMethod)
+    {
+        if (null === $isCalledFromOverridingMethod) {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 3);
+            $isCalledFromOverridingMethod = isset($trace[2]['function'], $trace[2]['object']) && 'serialize' === $trace[2]['function'] && $this === $trace[2]['object'];
+        }
+
+        return $isCalledFromOverridingMethod ? $serialized : serialize($serialized);
+    }
+
+    private function hasUserChanged(UserInterface $user)
     {
         if (!($this->user instanceof UserInterface)) {
             throw new \BadMethodCallException('Method "hasUserChanged" should be called when current user class is instance of "UserInterface".');
@@ -314,16 +254,6 @@ abstract class AbstractToken implements TokenInterface
         }
 
         if ($this->user->getSalt() !== $user->getSalt()) {
-            return true;
-        }
-
-        $userRoles = array_map('strval', (array) $user->getRoles());
-
-        if ($this instanceof SwitchUserToken) {
-            $userRoles[] = 'ROLE_PREVIOUS_ADMIN';
-        }
-
-        if (\count($userRoles) !== \count($this->getRoleNames()) || \count($userRoles) !== \count(array_intersect($userRoles, $this->getRoleNames()))) {
             return true;
         }
 

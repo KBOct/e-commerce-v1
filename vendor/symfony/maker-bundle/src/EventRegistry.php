@@ -14,11 +14,7 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -27,15 +23,10 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\HttpKernel\Event\TerminateEvent;
-use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
-use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal
@@ -43,16 +34,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 class EventRegistry
 {
     // list of *known* events to always include (if they exist)
-    private static $newEventsMap = [
-        'kernel.exception' => ExceptionEvent::class,
-        'kernel.request' => RequestEvent::class,
-        'kernel.response' => ResponseEvent::class,
-        'kernel.view' => ViewEvent::class,
-        'kernel.controller_arguments' => ControllerArgumentsEvent::class,
-        'kernel.controller' => ControllerEvent::class,
-        'kernel.terminate' => TerminateEvent::class,
-    ];
-
     private static $eventsMap = [
         'console.command' => ConsoleCommandEvent::class,
         'console.terminate' => ConsoleTerminateEvent::class,
@@ -76,15 +57,6 @@ class EventRegistry
     public function __construct(EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
-
-        // Loop through the new event classes
-        foreach (self::$newEventsMap as $eventName => $newEventClass) {
-            //Check if the new event classes exist, if so replace the old one with the new.
-            if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
-                unset(self::$eventsMap[$eventName]);
-                self::$eventsMap[$newEventClass] = $newEventClass;
-            }
-        }
     }
 
     /**
@@ -102,14 +74,6 @@ class EventRegistry
         }
 
         $listeners = $this->eventDispatcher->getListeners();
-
-        // Check if these listeners are part of the new events.
-        foreach (array_keys($listeners) as $listenerKey) {
-            if (isset(self::$newEventsMap[$listenerKey])) {
-                unset($listeners[$listenerKey]);
-            }
-        }
-
         $activeEvents = array_unique(array_merge($activeEvents, array_keys($listeners)));
 
         asort($activeEvents);
@@ -143,13 +107,7 @@ class EventRegistry
             }
 
             if (null !== $type = $args[0]->getType()) {
-                $type = $type instanceof \ReflectionNamedType ? $type->getName() : $type->__toString();
-
-                if (LegacyEvent::class === $type && class_exists(Event::class)) {
-                    return Event::class;
-                }
-
-                return $type;
+                return (string) $type;
             }
         }
 

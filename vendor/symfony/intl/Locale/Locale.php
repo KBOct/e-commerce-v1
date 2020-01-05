@@ -24,7 +24,7 @@ use Symfony\Component\Intl\Exception\MethodNotImplementedException;
  *
  * @internal
  */
-abstract class Locale
+class Locale
 {
     const DEFAULT_LOCALE = null;
 
@@ -48,7 +48,7 @@ abstract class Locale
      *
      * @return string The corresponding locale code
      *
-     * @see https://php.net/locale.acceptfromhttp
+     * @see http://www.php.net/manual/en/locale.acceptfromhttp.php
      *
      * @throws MethodNotImplementedException
      */
@@ -97,7 +97,7 @@ abstract class Locale
      *
      * @return string The corresponding locale code
      *
-     * @see https://php.net/locale.composelocale
+     * @see http://www.php.net/manual/en/locale.composelocale.php
      *
      * @throws MethodNotImplementedException
      */
@@ -115,7 +115,7 @@ abstract class Locale
      *
      * @return string The corresponding locale code
      *
-     * @see https://php.net/locale.filtermatches
+     * @see http://www.php.net/manual/en/locale.filtermatches.php
      *
      * @throws MethodNotImplementedException
      */
@@ -131,7 +131,7 @@ abstract class Locale
      *
      * @return array The locale variants
      *
-     * @see https://php.net/locale.getallvariants
+     * @see http://www.php.net/manual/en/locale.getallvariants.php
      *
      * @throws MethodNotImplementedException
      */
@@ -145,7 +145,7 @@ abstract class Locale
      *
      * @return string The default locale code. Always returns 'en'
      *
-     * @see https://php.net/locale.getdefault
+     * @see http://www.php.net/manual/en/locale.getdefault.php
      */
     public static function getDefault()
     {
@@ -160,7 +160,7 @@ abstract class Locale
      *
      * @return string The localized language display name
      *
-     * @see https://php.net/locale.getdisplaylanguage
+     * @see http://www.php.net/manual/en/locale.getdisplaylanguage.php
      *
      * @throws MethodNotImplementedException
      */
@@ -177,7 +177,7 @@ abstract class Locale
      *
      * @return string The localized locale display name
      *
-     * @see https://php.net/locale.getdisplayname
+     * @see http://www.php.net/manual/en/locale.getdisplayname.php
      *
      * @throws MethodNotImplementedException
      */
@@ -194,7 +194,7 @@ abstract class Locale
      *
      * @return string The localized region display name
      *
-     * @see https://php.net/locale.getdisplayregion
+     * @see http://www.php.net/manual/en/locale.getdisplayregion.php
      *
      * @throws MethodNotImplementedException
      */
@@ -211,7 +211,7 @@ abstract class Locale
      *
      * @return string The localized script display name
      *
-     * @see https://php.net/locale.getdisplayscript
+     * @see http://www.php.net/manual/en/locale.getdisplayscript.php
      *
      * @throws MethodNotImplementedException
      */
@@ -228,7 +228,7 @@ abstract class Locale
      *
      * @return string The localized variant display name
      *
-     * @see https://php.net/locale.getdisplayvariant
+     * @see http://www.php.net/manual/en/locale.getdisplayvariant.php
      *
      * @throws MethodNotImplementedException
      */
@@ -244,7 +244,7 @@ abstract class Locale
      *
      * @return array Associative array with the extracted variants
      *
-     * @see https://php.net/locale.getkeywords
+     * @see http://www.php.net/manual/en/locale.getkeywords.php
      *
      * @throws MethodNotImplementedException
      */
@@ -260,7 +260,7 @@ abstract class Locale
      *
      * @return string|null The extracted language code or null in case of error
      *
-     * @see https://php.net/locale.getprimarylanguage
+     * @see http://www.php.net/manual/en/locale.getprimarylanguage.php
      *
      * @throws MethodNotImplementedException
      */
@@ -276,7 +276,7 @@ abstract class Locale
      *
      * @return string|null The extracted region code or null if not present
      *
-     * @see https://php.net/locale.getregion
+     * @see http://www.php.net/manual/en/locale.getregion.php
      *
      * @throws MethodNotImplementedException
      */
@@ -292,7 +292,7 @@ abstract class Locale
      *
      * @return string|null The extracted script code or null if not present
      *
-     * @see https://php.net/locale.getscript
+     * @see http://www.php.net/manual/en/locale.getscript.php
      *
      * @throws MethodNotImplementedException
      */
@@ -309,7 +309,7 @@ abstract class Locale
      * @param bool   $canonicalize If true, the arguments will be converted to canonical form before matching
      * @param string $default      The locale to use if no match is found
      *
-     * @see https://php.net/locale.lookup
+     * @see http://www.php.net/manual/en/locale.lookup.php
      *
      * @throws MethodNotImplementedException
      */
@@ -325,7 +325,7 @@ abstract class Locale
      *
      * @return array Associative array with the extracted subtags
      *
-     * @see https://php.net/locale.parselocale
+     * @see http://www.php.net/manual/en/locale.parselocale.php
      *
      * @throws MethodNotImplementedException
      */
@@ -341,7 +341,7 @@ abstract class Locale
      *
      * @return bool true on success or false on failure
      *
-     * @see https://php.net/locale.setdefault
+     * @see http://www.php.net/manual/en/locale.setdefault.php
      *
      * @throws MethodNotImplementedException
      */

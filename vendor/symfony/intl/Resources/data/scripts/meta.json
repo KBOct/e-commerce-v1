@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Scripts": [
         "Adlm",
         "Afak",
@@ -189,6 +189,7 @@
         "Zsye",
         "Zsym",
         "Zxxx",
-        "Zyyy"
+        "Zyyy",
+        "Zzzz"
     ]
 }

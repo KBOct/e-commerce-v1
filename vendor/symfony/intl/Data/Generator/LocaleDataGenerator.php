@@ -36,7 +36,7 @@ class LocaleDataGenerator extends AbstractDataGenerator
     /**
      * {@inheritdoc}
      */
-    protected function scanLocales(LocaleScanner $scanner, string $sourceDir): array
+    protected function scanLocales(LocaleScanner $scanner, $sourceDir)
     {
         $this->locales = $scanner->scanLocales($sourceDir.'/locales');
         $this->localeAliases = $scanner->scanAliases($sourceDir.'/locales');
@@ -48,7 +48,7 @@ class LocaleDataGenerator extends AbstractDataGenerator
     /**
      * {@inheritdoc}
      */
-    protected function compileTemporaryBundles(BundleCompilerInterface $compiler, string $sourceDir, string $tempDir)
+    protected function compileTemporaryBundles(BundleCompilerInterface $compiler, $sourceDir, $tempDir)
     {
         $filesystem = new Filesystem();
         $filesystem->mkdir([
@@ -65,21 +65,21 @@ class LocaleDataGenerator extends AbstractDataGenerator
     protected function preGenerate()
     {
         // Write parents locale file for the Translation component
-        file_put_contents(
+        \file_put_contents(
             __DIR__.'/../../../Translation/Resources/data/parents.json',
-            json_encode($this->localeParents, \JSON_PRETTY_PRINT).\PHP_EOL
+            \json_encode($this->localeParents, \JSON_PRETTY_PRINT).\PHP_EOL
         );
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function generateDataForLocale(BundleEntryReaderInterface $reader, string $tempDir, string $displayLocale): ?array
+    protected function generateDataForLocale(BundleEntryReaderInterface $reader, $tempDir, $displayLocale)
     {
         // Don't generate aliases, as they are resolved during runtime
         // Unless an alias is needed as fallback for de-duplication purposes
         if (isset($this->localeAliases[$displayLocale]) && !$this->generatingFallback) {
-            return null;
+            return;
         }
 
         // Generate locale names for all locales that have translations in
@@ -124,7 +124,7 @@ class LocaleDataGenerator extends AbstractDataGenerator
             $data['Names'] = array_diff($data['Names'], $fallbackData['Names']);
         }
         if (!$data['Names']) {
-            return null;
+            return;
         }
 
         return $data;
@@ -133,15 +133,14 @@ class LocaleDataGenerator extends AbstractDataGenerator
     /**
      * {@inheritdoc}
      */
-    protected function generateDataForRoot(BundleEntryReaderInterface $reader, string $tempDir): ?array
+    protected function generateDataForRoot(BundleEntryReaderInterface $reader, $tempDir)
     {
-        return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function generateDataForMeta(BundleEntryReaderInterface $reader, string $tempDir): ?array
+    protected function generateDataForMeta(BundleEntryReaderInterface $reader, $tempDir)
     {
         return [
             'Locales' => $this->locales,
@@ -149,7 +148,10 @@ class LocaleDataGenerator extends AbstractDataGenerator
         ];
     }
 
-    private function generateLocaleName(BundleEntryReaderInterface $reader, string $tempDir, string $locale, string $displayLocale, string $pattern, string $separator): string
+    /**
+     * @return string
+     */
+    private function generateLocaleName(BundleEntryReaderInterface $reader, $tempDir, $locale, $displayLocale, $pattern, $separator)
     {
         // Apply generic notation using square brackets as described per http://cldr.unicode.org/translation/language-names
         $name = str_replace(['(', ')'], ['[', ']'], $reader->readEntry($tempDir.'/lang', $displayLocale, ['Languages', \Locale::getPrimaryLanguage($locale)]));

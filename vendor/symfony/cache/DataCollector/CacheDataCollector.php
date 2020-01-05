@@ -21,8 +21,6 @@ use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 /**
  * @author Aaron Scherer <aequasi@gmail.com>
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
- *
- * @final since Symfony 4.4
  */
 class CacheDataCollector extends DataCollector implements LateDataCollectorInterface
 {
@@ -32,7 +30,8 @@ class CacheDataCollector extends DataCollector implements LateDataCollectorInter
     private $instances = [];
 
     /**
-     * @param string $name
+     * @param string           $name
+     * @param TraceableAdapter $instance
      */
     public function addInstance($name, TraceableAdapter $instance)
     {
@@ -41,10 +40,8 @@ class CacheDataCollector extends DataCollector implements LateDataCollectorInter
 
     /**
      * {@inheritdoc}
-     *
-     * @param \Throwable|null $exception
      */
-    public function collect(Request $request, Response $response/*, \Throwable $exception = null*/)
+    public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         $empty = ['calls' => [], 'config' => [], 'options' => [], 'statistics' => []];
         $this->data = ['instances' => $empty, 'total' => $empty];

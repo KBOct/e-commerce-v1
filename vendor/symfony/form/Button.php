@@ -38,6 +38,8 @@ class Button implements \IteratorAggregate, FormInterface
 
     /**
      * Creates a new button from a form configuration.
+     *
+     * @param FormConfigInterface $config The button's configuration
      */
     public function __construct(FormConfigInterface $config)
     {
@@ -125,6 +127,10 @@ class Button implements \IteratorAggregate, FormInterface
      * Unsupported method.
      *
      * This method should not be invoked.
+     *
+     * @param int|string|FormInterface $child
+     * @param null                     $type
+     * @param array                    $options
      *
      * @throws BadMethodCallException
      */

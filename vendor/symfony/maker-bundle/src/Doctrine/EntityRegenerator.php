@@ -234,7 +234,6 @@ final class EntityRegenerator
                 'entity_full_class_name' => $metadata->name,
                 'entity_class_name' => $entityClassName,
                 'entity_alias' => strtolower($entityClassName[0]),
-                'with_password_upgrade' => false,
             ]
         );
 

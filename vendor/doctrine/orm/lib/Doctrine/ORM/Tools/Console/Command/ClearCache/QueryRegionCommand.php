@@ -112,7 +112,7 @@ EOT
                 )
             );
 
-            return 0;
+            return;
         }
 
         if ($input->getOption('all')) {
@@ -120,12 +120,10 @@ EOT
 
             $cache->evictQueryRegions();
 
-            return 0;
+            return;
         }
 
         $ui->comment(sprintf('Clearing second-level cache query region named <info>"%s"</info>', $name));
         $cache->evictQueryRegion($name);
-
-        return 0;
     }
 }

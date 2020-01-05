@@ -108,9 +108,13 @@ class XmlFileLoader extends FileLoader
     /**
      * Parses a XML File.
      *
+     * @param string $file Path of file
+     *
+     * @return \SimpleXMLElement
+     *
      * @throws MappingException
      */
-    private function parseFile(string $file): \SimpleXMLElement
+    private function parseFile($file)
     {
         try {
             $dom = XmlUtils::loadFile($file, __DIR__.'/schema/dic/serializer-mapping/serializer-mapping-1.0.xsd');
@@ -121,7 +125,7 @@ class XmlFileLoader extends FileLoader
         return simplexml_import_dom($dom);
     }
 
-    private function getClassesFromXml(): array
+    private function getClassesFromXml()
     {
         $xml = $this->parseFile($this->file);
         $classes = [];

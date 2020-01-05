@@ -19,7 +19,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -35,14 +34,12 @@ class RouterDebugCommand extends Command
 {
     protected static $defaultName = 'debug:router';
     private $router;
-    private $fileLinkFormatter;
 
-    public function __construct(RouterInterface $router, FileLinkFormatter $fileLinkFormatter = null)
+    public function __construct(RouterInterface $router)
     {
         parent::__construct();
 
         $this->router = $router;
-        $this->fileLinkFormatter = $fileLinkFormatter;
     }
 
     /**
@@ -73,11 +70,11 @@ EOF
      *
      * @throws InvalidArgumentException When route does not exist
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $name = $input->getArgument('name');
-        $helper = new DescriptorHelper($this->fileLinkFormatter);
+        $helper = new DescriptorHelper();
         $routes = $this->router->getRouteCollection();
 
         if ($name) {
@@ -105,8 +102,6 @@ EOF
                 'output' => $io,
             ]);
         }
-
-        return 0;
     }
 
     private function findRouteNameContaining(string $name, RouteCollection $routes): array

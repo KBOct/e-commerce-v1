@@ -37,9 +37,7 @@ class Table extends AbstractAsset
     protected $_fkConstraints = [];
 
     /** @var mixed[] */
-    protected $_options = [
-        'create_options' => [],
-    ];
+    protected $_options = [];
 
     /** @var SchemaConfig|null */
     protected $_schemaConfig = null;
@@ -74,7 +72,7 @@ class Table extends AbstractAsset
             $this->_addForeignKeyConstraint($constraint);
         }
 
-        $this->_options = array_merge($this->_options, $options);
+        $this->_options = $options;
     }
 
     /**

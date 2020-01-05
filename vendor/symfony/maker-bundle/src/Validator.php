@@ -34,25 +34,19 @@ final class Validator
             'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
             'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
             'endforeach', 'endif', 'endswitch', 'endwhile', 'eval',
-            'exit', 'extends', 'final', 'finally', 'for', 'foreach', 'function',
+            'exit', 'extends', 'final', 'for', 'foreach', 'function',
             'global', 'goto', 'if', 'implements', 'include',
             'include_once', 'instanceof', 'insteadof', 'interface', 'isset',
             'list', 'namespace', 'new', 'or', 'print', 'private',
             'protected', 'public', 'require', 'require_once', 'return',
             'static', 'switch', 'throw', 'trait', 'try', 'unset',
-            'use', 'var', 'while', 'xor', 'yield',
+            'use', 'var', 'while', 'xor',
             'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
             'iterable', 'object', '__file__', '__line__', '__dir__', '__function__', '__class__',
             '__method__', '__namespace__', '__trait__', 'self', 'parent',
         ];
 
         foreach ($pieces as $piece) {
-            if (!mb_check_encoding($piece, 'UTF-8')) {
-                $errorMessage = $errorMessage ?: sprintf('"%s" is not a UTF-8-encoded string.', $piece);
-
-                throw new RuntimeCommandException($errorMessage);
-            }
-
             if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
                 $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
 
@@ -71,7 +65,7 @@ final class Validator
     public static function notBlank(string $value = null): string
     {
         if (null === $value || '' === $value) {
-            throw new RuntimeCommandException('This value cannot be blank.');
+            throw new RuntimeCommandException('This value cannot be blank');
         }
 
         return $value;
@@ -187,7 +181,7 @@ final class Validator
         self::notBlank($className);
 
         if (!class_exists($className)) {
-            $errorMessage = $errorMessage ?: sprintf('Class "%s" doesn\'t exist; please enter an existing full class name.', $className);
+            $errorMessage = $errorMessage ?: sprintf('Class "%s" doesn\'t exists. Please enter existing full class name', $className);
 
             throw new RuntimeCommandException($errorMessage);
         }
@@ -200,15 +194,15 @@ final class Validator
         self::notBlank($className);
 
         if (empty($entities)) {
-            throw new RuntimeCommandException('There are no registered entities; please create an entity before using this command.');
+            throw new RuntimeCommandException('There is no registered entities. Please create entity before use this command');
         }
 
         if (0 === strpos($className, '\\')) {
-            self::classExists($className, sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
+            self::classExists($className, sprintf('Entity "%s" doesn\'t exists. Please enter existing one or create new', $className));
         }
 
         if (!\in_array($className, $entities)) {
-            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
+            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists. Please enter existing one or create new', $className));
         }
 
         return $className;
@@ -219,7 +213,7 @@ final class Validator
         self::notBlank($className);
 
         if (class_exists($className)) {
-            throw new RuntimeCommandException(sprintf('Class "%s" already exists.', $className));
+            throw new RuntimeCommandException(sprintf('Class "%s" already exists', $className));
         }
 
         return $className;

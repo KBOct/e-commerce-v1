@@ -37,7 +37,8 @@ class WebProfilerExtension extends Extension
     /**
      * Loads the web profiler configuration.
      *
-     * @param array $configs An array of configuration settings
+     * @param array            $configs   An array of configuration settings
+     * @param ContainerBuilder $container A ContainerBuilder instance
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -61,7 +62,9 @@ class WebProfilerExtension extends Extension
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the base path for the XSD files.
+     *
+     * @return string The XSD base path
      */
     public function getXsdValidationBasePath()
     {

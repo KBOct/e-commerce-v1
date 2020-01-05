@@ -46,7 +46,7 @@ class AnnotationFileLoader extends FileLoader
      * @param string      $file A PHP file path
      * @param string|null $type The resource type
      *
-     * @return RouteCollection|null A RouteCollection instance
+     * @return RouteCollection A RouteCollection instance
      *
      * @throws \InvalidArgumentException When the file does not exist or its routes cannot be parsed
      */
@@ -58,13 +58,14 @@ class AnnotationFileLoader extends FileLoader
         if ($class = $this->findClass($path)) {
             $refl = new \ReflectionClass($class);
             if ($refl->isAbstract()) {
-                return null;
+                return;
             }
 
             $collection->addResource(new FileResource($path));
             $collection->addCollection($this->loader->load($class, $type));
         }
 
+        // PHP 7 memory manager will not release after token_get_all(), see https://bugs.php.net/70098
         gc_mem_caches();
 
         return $collection;

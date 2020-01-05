@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.42",
     "Names": {
         "Adlm": "adlam",
         "Afak": "afaka",
@@ -172,6 +172,7 @@
         "Zsye": "emoji",
         "Zsym": "símbols",
         "Zxxx": "sense escriptura",
-        "Zyyy": "comú"
+        "Zyyy": "comú",
+        "Zzzz": "escriptura desconeguda"
     }
 }

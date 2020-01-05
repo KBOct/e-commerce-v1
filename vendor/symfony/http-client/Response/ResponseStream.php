@@ -17,6 +17,8 @@ use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
 /**
  * @author Nicolas Grekas <p@tchwork.com>
+ *
+ * @internal
  */
 final class ResponseStream implements ResponseStreamInterface
 {

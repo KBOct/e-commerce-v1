@@ -16,15 +16,6 @@ especially what the strategies presented here provide help with.
     operations.
 
 
-.. note::
-
-    Having an SQL logger enabled when processing batches can have a serious impact on performance and resource usage.
-    To avoid that you should disable it in the DBAL configuration:
-.. code-block:: php
-
-    <?php
-    $em->getConnection()->getConfiguration()->setSQLLogger(null);
-
 Bulk Inserts
 ------------
 
@@ -84,7 +75,7 @@ with the batching strategy that was already used for bulk inserts:
 
     <?php
     $batchSize = 20;
-    $i = 1;
+    $i = 0;
     $q = $em->createQuery('select u from MyProject\Model\User u');
     $iterableResult = $q->iterate();
     foreach ($iterableResult as $row) {
@@ -145,7 +136,7 @@ The following example shows how to do this:
 
     <?php
     $batchSize = 20;
-    $i = 1;
+    $i = 0;
     $q = $em->createQuery('select u from MyProject\Model\User u');
     $iterableResult = $q->iterate();
     while (($row = $iterableResult->next()) !== false) {

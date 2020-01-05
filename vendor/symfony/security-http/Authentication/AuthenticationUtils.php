@@ -38,11 +38,12 @@ class AuthenticationUtils
     public function getLastAuthenticationError($clearSession = true)
     {
         $request = $this->getRequest();
+        $session = $request->getSession();
         $authenticationException = null;
 
         if ($request->attributes->has(Security::AUTHENTICATION_ERROR)) {
             $authenticationException = $request->attributes->get(Security::AUTHENTICATION_ERROR);
-        } elseif ($request->hasSession() && ($session = $request->getSession())->has(Security::AUTHENTICATION_ERROR)) {
+        } elseif (null !== $session && $session->has(Security::AUTHENTICATION_ERROR)) {
             $authenticationException = $session->get(Security::AUTHENTICATION_ERROR);
 
             if ($clearSession) {
@@ -64,7 +65,9 @@ class AuthenticationUtils
             return $request->attributes->get(Security::LAST_USERNAME, '');
         }
 
-        return $request->hasSession() ? $request->getSession()->get(Security::LAST_USERNAME, '') : '';
+        $session = $request->getSession();
+
+        return null === $session ? '' : $session->get(Security::LAST_USERNAME, '');
     }
 
     /**

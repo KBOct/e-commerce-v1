@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "Arab": "arabiarra",
         "Armn": "armeniarra",
@@ -43,6 +43,7 @@
         "Zsye": "emotikonoa",
         "Zsym": "ikurrak",
         "Zxxx": "idatzi gabea",
-        "Zyyy": "ohikoa"
+        "Zyyy": "ohikoa",
+        "Zzzz": "idazkera ezezaguna"
     }
 }

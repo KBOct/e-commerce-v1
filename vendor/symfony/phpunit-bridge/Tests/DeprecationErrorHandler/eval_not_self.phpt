@@ -3,8 +3,7 @@ Test eval()'d deprecation is not considered as self
 --FILE--
 <?php
 
-$k = 'SYMFONY_DEPRECATIONS_HELPER';
-putenv($k.'='.$_SERVER[$k] = $_ENV[$k] = 'max[self]=0');
+putenv('SYMFONY_DEPRECATIONS_HELPER=max[self]=0');
 putenv('ANSICON');
 putenv('ConEmuANSI');
 putenv('TERM');

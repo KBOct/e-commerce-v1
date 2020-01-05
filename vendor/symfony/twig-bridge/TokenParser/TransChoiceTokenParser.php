@@ -18,7 +18,6 @@ use Twig\Node\Expression\ArrayExpression;
 use Twig\Node\Node;
 use Twig\Node\TextNode;
 use Twig\Token;
-use Twig\TokenParser\AbstractTokenParser;
 
 /**
  * Token Parser for the 'transchoice' tag.
@@ -26,15 +25,15 @@ use Twig\TokenParser\AbstractTokenParser;
  * @author Fabien Potencier <fabien@symfony.com>
  *
  * @deprecated since Symfony 4.2, use the "trans" tag with a "%count%" parameter instead
- *
- * @final since Symfony 4.4
  */
-class TransChoiceTokenParser extends AbstractTokenParser
+class TransChoiceTokenParser extends TransTokenParser
 {
     /**
-     * {@inheritdoc}
+     * Parses a token and returns a node.
      *
      * @return Node
+     *
+     * @throws SyntaxError
      */
     public function parse(Token $token)
     {
@@ -87,9 +86,9 @@ class TransChoiceTokenParser extends AbstractTokenParser
     }
 
     /**
-     * {@inheritdoc}
+     * Gets the tag name associated with this token parser.
      *
-     * @return string
+     * @return string The tag name
      */
     public function getTag()
     {

@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
-use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 /**
  * @internal
@@ -49,7 +48,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -79,16 +78,6 @@ final class SecurityConfigUpdater
 
         if (\count($firewall['guard']['authenticators']) > 1) {
             $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
-        }
-
-        if (!isset($firewall['logout']) && $logoutSetup) {
-            $firewall['logout'] = ['path' => 'app_logout'];
-            $firewall['logout'][] = $this->manipulator->createCommentLine(
-                ' where to redirect after logout'
-            );
-            $firewall['logout'][] = $this->manipulator->createCommentLine(
-                ' target: app_any_route'
-            );
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;
@@ -148,7 +137,7 @@ final class SecurityConfigUpdater
         }
 
         $newData['security']['encoders'][$userClass] = [
-            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : (class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt'),
+            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : 'bcrypt',
         ];
         $newData['security']['encoders']['_'] = $this->manipulator->createEmptyLine();
 

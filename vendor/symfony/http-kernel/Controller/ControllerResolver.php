@@ -82,11 +82,7 @@ class ControllerResolver implements ControllerResolverInterface
             return $controller;
         }
 
-        try {
-            $callable = $this->createController($controller);
-        } catch (\InvalidArgumentException $e) {
-            throw new \InvalidArgumentException(sprintf('The controller for URI "%s" is not callable. %s', $request->getPathInfo(), $e->getMessage()));
-        }
+        $callable = $this->createController($controller);
 
         if (!\is_callable($callable)) {
             throw new \InvalidArgumentException(sprintf('The controller for URI "%s" is not callable. %s', $request->getPathInfo(), $this->getControllerError($callable)));
@@ -101,25 +97,17 @@ class ControllerResolver implements ControllerResolverInterface
      * @param string $controller A Controller string
      *
      * @return callable A PHP callable
-     *
-     * @throws \InvalidArgumentException When the controller cannot be created
      */
     protected function createController($controller)
     {
         if (false === strpos($controller, '::')) {
-            $controller = $this->instantiateController($controller);
-
-            if (!\is_callable($controller)) {
-                throw new \InvalidArgumentException($this->getControllerError($controller));
-            }
-
-            return $controller;
+            return $this->instantiateController($controller);
         }
 
         list($class, $method) = explode('::', $controller, 2);
 
         try {
-            $controller = [$this->instantiateController($class), $method];
+            return [$this->instantiateController($class), $method];
         } catch (\Error | \LogicException $e) {
             try {
                 if ((new \ReflectionMethod($class, $method))->isStatic()) {
@@ -131,12 +119,6 @@ class ControllerResolver implements ControllerResolverInterface
 
             throw $e;
         }
-
-        if (!\is_callable($controller)) {
-            throw new \InvalidArgumentException($this->getControllerError($controller));
-        }
-
-        return $controller;
     }
 
     /**
@@ -151,7 +133,7 @@ class ControllerResolver implements ControllerResolverInterface
         return new $class();
     }
 
-    private function getControllerError($callable): string
+    private function getControllerError($callable)
     {
         if (\is_string($callable)) {
             if (false !== strpos($callable, '::')) {
@@ -213,7 +195,7 @@ class ControllerResolver implements ControllerResolverInterface
         return $message;
     }
 
-    private function getClassMethodsWithoutMagicMethods($classOrObject): array
+    private function getClassMethodsWithoutMagicMethods($classOrObject)
     {
         $methods = get_class_methods($classOrObject);
 

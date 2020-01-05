@@ -2,30 +2,115 @@
 
 namespace Doctrine\Common\Persistence;
 
-use const E_USER_DEPRECATED;
-use function class_alias;
-use function class_exists;
-use function sprintf;
-use function trigger_error;
+/**
+ * Base class to simplify ObjectManager decorators
+ */
+abstract class ObjectManagerDecorator implements ObjectManager
+{
+    /** @var ObjectManager */
+    protected $wrapped;
 
-if (! class_exists(\Doctrine\Persistence\ObjectManagerDecorator::class, false)) {
-    @trigger_error(sprintf(
-        'The %s\ObjectManagerDecorator class is deprecated since doctrine/persistence 1.3 and will be removed in 2.0.'
-        . ' Use \Doctrine\Persistence\ObjectManagerDecorator instead.',
-        __NAMESPACE__
-    ), E_USER_DEPRECATED);
-}
-
-class_alias(
-    \Doctrine\Persistence\ObjectManagerDecorator::class,
-    __NAMESPACE__ . '\ObjectManagerDecorator'
-);
-
-if (false) {
     /**
-     * @deprecated 1.3 Use Doctrine\Persistence\ObjectManagerDecorator
+     * {@inheritdoc}
      */
-    abstract class ObjectManagerDecorator extends \Doctrine\Persistence\ObjectManagerDecorator
+    public function find($className, $id)
     {
+        return $this->wrapped->find($className, $id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function persist($object)
+    {
+        $this->wrapped->persist($object);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function remove($object)
+    {
+        $this->wrapped->remove($object);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function merge($object)
+    {
+        return $this->wrapped->merge($object);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clear($objectName = null)
+    {
+        $this->wrapped->clear($objectName);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function detach($object)
+    {
+        $this->wrapped->detach($object);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function refresh($object)
+    {
+        $this->wrapped->refresh($object);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flush()
+    {
+        $this->wrapped->flush();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRepository($className)
+    {
+        return $this->wrapped->getRepository($className);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getClassMetadata($className)
+    {
+        return $this->wrapped->getClassMetadata($className);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMetadataFactory()
+    {
+        return $this->wrapped->getMetadataFactory();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function initializeObject($obj)
+    {
+        $this->wrapped->initializeObject($obj);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function contains($object)
+    {
+        return $this->wrapped->contains($object);
     }
 }

@@ -12,6 +12,7 @@
 namespace Symfony\Component\Security\Guard\Token;
 
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
+use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -27,8 +28,9 @@ class PostAuthenticationGuardToken extends AbstractToken implements GuardTokenIn
     private $providerKey;
 
     /**
-     * @param string   $providerKey The provider (firewall) key
-     * @param string[] $roles       An array of roles
+     * @param UserInterface   $user        The user!
+     * @param string          $providerKey The provider (firewall) key
+     * @param (Role|string)[] $roles       An array of roles
      *
      * @throws \InvalidArgumentException
      */
@@ -72,17 +74,19 @@ class PostAuthenticationGuardToken extends AbstractToken implements GuardTokenIn
     /**
      * {@inheritdoc}
      */
-    public function __serialize(): array
+    public function serialize()
     {
-        return [$this->providerKey, parent::__serialize()];
+        $serialized = [$this->providerKey, parent::serialize(true)];
+
+        return $this->doSerialize($serialized, \func_num_args() ? \func_get_arg(0) : null);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function __unserialize(array $data): void
+    public function unserialize($serialized)
     {
-        [$this->providerKey, $parentData] = $data;
-        parent::__unserialize($parentData);
+        list($this->providerKey, $parentStr) = \is_array($serialized) ? $serialized : unserialize($serialized);
+        parent::unserialize($parentStr);
     }
 }

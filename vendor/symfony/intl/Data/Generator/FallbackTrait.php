@@ -25,14 +25,23 @@ trait FallbackTrait
     private $generatingFallback = false;
 
     /**
+     * @param string $tempDir
+     * @param string $displayLocale
+     *
+     * @return array|null
+     *
      * @see AbstractDataGenerator::generateDataForLocale()
      */
-    abstract protected function generateDataForLocale(BundleEntryReaderInterface $reader, string $tempDir, string $displayLocale): ?array;
+    abstract protected function generateDataForLocale(BundleEntryReaderInterface $reader, $tempDir, $displayLocale);
 
     /**
+     * @param string $tempDir
+     *
+     * @return array|null
+     *
      * @see AbstractDataGenerator::generateDataForRoot()
      */
-    abstract protected function generateDataForRoot(BundleEntryReaderInterface $reader, string $tempDir): ?array;
+    abstract protected function generateDataForRoot(BundleEntryReaderInterface $reader, $tempDir);
 
     private function generateFallbackData(BundleEntryReaderInterface $reader, string $tempDir, string $displayLocale): array
     {

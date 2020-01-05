@@ -116,7 +116,7 @@ EOT
                 )
             );
 
-            return 0;
+            return;
         }
 
         if ($input->getOption('all')) {
@@ -124,7 +124,7 @@ EOT
 
             $cache->evictEntityRegions();
 
-            return 0;
+            return;
         }
 
         if ($ownerId) {
@@ -138,12 +138,10 @@ EOT
             );
             $cache->evictCollection($ownerClass, $assoc, $ownerId);
 
-            return 0;
+            return;
         }
 
         $ui->comment(sprintf('Clearing second-level cache for collection <info>"%s#%s"</info>', $ownerClass, $assoc));
         $cache->evictCollectionRegion($ownerClass, $assoc);
-
-        return 0;
     }
 }

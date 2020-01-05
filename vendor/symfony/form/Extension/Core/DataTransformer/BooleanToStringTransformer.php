@@ -28,7 +28,8 @@ class BooleanToStringTransformer implements DataTransformerInterface
     private $falseValues;
 
     /**
-     * @param string $trueValue The value emitted upon transform if the input is true
+     * @param string $trueValue   The value emitted upon transform if the input is true
+     * @param array  $falseValues
      */
     public function __construct(string $trueValue, array $falseValues = [null])
     {
@@ -44,14 +45,14 @@ class BooleanToStringTransformer implements DataTransformerInterface
      *
      * @param bool $value Boolean value
      *
-     * @return string|null String value
+     * @return string String value
      *
      * @throws TransformationFailedException if the given value is not a Boolean
      */
     public function transform($value)
     {
         if (null === $value) {
-            return null;
+            return;
         }
 
         if (!\is_bool($value)) {

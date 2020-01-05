@@ -3,7 +3,6 @@
 namespace Doctrine\Bundle\DoctrineBundle\Controller;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Exception;
 use PDO;
@@ -56,10 +55,7 @@ class ProfilerController implements ContainerAwareInterface
         /** @var Connection $connection */
         $connection = $this->container->get('doctrine')->getConnection($connectionName);
         try {
-            $platform = $connection->getDatabasePlatform();
-            if ($platform instanceof SqlitePlatform) {
-                $results = $this->explainSQLitePlatform($connection, $query);
-            } elseif ($platform instanceof SQLServerPlatform) {
+            if ($connection->getDatabasePlatform() instanceof SQLServerPlatform) {
                 $results = $this->explainSQLServerPlatform($connection, $query);
             } else {
                 $results = $this->explainOtherPlatform($connection, $query);
@@ -72,18 +68,6 @@ class ProfilerController implements ContainerAwareInterface
             'data' => $results,
             'query' => $query,
         ]));
-    }
-
-    private function explainSQLitePlatform(Connection $connection, $query)
-    {
-        $params = $query['params'];
-
-        if ($params instanceof Data) {
-            $params = $params->getValue(true);
-        }
-
-        return $connection->executeQuery('EXPLAIN QUERY PLAN ' . $query['sql'], $params, $query['types'])
-            ->fetchAll(PDO::FETCH_ASSOC);
     }
 
     private function explainSQLServerPlatform(Connection $connection, $query)

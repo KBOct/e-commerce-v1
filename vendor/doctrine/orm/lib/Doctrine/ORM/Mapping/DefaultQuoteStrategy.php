@@ -99,8 +99,7 @@ class DefaultQuoteStrategy implements QuoteStrategy
         $schema = '';
 
         if (isset($association['joinTable']['schema'])) {
-            $schema  = $association['joinTable']['schema'];
-            $schema .= ! $platform->supportsSchemas() && $platform->canEmulateSchemas() ? '__' : '.';
+            $schema = $association['joinTable']['schema'] . '.';
         }
 
         $tableName = $association['joinTable']['name'];

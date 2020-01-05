@@ -11,8 +11,6 @@ use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use function assert;
 use function count;
 use function sprintf;
 
@@ -25,7 +23,6 @@ abstract class DoctrineCommandHelper extends BaseDoctrineCommandHelper
     public static function setApplicationHelper(Application $application, InputInterface $input) : void
     {
         $container = $application->getKernel()->getContainer();
-        assert($container instanceof ContainerInterface);
 
         /** @var Registry $doctrine */
         $doctrine = $container->get('doctrine');

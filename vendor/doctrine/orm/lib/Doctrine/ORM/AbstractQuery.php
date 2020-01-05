@@ -72,7 +72,7 @@ abstract class AbstractQuery
     /**
      * The parameter map of this query.
      *
-     * @var ArrayCollection|Parameter[]
+     * @var \Doctrine\Common\Collections\ArrayCollection
      */
     protected $parameters;
 
@@ -306,7 +306,7 @@ abstract class AbstractQuery
     /**
      * Get all defined parameters.
      *
-     * @return ArrayCollection The defined query parameters.
+     * @return \Doctrine\Common\Collections\ArrayCollection The defined query parameters.
      */
     public function getParameters()
     {
@@ -336,7 +336,7 @@ abstract class AbstractQuery
     /**
      * Sets a collection of query parameters.
      *
-     * @param ArrayCollection|mixed[] $parameters
+     * @param \Doctrine\Common\Collections\ArrayCollection|array $parameters
      *
      * @return static This query instance.
      */
@@ -583,45 +583,21 @@ abstract class AbstractQuery
      * Set whether or not to cache the results of this query and if so, for
      * how long and which ID to use for the cache entry.
      *
-     * @deprecated 2.7 Use {@see enableResultCache} and {@see disableResultCache} instead.
-     *
-     * @param bool   $useCache
-     * @param int    $lifetime
-     * @param string $resultCacheId
+     * @param boolean $bool
+     * @param integer $lifetime
+     * @param string  $resultCacheId
      *
      * @return static This query instance.
      */
-    public function useResultCache($useCache, $lifetime = null, $resultCacheId = null)
+    public function useResultCache($bool, $lifetime = null, $resultCacheId = null)
     {
-        return $useCache
-            ? $this->enableResultCache($lifetime, $resultCacheId)
-            : $this->disableResultCache();
-    }
+        if ($bool) {
+            $this->setResultCacheLifetime($lifetime);
+            $this->setResultCacheId($resultCacheId);
 
-    /**
-     * Enables caching of the results of this query, for given or default amount of seconds
-     * and optionally specifies which ID to use for the cache entry.
-     *
-     * @param int|null    $lifetime      How long the cache entry is valid, in seconds.
-     * @param string|null $resultCacheId ID to use for the cache entry.
-     *
-     * @return static This query instance.
-     */
-    public function enableResultCache(?int $lifetime = null, ?string $resultCacheId = null) : self
-    {
-        $this->setResultCacheLifetime($lifetime);
-        $this->setResultCacheId($resultCacheId);
+            return $this;
+        }
 
-        return $this;
-    }
-
-    /**
-     * Disables caching of the results of this query.
-     *
-     * @return static This query instance.
-     */
-    public function disableResultCache() : self
-    {
         $this->_queryCacheProfile = null;
 
         return $this;
@@ -846,9 +822,8 @@ abstract class AbstractQuery
      *
      * Alias for getSingleResult(HYDRATE_SINGLE_SCALAR).
      *
-     * @return mixed The scalar result.
+     * @return mixed The scalar result, or NULL if the query returned no result.
      *
-     * @throws NoResultException        If the query returned no result.
      * @throws NonUniqueResultException If the query result is not unique.
      */
     public function getSingleScalarResult()

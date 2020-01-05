@@ -10,22 +10,18 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use function assert;
 
 /**
  * Command for checking if your database is up to date or not.
  */
 class MigrationsUpToDateDoctrineCommand extends UpToDateCommand
 {
-    /** @var string */
-    protected static $defaultName = 'doctrine:migrations:up-to-date';
-
     protected function configure() : void
     {
         parent::configure();
 
         $this
+            ->setName('doctrine:migrations:up-to-date')
             ->addOption('db', null, InputOption::VALUE_REQUIRED, 'The database connection to use for this command.')
             ->addOption('em', null, InputOption::VALUE_REQUIRED, 'The entity manager to use for this command.')
             ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection to use for this command.');
@@ -39,9 +35,7 @@ class MigrationsUpToDateDoctrineCommand extends UpToDateCommand
         Helper\DoctrineCommandHelper::setApplicationHelper($application, $input);
 
         $configuration = $this->getMigrationConfiguration($input, $output);
-        $container     = $application->getKernel()->getContainer();
-        assert($container instanceof ContainerInterface);
-        DoctrineCommand::configureMigrations($container, $configuration);
+        DoctrineCommand::configureMigrations($application->getKernel()->getContainer(), $configuration);
 
         parent::initialize($input, $output);
     }

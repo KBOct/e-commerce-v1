@@ -29,10 +29,10 @@ abstract protected methods that each of the drivers must
 implement:
 
 
--  doFetch($id)
--  doContains($id)
--  doSave($id, $data, $lifeTime = false)
--  doDelete($id)
+-  \_doFetch($id)
+-  \_doContains($id)
+-  \_doSave($id, $data, $lifeTime = false)
+-  \_doDelete($id)
 
 The public methods ``fetch()``, ``contains()`` etc. use the
 above protected methods which are implemented by the drivers. The
@@ -43,7 +43,7 @@ these methods.
 
 This documentation does not cover every single cache driver included
 with Doctrine. For an up-to-date-list, see the
-`cache directory on GitHub <https://github.com/doctrine/cache/tree/master/lib/Doctrine/Common/Cache>`_.
+`cache directory on GitHub <https://github.com/doctrine/cache/tree/master/lib/Doctrine/Common/Cache>`.
 
 APC
 ~~~
@@ -281,8 +281,6 @@ You can set the namespace a cache driver should use by using the
 
     <?php
     $cacheDriver->setNamespace('my_namespace_');
-
-.. _integrating-with-the-orm:
 
 Integrating with the ORM
 ------------------------

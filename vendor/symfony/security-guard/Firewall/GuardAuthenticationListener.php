@@ -14,15 +14,13 @@ namespace Symfony\Component\Security\Guard\Firewall;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Guard\AuthenticatorInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Guard\Token\PreAuthenticationGuardToken;
-use Symfony\Component\Security\Http\Firewall\AbstractListener;
-use Symfony\Component\Security\Http\Firewall\LegacyListenerTrait;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 use Symfony\Component\Security\Http\RememberMe\RememberMeServicesInterface;
 
@@ -31,13 +29,9 @@ use Symfony\Component\Security\Http\RememberMe\RememberMeServicesInterface;
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  * @author Amaury Leroux de Lens <amaury@lerouxdelens.com>
- *
- * @final since Symfony 4.3
  */
-class GuardAuthenticationListener extends AbstractListener implements ListenerInterface
+class GuardAuthenticationListener implements ListenerInterface
 {
-    use LegacyListenerTrait;
-
     private $guardHandler;
     private $authenticationManager;
     private $providerKey;
@@ -46,8 +40,11 @@ class GuardAuthenticationListener extends AbstractListener implements ListenerIn
     private $rememberMeServices;
 
     /**
-     * @param string                            $providerKey         The provider (i.e. firewall) key
-     * @param iterable|AuthenticatorInterface[] $guardAuthenticators The authenticators, with keys that match what's passed to GuardAuthenticationProvider
+     * @param GuardAuthenticatorHandler         $guardHandler          The Guard handler
+     * @param AuthenticationManagerInterface    $authenticationManager An AuthenticationManagerInterface instance
+     * @param string                            $providerKey           The provider (i.e. firewall) key
+     * @param iterable|AuthenticatorInterface[] $guardAuthenticators   The authenticators, with keys that match what's passed to GuardAuthenticationProvider
+     * @param LoggerInterface                   $logger                A LoggerInterface instance
      */
     public function __construct(GuardAuthenticatorHandler $guardHandler, AuthenticationManagerInterface $authenticationManager, string $providerKey, $guardAuthenticators, LoggerInterface $logger = null)
     {
@@ -63,9 +60,9 @@ class GuardAuthenticationListener extends AbstractListener implements ListenerIn
     }
 
     /**
-     * {@inheritdoc}
+     * Iterates over each authenticator to see if each wants to authenticate the request.
      */
-    public function supports(Request $request): ?bool
+    public function handle(GetResponseEvent $event)
     {
         if (null !== $this->logger) {
             $context = ['firewall_key' => $this->providerKey];
@@ -77,39 +74,7 @@ class GuardAuthenticationListener extends AbstractListener implements ListenerIn
             $this->logger->debug('Checking for guard authentication credentials.', $context);
         }
 
-        $guardAuthenticators = [];
-
         foreach ($this->guardAuthenticators as $key => $guardAuthenticator) {
-            if (null !== $this->logger) {
-                $this->logger->debug('Checking support on guard authenticator.', ['firewall_key' => $this->providerKey, 'authenticator' => \get_class($guardAuthenticator)]);
-            }
-
-            if ($guardAuthenticator->supports($request)) {
-                $guardAuthenticators[$key] = $guardAuthenticator;
-            } elseif (null !== $this->logger) {
-                $this->logger->debug('Guard authenticator does not support the request.', ['firewall_key' => $this->providerKey, 'authenticator' => \get_class($guardAuthenticator)]);
-            }
-        }
-
-        if (!$guardAuthenticators) {
-            return false;
-        }
-
-        $request->attributes->set('_guard_authenticators', $guardAuthenticators);
-
-        return true;
-    }
-
-    /**
-     * Iterates over each authenticator to see if each wants to authenticate the request.
-     */
-    public function authenticate(RequestEvent $event)
-    {
-        $request = $event->getRequest();
-        $guardAuthenticators = $request->attributes->get('_guard_authenticators');
-        $request->attributes->remove('_guard_authenticators');
-
-        foreach ($guardAuthenticators as $key => $guardAuthenticator) {
             // get a key that's unique to *this* guard authenticator
             // this MUST be the same as GuardAuthenticationProvider
             $uniqueGuardKey = $this->providerKey.'_'.$key;
@@ -126,10 +91,23 @@ class GuardAuthenticationListener extends AbstractListener implements ListenerIn
         }
     }
 
-    private function executeGuardAuthenticator(string $uniqueGuardKey, AuthenticatorInterface $guardAuthenticator, RequestEvent $event)
+    private function executeGuardAuthenticator($uniqueGuardKey, AuthenticatorInterface $guardAuthenticator, GetResponseEvent $event)
     {
         $request = $event->getRequest();
         try {
+            if (null !== $this->logger) {
+                $this->logger->debug('Checking support on guard authenticator.', ['firewall_key' => $this->providerKey, 'authenticator' => \get_class($guardAuthenticator)]);
+            }
+
+            // abort the execution of the authenticator if it doesn't support the request
+            if (!$guardAuthenticator->supports($request)) {
+                if (null !== $this->logger) {
+                    $this->logger->debug('Guard authenticator does not support the request.', ['firewall_key' => $this->providerKey, 'authenticator' => \get_class($guardAuthenticator)]);
+                }
+
+                return;
+            }
+
             if (null !== $this->logger) {
                 $this->logger->debug('Calling getCredentials() on guard authenticator.', ['firewall_key' => $this->providerKey, 'authenticator' => \get_class($guardAuthenticator)]);
             }

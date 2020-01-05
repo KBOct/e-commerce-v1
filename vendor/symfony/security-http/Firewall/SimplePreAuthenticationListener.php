@@ -13,10 +13,9 @@ namespace Symfony\Component\Security\Http\Firewall;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
@@ -41,10 +40,8 @@ use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterfa
  *
  * @deprecated since Symfony 4.2, use Guard instead.
  */
-class SimplePreAuthenticationListener extends AbstractListener implements ListenerInterface
+class SimplePreAuthenticationListener implements ListenerInterface
 {
-    use LegacyListenerTrait;
-
     private $tokenStorage;
     private $authenticationManager;
     private $providerKey;
@@ -65,13 +62,7 @@ class SimplePreAuthenticationListener extends AbstractListener implements Listen
         $this->providerKey = $providerKey;
         $this->simpleAuthenticator = $simpleAuthenticator;
         $this->logger = $logger;
-
-        if (null !== $dispatcher && class_exists(LegacyEventDispatcherProxy::class)) {
-            $this->dispatcher = LegacyEventDispatcherProxy::decorate($dispatcher);
-        } else {
-            $this->dispatcher = $dispatcher;
-        }
-
+        $this->dispatcher = $dispatcher;
         $this->trustResolver = $trustResolver ?: new AuthenticationTrustResolver(AnonymousToken::class, RememberMeToken::class);
     }
 
@@ -85,28 +76,10 @@ class SimplePreAuthenticationListener extends AbstractListener implements Listen
         $this->sessionStrategy = $sessionStrategy;
     }
 
-    public function supports(Request $request): ?bool
-    {
-        if ((null !== $token = $this->tokenStorage->getToken()) && !$this->trustResolver->isAnonymous($token)) {
-            return false;
-        }
-
-        $token = $this->simpleAuthenticator->createToken($request, $this->providerKey);
-
-        // allow null to be returned to skip authentication
-        if (null === $token) {
-            return false;
-        }
-
-        $request->attributes->set('_simple_pre_authenticator_token', $token);
-
-        return true;
-    }
-
     /**
      * Handles basic authentication.
      */
-    public function authenticate(RequestEvent $event)
+    public function handle(GetResponseEvent $event)
     {
         $request = $event->getRequest();
 
@@ -115,14 +88,16 @@ class SimplePreAuthenticationListener extends AbstractListener implements Listen
         }
 
         if ((null !== $token = $this->tokenStorage->getToken()) && !$this->trustResolver->isAnonymous($token)) {
-            $request->attributes->remove('_simple_pre_authenticator_token');
-
             return;
         }
 
         try {
-            $token = $request->attributes->get('_simple_pre_authenticator_token');
-            $request->attributes->remove('_simple_pre_authenticator_token');
+            $token = $this->simpleAuthenticator->createToken($request, $this->providerKey);
+
+            // allow null to be returned to skip authentication
+            if (null === $token) {
+                return;
+            }
 
             $token = $this->authenticationManager->authenticate($token);
 
@@ -132,7 +107,7 @@ class SimplePreAuthenticationListener extends AbstractListener implements Listen
 
             if (null !== $this->dispatcher) {
                 $loginEvent = new InteractiveLoginEvent($request, $token);
-                $this->dispatcher->dispatch($loginEvent, SecurityEvents::INTERACTIVE_LOGIN);
+                $this->dispatcher->dispatch(SecurityEvents::INTERACTIVE_LOGIN, $loginEvent);
             }
         } catch (AuthenticationException $e) {
             $this->tokenStorage->setToken(null);

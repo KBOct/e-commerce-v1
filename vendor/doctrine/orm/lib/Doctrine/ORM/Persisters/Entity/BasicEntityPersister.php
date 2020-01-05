@@ -37,9 +37,7 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\UnitOfWork;
 use Doctrine\ORM\Utility\IdentifierFlattener;
 use Doctrine\ORM\Utility\PersisterHelper;
-use function array_map;
 use function array_merge;
-use function assert;
 use function reset;
 
 /**
@@ -571,12 +569,29 @@ class BasicEntityPersister implements EntityPersister
      */
     public function delete($entity)
     {
+        $self       = $this;
         $class      = $this->class;
         $identifier = $this->em->getUnitOfWork()->getEntityIdentifier($entity);
         $tableName  = $this->quoteStrategy->getTableName($class, $this->platform);
         $idColumns  = $this->quoteStrategy->getIdentifierColumnNames($class, $this->platform);
         $id         = array_combine($idColumns, $identifier);
-        $types      = $this->getClassIdentifiersTypes($class);
+        $types      = array_map(function ($identifier) use ($class, $self) {
+            if (isset($class->fieldMappings[$identifier])) {
+                return $class->fieldMappings[$identifier]['type'];
+            }
+
+            $targetMapping = $self->em->getClassMetadata($class->associationMappings[$identifier]['targetEntity']);
+
+            if (isset($targetMapping->fieldMappings[$targetMapping->identifier[0]])) {
+                return $targetMapping->fieldMappings[$targetMapping->identifier[0]]['type'];
+            }
+
+            if (isset($targetMapping->associationMappings[$targetMapping->identifier[0]])) {
+                return $targetMapping->associationMappings[$targetMapping->identifier[0]]['type'];
+            }
+
+            throw ORMException::unrecognizedField($targetMapping->identifier[0]);
+        }, $class->identifier);
 
         $this->deleteJoinTableRecords($identifier);
 
@@ -2073,23 +2088,5 @@ class BasicEntityPersister implements EntityPersister
         }
 
         $this->currentPersisterContext = $this->limitsHandlingContext;
-    }
-
-    /**
-     * @return string[]
-     */
-    protected function getClassIdentifiersTypes(ClassMetadata $class) : array
-    {
-        $entityManager = $this->em;
-
-        return array_map(
-            static function ($fieldName) use ($class, $entityManager) : string {
-                $types = PersisterHelper::getTypeOfField($fieldName, $class, $entityManager);
-                assert(isset($types[0]));
-
-                return $types[0];
-            },
-            $class->identifier
-        );
     }
 }

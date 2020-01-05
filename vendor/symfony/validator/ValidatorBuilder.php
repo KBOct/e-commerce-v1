@@ -15,7 +15,6 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\ArrayCache;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextFactory;
 use Symfony\Component\Validator\Exception\LogicException;
@@ -39,6 +38,8 @@ use Symfony\Contracts\Translation\TranslatorTrait;
  * The default implementation of {@link ValidatorBuilderInterface}.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @final since Symfony 4.2
  */
 class ValidatorBuilder implements ValidatorBuilderInterface
 {
@@ -64,9 +65,9 @@ class ValidatorBuilder implements ValidatorBuilderInterface
     private $validatorFactory;
 
     /**
-     * @var CacheItemPoolInterface|null
+     * @var CacheInterface|null
      */
-    private $mappingCache;
+    private $metadataCache;
 
     /**
      * @var TranslatorInterface|null
@@ -229,37 +230,15 @@ class ValidatorBuilder implements ValidatorBuilderInterface
     }
 
     /**
-     * Sets the cache for caching class metadata.
-     *
-     * @return $this
-     *
-     * @deprecated since Symfony 4.4.
+     * {@inheritdoc}
      */
     public function setMetadataCache(CacheInterface $cache)
     {
-        @trigger_error(sprintf('%s is deprecated since Symfony 4.4. Use setMappingCache() instead.', __METHOD__), E_USER_DEPRECATED);
-
         if (null !== $this->metadataFactory) {
             throw new ValidatorException('You cannot set a custom metadata cache after setting a custom metadata factory. Configure your metadata factory instead.');
         }
 
-        $this->mappingCache = $cache;
-
-        return $this;
-    }
-
-    /**
-     * Sets the cache for caching class metadata.
-     *
-     * @return $this
-     */
-    public function setMappingCache(CacheItemPoolInterface $cache)
-    {
-        if (null !== $this->metadataFactory) {
-            throw new ValidatorException('You cannot set a custom mapping cache after setting a custom metadata factory. Configure your metadata factory instead.');
-        }
-
-        $this->mappingCache = $cache;
+        $this->metadataCache = $cache;
 
         return $this;
     }
@@ -276,8 +255,6 @@ class ValidatorBuilder implements ValidatorBuilderInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @final since Symfony 4.2
      */
     public function setTranslator(LegacyTranslatorInterface $translator)
     {
@@ -353,7 +330,7 @@ class ValidatorBuilder implements ValidatorBuilderInterface
                 $loader = $loaders[0];
             }
 
-            $metadataFactory = new LazyLoadingMetadataFactory($loader, $this->mappingCache);
+            $metadataFactory = new LazyLoadingMetadataFactory($loader, $this->metadataCache);
         }
 
         $validatorFactory = $this->validatorFactory ?: new ConstraintValidatorFactory();

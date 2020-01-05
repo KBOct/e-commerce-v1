@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.36",
     "Names": {
         "Arab": "arabe",
         "Armn": "armenian",
@@ -43,6 +43,7 @@
         "Zsye": "emoji",
         "Zsym": "symbolos",
         "Zxxx": "non scripte",
-        "Zyyy": "commun"
+        "Zyyy": "commun",
+        "Zzzz": "scriptura incognite"
     }
 }

@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.82",
     "Names": {
         "Arab": "Arabaidd",
         "Armn": "Armenaidd",
@@ -32,6 +32,7 @@
         "Mlym": "Malayalamaidd",
         "Mong": "Mongolaidd",
         "Mymr": "Myanmaraidd",
+        "Ogam": "Ogam",
         "Orya": "Orïaidd",
         "Sinh": "Sinhanaidd",
         "Taml": "Tamilaidd",
@@ -43,6 +44,7 @@
         "Zsye": "Emoji",
         "Zsym": "Symbolau",
         "Zxxx": "Anysgrifenedig",
-        "Zyyy": "Cyffredin"
+        "Zyyy": "Cyffredin",
+        "Zzzz": "Sgript anhysbys"
     }
 }

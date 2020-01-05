@@ -3,8 +3,7 @@ Test DeprecationErrorHandler with quiet output
 --FILE--
 <?php
 
-$k = 'SYMFONY_DEPRECATIONS_HELPER';
-putenv($k.'='.$_SERVER[$k] = $_ENV[$k] = 'verbose=0');
+putenv('SYMFONY_DEPRECATIONS_HELPER=verbose=0');
 putenv('ANSICON');
 putenv('ConEmuANSI');
 putenv('TERM');

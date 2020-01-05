@@ -31,7 +31,7 @@ class Exporter
      * @param int               &$objectsCount
      * @param bool              &$valuesAreStatic
      *
-     * @return array
+     * @return int
      *
      * @throws NotInstantiableTypeException When a value cannot be serialized
      */
@@ -40,7 +40,7 @@ class Exporter
         $refs = $values;
         foreach ($values as $k => $value) {
             if (\is_resource($value)) {
-                throw new NotInstantiableTypeException(get_resource_type($value).' resource');
+                throw new NotInstantiableTypeException(\get_resource_type($value).' resource');
             }
             $refs[$k] = $objectsPool;
 
@@ -115,14 +115,14 @@ class Exporter
                 goto handle_value;
             }
 
-            if (method_exists($class, '__sleep')) {
+            if (\method_exists($class, '__sleep')) {
                 if (!\is_array($sleep = $value->__sleep())) {
                     trigger_error('serialize(): __sleep should return an array only containing the names of instance-variables to serialize', E_USER_NOTICE);
                     $value = null;
                     goto handle_value;
                 }
                 foreach ($sleep as $name) {
-                    if (property_exists($value, $name) && !$reflector->hasProperty($name)) {
+                    if (\property_exists($value, $name) && !$reflector->hasProperty($name)) {
                         $arrayValue[$name] = $value->$name;
                     }
                 }
@@ -155,7 +155,7 @@ class Exporter
                     }
                     $sleep[$n] = false;
                 }
-                if (!\array_key_exists($name, $proto) || $proto[$name] !== $v || "\x00Error\x00trace" === $name || "\x00Exception\x00trace" === $name) {
+                if (!\array_key_exists($name, $proto) || $proto[$name] !== $v) {
                     $properties[$c][$n] = $v;
                 }
             }
@@ -171,7 +171,7 @@ class Exporter
             $objectsPool[$value] = [$id = \count($objectsPool)];
             $properties = self::prepare($properties, $objectsPool, $refsPool, $objectsCount, $valueIsStatic);
             ++$objectsCount;
-            $objectsPool[$value] = [$id, $class, $properties, method_exists($class, '__unserialize') ? -$objectsCount : (method_exists($class, '__wakeup') ? $objectsCount : 0)];
+            $objectsPool[$value] = [$id, $class, $properties, \method_exists($class, '__unserialize') ? -$objectsCount : (\method_exists($class, '__wakeup') ? $objectsCount : 0)];
 
             $value = new Reference($id);
 
@@ -212,28 +212,27 @@ class Exporter
         $subIndent = $indent.'    ';
 
         if (\is_string($value)) {
-            $code = sprintf("'%s'", addcslashes($value, "'\\"));
+            $code = var_export($value, true);
 
-            $code = preg_replace_callback('/([\0\r\n]++)(.)/', function ($m) use ($subIndent) {
-                $m[1] = sprintf('\'."%s".\'', str_replace(
-                    ["\0", "\r", "\n", '\n\\'],
-                    ['\0', '\r', '\n', '\n"'."\n".$subIndent.'."\\'],
-                    $m[1]
-                ));
+            if (false !== strpos($value, "\n") || false !== strpos($value, "\r")) {
+                $code = strtr($code, [
+                    "\r\n" => "'.\"\\r\\n\"\n".$subIndent.".'",
+                    "\r" => "'.\"\\r\"\n".$subIndent.".'",
+                    "\n" => "'.\"\\n\"\n".$subIndent.".'",
+                ]);
+            }
 
-                if ("'" === $m[2]) {
-                    return substr($m[1], 0, -2);
-                }
+            if (false !== strpos($value, "\0")) {
+                $code = str_replace('\' . "\0" . \'', '\'."\0".\'', $code);
+                $code = str_replace('".\'\'."', '', $code);
+            }
 
-                if ('n".\'' === substr($m[1], -4)) {
-                    return substr_replace($m[1], "\n".$subIndent.".'".$m[2], -2);
-                }
+            if (false !== strpos($code, "''.")) {
+                $code = str_replace("''.", '', $code);
+            }
 
-                return $m[1].$m[2];
-            }, $code, -1, $count);
-
-            if ($count && 0 === strpos($code, "''.")) {
-                $code = substr($code, 3);
+            if (".''" === substr($code, -3)) {
+                $code = rtrim(substr($code, 0, -3));
             }
 
             return $code;
@@ -292,7 +291,7 @@ class Exporter
                 continue;
             }
             if (!Registry::$instantiableWithoutConstructor[$class]) {
-                if (is_subclass_of($class, 'Serializable') && !method_exists($class, '__unserialize')) {
+                if (is_subclass_of($class, 'Serializable')) {
                     $serializables[$k] = 'C:'.\strlen($class).':"'.$class.'":0:{}';
                 } else {
                     $serializables[$k] = 'O:'.\strlen($class).':"'.$class.'":0:{}';

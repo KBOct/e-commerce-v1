@@ -1,9 +1,10 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.42",
     "Names": {
         "Afak": "Afaka",
         "Aghb": "Kaukasisch-Albanisch",
         "Arab": "Arabisch",
+        "Armi": "Armi",
         "Armn": "Armenisch",
         "Avst": "Avestisch",
         "Bali": "Balinesisch",
@@ -42,6 +43,7 @@
         "Grek": "Griechisch",
         "Gujr": "Gujarati",
         "Guru": "Gurmukhi",
+        "Hanb": "Hanb",
         "Hang": "Hangul",
         "Hani": "Chinesisch",
         "Hano": "Hanunoo",
@@ -162,6 +164,7 @@
         "Zsye": "Emoji",
         "Zsym": "Symbole",
         "Zxxx": "Schriftlos",
-        "Zyyy": "Verbreitet"
+        "Zyyy": "Verbreitet",
+        "Zzzz": "Unbekannte Schrift"
     }
 }

@@ -1,7 +1,8 @@
 {
-    "Version": "36",
+    "Version": "2.1.47.71",
     "Names": {
         "ak": "Kiakan",
+        "ar_001": "Kiarabu cha Dunia Kilichosanifishwa",
         "arq": "Kiarabu cha Aljeria",
         "az": "Kiazabajani",
         "gv": "Kimanksi",
@@ -33,8 +34,5 @@
         "syr": "Kisiria",
         "udm": "Kiudumurti",
         "yi": "Kiyidi"
-    },
-    "LocalizedNames": {
-        "ar_001": "Kiarabu cha Dunia Kilichosanifishwa"
     }
 }

@@ -39,7 +39,7 @@ proper quoting of parameters.
 
     <?php
     namespace Example;
-    use Doctrine\ORM\Mapping\ClassMetadata,
+    use Doctrine\ORM\Mapping\ClassMetaData,
         Doctrine\ORM\Query\Filter\SQLFilter;
 
     class MyLocaleFilter extends SQLFilter

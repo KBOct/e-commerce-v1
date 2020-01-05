@@ -1,5 +1,3 @@
-{% deprecated 'The template "' ~ _self ~'" is deprecated since Symfony 4.4, will be removed in 5.0.' %}
-{% block before_html %}{% endblock %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -36,4 +34,3 @@
         {{ include('@Twig/base_js.html.twig') }}
     </body>
 </html>
-{% block after_html %}{% endblock %}

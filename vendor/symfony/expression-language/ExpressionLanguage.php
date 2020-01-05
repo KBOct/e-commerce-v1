@@ -29,6 +29,7 @@ class ExpressionLanguage
     protected $functions = [];
 
     /**
+     * @param CacheItemPoolInterface                $cache
      * @param ExpressionFunctionProviderInterface[] $providers
      */
     public function __construct(CacheItemPoolInterface $cache = null, array $providers = [])

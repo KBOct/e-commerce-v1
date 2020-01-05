@@ -12,20 +12,16 @@
 namespace Symfony\Component\Cache\Simple;
 
 use Psr\Log\LoggerAwareInterface;
-use Psr\SimpleCache\CacheInterface as Psr16CacheInterface;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Cache\Exception\InvalidArgumentException;
 use Symfony\Component\Cache\ResettableInterface;
 use Symfony\Component\Cache\Traits\ArrayTrait;
-use Symfony\Contracts\Cache\CacheInterface;
-
-@trigger_error(sprintf('The "%s" class is deprecated since Symfony 4.3, use "%s" and type-hint for "%s" instead.', ArrayCache::class, ArrayAdapter::class, CacheInterface::class), E_USER_DEPRECATED);
 
 /**
- * @deprecated since Symfony 4.3, use ArrayAdapter and type-hint for CacheInterface instead.
+ * @author Nicolas Grekas <p@tchwork.com>
  */
-class ArrayCache implements Psr16CacheInterface, LoggerAwareInterface, ResettableInterface
+class ArrayCache implements CacheInterface, LoggerAwareInterface, ResettableInterface
 {
     use ArrayTrait {
         ArrayTrait::deleteItem as delete;
@@ -35,6 +31,7 @@ class ArrayCache implements Psr16CacheInterface, LoggerAwareInterface, Resettabl
     private $defaultLifetime;
 
     /**
+     * @param int  $defaultLifetime
      * @param bool $storeSerialized Disabling serialization can lead to cache corruptions when storing mutable values but increases performance otherwise
      */
     public function __construct(int $defaultLifetime = 0, bool $storeSerialized = true)
@@ -66,8 +63,6 @@ class ArrayCache implements Psr16CacheInterface, LoggerAwareInterface, Resettabl
 
     /**
      * {@inheritdoc}
-     *
-     * @return iterable
      */
     public function getMultiple($keys, $default = null)
     {
@@ -87,8 +82,6 @@ class ArrayCache implements Psr16CacheInterface, LoggerAwareInterface, Resettabl
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function deleteMultiple($keys)
     {
@@ -104,8 +97,6 @@ class ArrayCache implements Psr16CacheInterface, LoggerAwareInterface, Resettabl
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function set($key, $value, $ttl = null)
     {
@@ -118,8 +109,6 @@ class ArrayCache implements Psr16CacheInterface, LoggerAwareInterface, Resettabl
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function setMultiple($values, $ttl = null)
     {

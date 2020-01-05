@@ -37,15 +37,15 @@ class MockResponse implements ResponseInterface
 
     /**
      * @param string|string[]|iterable $body The response body as a string or an iterable of strings,
-     *                                       yielding an empty string simulates an idle timeout,
+     *                                       yielding an empty string simulates a timeout,
      *                                       exceptions are turned to TransportException
      *
      * @see ResponseInterface::getInfo() for possible info, e.g. "response_headers"
      */
     public function __construct($body = '', array $info = [])
     {
-        $this->body = is_iterable($body) ? $body : (string) $body;
-        $this->info = $info + ['http_code' => 200] + $this->info;
+        $this->body = \is_iterable($body) ? $body : (string) $body;
+        $this->info = $info + $this->info;
 
         if (!isset($info['response_headers'])) {
             return;
@@ -59,8 +59,7 @@ class MockResponse implements ResponseInterface
             }
         }
 
-        $this->info['response_headers'] = [];
-        self::addResponseHeaders($responseHeaders, $this->info, $this->headers);
+        $this->info['response_headers'] = $responseHeaders;
     }
 
     /**
@@ -82,16 +81,6 @@ class MockResponse implements ResponseInterface
     /**
      * {@inheritdoc}
      */
-    public function cancel(): void
-    {
-        $this->info['canceled'] = true;
-        $this->info['error'] = 'Response has been canceled.';
-        $this->body = null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function close(): void
     {
         $this->body = [];
@@ -105,21 +94,15 @@ class MockResponse implements ResponseInterface
         $response = new self([]);
         $response->requestOptions = $options;
         $response->id = ++self::$idSequence;
-
-        if (!($options['buffer'] ?? null) instanceof \Closure) {
-            $response->content = true === ($options['buffer'] ?? true) ? fopen('php://temp', 'w+') : (\is_resource($options['buffer']) ? $options['buffer'] : null);
-        }
+        $response->content = ($options['buffer'] ?? true) ? fopen('php://temp', 'w+') : null;
         $response->initializer = static function (self $response) {
             if (null !== $response->info['error']) {
                 throw new TransportException($response->info['error']);
             }
 
             if (\is_array($response->body[0] ?? null)) {
-                foreach (self::stream([$response]) as $chunk) {
-                    if ($chunk->isFirst()) {
-                        break;
-                    }
-                }
+                // Consume the first chunk if it's not yielded yet
+                self::stream([$response])->current();
             }
         };
 
@@ -167,11 +150,8 @@ class MockResponse implements ResponseInterface
         foreach ($responses as $response) {
             $id = $response->id;
 
-            if (null === $response->body) {
-                // Canceled response
-                $response->body = [];
-            } elseif ([] === $response->body) {
-                // Error chunk
+            if (!$response->body) {
+                // Last chunk
                 $multi->handlesActivity[$id][] = null;
                 $multi->handlesActivity[$id][] = null !== $response->info['error'] ? new TransportException($response->info['error']) : null;
             } elseif (null === $chunk = array_shift($response->body)) {
@@ -183,14 +163,9 @@ class MockResponse implements ResponseInterface
                 try {
                     $offset = 0;
                     $chunk[1]->getStatusCode();
-                    $chunk[1]->getHeaders(false);
+                    $response->headers = $chunk[1]->getHeaders(false);
                     self::readResponse($response, $chunk[0], $chunk[1], $offset);
                     $multi->handlesActivity[$id][] = new FirstChunk();
-                    $buffer = $response->requestOptions['buffer'] ?? null;
-
-                    if ($buffer instanceof \Closure && $response->content = $buffer($response->headers) ?: null) {
-                        $response->content = \is_resource($response->content) ? $response->content : fopen('php://temp', 'w+');
-                    }
                 } catch (\Throwable $e) {
                     $multi->handlesActivity[$id][] = null;
                     $multi->handlesActivity[$id][] = $e;
@@ -267,9 +242,9 @@ class MockResponse implements ResponseInterface
 
         // populate info related to headers
         $info = $mock->getInfo() ?: [];
-        $response->info['http_code'] = ($info['http_code'] ?? 0) ?: $mock->getStatusCode() ?: 200;
+        $response->info['http_code'] = ($info['http_code'] ?? 0) ?: $mock->getStatusCode(false) ?: 200;
         $response->addResponseHeaders($info['response_headers'] ?? [], $response->info, $response->headers);
-        $dlSize = isset($response->headers['content-encoding']) || 'HEAD' === $response->info['http_method'] || \in_array($response->info['http_code'], [204, 304], true) ? 0 : (int) ($response->headers['content-length'][0] ?? 0);
+        $dlSize = isset($response->headers['content-encoding']) ? 0 : (int) ($response->headers['content-length'][0] ?? 0);
 
         $response->info = [
             'start_time' => $response->info['start_time'],
@@ -290,8 +265,8 @@ class MockResponse implements ResponseInterface
         if (!\is_string($body)) {
             foreach ($body as $chunk) {
                 if ('' === $chunk = (string) $chunk) {
-                    // simulate an idle timeout
-                    $response->body[] = new ErrorChunk($offset, sprintf('Idle timeout reached for "%s".', $response->info['url']));
+                    // simulate a timeout
+                    $response->body[] = new ErrorChunk($offset);
                 } else {
                     $response->body[] = $chunk;
                     $offset += \strlen($chunk);

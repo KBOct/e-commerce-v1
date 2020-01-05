@@ -33,6 +33,7 @@ class HttpUtils
     private $secureDomainRegexp;
 
     /**
+     * @param UrlGeneratorInterface                       $urlGenerator       A UrlGeneratorInterface instance
      * @param UrlMatcherInterface|RequestMatcherInterface $urlMatcher         The URL or Request matcher
      * @param string|null                                 $domainRegexp       A regexp the target of HTTP redirections must match, scheme included
      * @param string|null                                 $secureDomainRegexp A regexp the target of HTTP redirections must match when the scheme is "https"
@@ -53,8 +54,9 @@ class HttpUtils
     /**
      * Creates a redirect Response.
      *
-     * @param string $path   A path (an absolute path (/foo), an absolute URL (http://...), or a route name (foo))
-     * @param int    $status The status code
+     * @param Request $request A Request instance
+     * @param string  $path    A path (an absolute path (/foo), an absolute URL (http://...), or a route name (foo))
+     * @param int     $status  The status code
      *
      * @return RedirectResponse A RedirectResponse instance
      */
@@ -73,7 +75,8 @@ class HttpUtils
     /**
      * Creates a Request.
      *
-     * @param string $path A path (an absolute path (/foo), an absolute URL (http://...), or a route name (foo))
+     * @param Request $request The current Request instance
+     * @param string  $path    A path (an absolute path (/foo), an absolute URL (http://...), or a route name (foo))
      *
      * @return Request A Request instance
      */
@@ -84,7 +87,7 @@ class HttpUtils
         static $setSession;
 
         if (null === $setSession) {
-            $setSession = \Closure::bind(static function ($newRequest, $request) { $newRequest->session = $request->session; }, null, Request::class);
+            $setSession = \Closure::bind(function ($newRequest, $request) { $newRequest->session = $request->session; }, null, Request::class);
         }
         $setSession($newRequest, $request);
 
@@ -111,7 +114,8 @@ class HttpUtils
     /**
      * Checks that a given path matches the Request.
      *
-     * @param string $path A path (an absolute path (/foo), an absolute URL (http://...), or a route name (foo))
+     * @param Request $request A Request instance
+     * @param string  $path    A path (an absolute path (/foo), an absolute URL (http://...), or a route name (foo))
      *
      * @return bool true if the path is the same as the one from the Request, false otherwise
      */

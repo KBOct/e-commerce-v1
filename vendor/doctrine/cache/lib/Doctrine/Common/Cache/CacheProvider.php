@@ -9,6 +9,7 @@ use function sprintf;
 
 /**
  * Base class for cache provider implementations.
+ *
  */
 abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, MultiOperationCache
 {
@@ -205,7 +206,6 @@ abstract class CacheProvider implements Cache, FlushableCache, ClearableCache, M
      * Default implementation of doFetchMultiple. Each driver that supports multi-get should owerwrite it.
      *
      * @param array $keys Array of keys to retrieve from cache
-     *
      * @return array Array of values retrieved for the given keys.
      */
     protected function doFetchMultiple(array $keys)

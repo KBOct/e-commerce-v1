@@ -17,15 +17,12 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Template;
-use Twig\TokenParser\TokenParserInterface;
 use Twig\TwigFunction;
 
 /**
  * Provides integration of the dump() function with Twig.
  *
  * @author Nicolas Grekas <p@tchwork.com>
- *
- * @final since Symfony 4.4
  */
 class DumpExtension extends AbstractExtension
 {
@@ -38,9 +35,6 @@ class DumpExtension extends AbstractExtension
         $this->dumper = $dumper;
     }
 
-    /**
-     * @return TwigFunction[]
-     */
     public function getFunctions()
     {
         return [
@@ -48,9 +42,6 @@ class DumpExtension extends AbstractExtension
         ];
     }
 
-    /**
-     * @return TokenParserInterface[]
-     */
     public function getTokenParsers()
     {
         return [new DumpTokenParser()];
@@ -64,7 +55,7 @@ class DumpExtension extends AbstractExtension
     public function dump(Environment $env, $context)
     {
         if (!$env->isDebug()) {
-            return null;
+            return;
         }
 
         if (2 === \func_num_args()) {

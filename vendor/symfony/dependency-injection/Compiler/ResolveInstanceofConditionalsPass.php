@@ -44,7 +44,7 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
         }
     }
 
-    private function processDefinition(ContainerBuilder $container, string $id, Definition $definition): Definition
+    private function processDefinition(ContainerBuilder $container, $id, Definition $definition)
     {
         $instanceofConditionals = $definition->getInstanceofConditionals();
         $autoconfiguredInstanceof = $definition->isAutoconfigured() ? $container->getAutoconfiguredInstanceof() : [];
@@ -63,10 +63,9 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
         $instanceofTags = [];
         $instanceofCalls = [];
         $instanceofBindings = [];
-        $reflectionClass = null;
 
         foreach ($conditionals as $interface => $instanceofDefs) {
-            if ($interface !== $class && !(null === $reflectionClass ? $reflectionClass = ($container->getReflectionClass($class, false) ?: false) : $reflectionClass)) {
+            if ($interface !== $class && (!$container->getReflectionClass($class, false))) {
                 continue;
             }
 
@@ -145,7 +144,7 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
         return $definition;
     }
 
-    private function mergeConditionals(array $autoconfiguredInstanceof, array $instanceofConditionals, ContainerBuilder $container): array
+    private function mergeConditionals(array $autoconfiguredInstanceof, array $instanceofConditionals, ContainerBuilder $container)
     {
         // make each value an array of ChildDefinition
         $conditionals = array_map(function ($childDef) { return [$childDef]; }, $autoconfiguredInstanceof);

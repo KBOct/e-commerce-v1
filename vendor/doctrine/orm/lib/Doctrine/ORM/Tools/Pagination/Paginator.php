@@ -19,12 +19,11 @@
 
 namespace Doctrine\ORM\Tools\Pagination;
 
-use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Parser;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\QueryBuilder;
-use function array_map;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\NoResultException;
 
 /**
  * The paginator can handle various complex scenarios with DQL.
@@ -139,7 +138,7 @@ class Paginator implements \Countable, \IteratorAggregate
         $offset = $this->query->getFirstResult();
         $length = $this->query->getMaxResults();
 
-        if ($this->fetchJoinCollection && $length !== null) {
+        if ($this->fetchJoinCollection) {
             $subQuery = $this->cloneQuery($this->query);
 
             if ($this->useOutputWalker($subQuery)) {
@@ -151,22 +150,19 @@ class Paginator implements \Countable, \IteratorAggregate
 
             $subQuery->setFirstResult($offset)->setMaxResults($length);
 
-            $foundIdRows = $subQuery->getScalarResult();
-
-            // don't do this for an empty id array
-            if ($foundIdRows === []) {
-                return new \ArrayIterator([]);
-            }
+            $ids = array_map('current', $subQuery->getScalarResult());
 
             $whereInQuery = $this->cloneQuery($this->query);
-            $ids          = array_map('current', $foundIdRows);
+            // don't do this for an empty id array
+            if (count($ids) === 0) {
+                return new \ArrayIterator([]);
+            }
 
             $this->appendTreeWalker($whereInQuery, WhereInWalker::class);
             $whereInQuery->setHint(WhereInWalker::HINT_PAGINATOR_ID_COUNT, count($ids));
             $whereInQuery->setFirstResult(null)->setMaxResults(null);
             $whereInQuery->setParameter(WhereInWalker::PAGINATOR_ID_ALIAS, $ids);
             $whereInQuery->setCacheable($this->query->isCacheable());
-            $whereInQuery->expireQueryCache();
 
             $result = $whereInQuery->getResult($this->query->getHydrationMode());
         } else {

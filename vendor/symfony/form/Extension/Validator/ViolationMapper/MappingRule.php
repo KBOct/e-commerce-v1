@@ -50,7 +50,9 @@ class MappingRule
      */
     public function match($propertyPath)
     {
-        return $propertyPath === $this->propertyPath ? $this->getTarget() : null;
+        if ($propertyPath === $this->propertyPath) {
+            return $this->getTarget();
+        }
     }
 
     /**

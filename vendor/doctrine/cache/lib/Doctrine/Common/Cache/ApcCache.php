@@ -14,9 +14,8 @@ use function apc_store;
 /**
  * APC cache provider.
  *
- * @deprecated since version 1.6, use ApcuCache instead
- *
  * @link       www.doctrine-project.org
+ * @deprecated since version 1.6, use ApcuCache instead
  */
 class ApcCache extends CacheProvider
 {

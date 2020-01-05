@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.47.82",
     "Names": {
         "ak": "Igikani",
         "am": "Ikimuhariki",
@@ -46,6 +46,5 @@
         "yo": "Ikiyoruba",
         "zh": "Igishinwa",
         "zu": "Ikizulu"
-    },
-    "LocalizedNames": []
+    }
 }

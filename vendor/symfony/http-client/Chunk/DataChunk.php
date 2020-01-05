@@ -20,8 +20,8 @@ use Symfony\Contracts\HttpClient\ChunkInterface;
  */
 class DataChunk implements ChunkInterface
 {
-    private $offset = 0;
-    private $content = '';
+    private $offset;
+    private $content;
 
     public function __construct(int $offset = 0, string $content = '')
     {
@@ -51,14 +51,6 @@ class DataChunk implements ChunkInterface
     public function isLast(): bool
     {
         return false;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getInformationalStatus(): ?array
-    {
-        return null;
     }
 
     /**

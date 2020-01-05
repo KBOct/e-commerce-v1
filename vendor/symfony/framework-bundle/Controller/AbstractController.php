@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Controller;
 
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -47,7 +47,7 @@ abstract class AbstractController implements ServiceSubscriberInterface
      * @internal
      * @required
      */
-    public function setContainer(ContainerInterface $container): ?ContainerInterface
+    public function setContainer(ContainerInterface $container)
     {
         $previous = $this->container;
         $this->container = $container;
@@ -88,7 +88,6 @@ abstract class AbstractController implements ServiceSubscriberInterface
             'security.csrf.token_manager' => '?'.CsrfTokenManagerInterface::class,
             'parameter_bag' => '?'.ContainerBagInterface::class,
             'message_bus' => '?'.MessageBusInterface::class,
-            'messenger.default_bus' => '?'.MessageBusInterface::class,
         ];
     }
 }

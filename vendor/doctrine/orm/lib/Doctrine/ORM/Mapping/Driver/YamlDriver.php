@@ -25,7 +25,6 @@ use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\ORM\Mapping\ClassMetadata as Metadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Component\Yaml\Yaml;
-use function trigger_error;
 
 /**
  * The YamlDriver reads the mapping metadata from yaml schema files.
@@ -35,8 +34,6 @@ use function trigger_error;
  * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
  * @author Jonathan H. Wage <jonwage@gmail.com>
  * @author Roman Borschel <roman@code-factory.org>
- *
- * @deprecated 2.7 This class is being removed from the ORM and won't have any replacement
  */
 class YamlDriver extends FileDriver
 {
@@ -47,11 +44,6 @@ class YamlDriver extends FileDriver
      */
     public function __construct($locator, $fileExtension = self::DEFAULT_FILE_EXTENSION)
     {
-        @trigger_error(
-            'YAML mapping driver is deprecated and will be removed in Doctrine ORM 3.0, please migrate to annotation or XML driver.',
-            E_USER_DEPRECATED
-        );
-
         parent::__construct($locator, $fileExtension);
     }
 

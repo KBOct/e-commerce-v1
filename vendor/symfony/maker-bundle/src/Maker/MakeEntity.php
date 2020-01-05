@@ -18,17 +18,17 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
-use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
-use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
-use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -318,12 +318,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $type = null;
-        $types = Type::getTypesMap();
-        // remove deprecated json_array
-        unset($types[Type::JSON_ARRAY]);
-
         $allValidTypes = array_merge(
-            array_keys($types),
+            array_keys(Type::getTypesMap()),
             EntityRelation::getValidRelationTypes(),
             ['relation']
         );
@@ -481,7 +477,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             } elseif (class_exists($answeredEntityClass)) {
                 $targetEntityClass = $answeredEntityClass;
             } else {
-                $io->error(sprintf('Unknown class "%s"', $answeredEntityClass));
+                $io->error(sprintf('Unknown class "%s"', $targetEntityClass));
+                $targetEntityClass = null;
+
                 continue;
             }
         }

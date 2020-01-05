@@ -15,7 +15,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
-use Symfony\Component\Intl\Countries;
+use Symfony\Component\Intl\Intl;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -42,19 +42,16 @@ class CountryType extends AbstractType implements ChoiceLoaderInterface
         $resolver->setDefaults([
             'choice_loader' => function (Options $options) {
                 $choiceTranslationLocale = $options['choice_translation_locale'];
-                $alpha3 = $options['alpha3'];
 
-                return new IntlCallbackChoiceLoader(function () use ($choiceTranslationLocale, $alpha3) {
-                    return array_flip($alpha3 ? Countries::getAlpha3Names($choiceTranslationLocale) : Countries::getNames($choiceTranslationLocale));
+                return new IntlCallbackChoiceLoader(function () use ($choiceTranslationLocale) {
+                    return array_flip(Intl::getRegionBundle()->getCountryNames($choiceTranslationLocale));
                 });
             },
             'choice_translation_domain' => false,
             'choice_translation_locale' => null,
-            'alpha3' => false,
         ]);
 
         $resolver->setAllowedTypes('choice_translation_locale', ['null', 'string']);
-        $resolver->setAllowedTypes('alpha3', 'bool');
     }
 
     /**
@@ -62,7 +59,7 @@ class CountryType extends AbstractType implements ChoiceLoaderInterface
      */
     public function getParent()
     {
-        return ChoiceType::class;
+        return __NAMESPACE__.'\ChoiceType';
     }
 
     /**
@@ -86,7 +83,7 @@ class CountryType extends AbstractType implements ChoiceLoaderInterface
             return $this->choiceList;
         }
 
-        return $this->choiceList = new ArrayChoiceList(array_flip(Countries::getNames()), $value);
+        return $this->choiceList = new ArrayChoiceList(array_flip(Intl::getRegionBundle()->getCountryNames()), $value);
     }
 
     /**

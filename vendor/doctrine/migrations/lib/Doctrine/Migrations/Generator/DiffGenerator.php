@@ -6,7 +6,6 @@ namespace Doctrine\Migrations\Generator;
 
 use Doctrine\DBAL\Configuration as DBALConfiguration;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\Generator\Exception\NoChangesDetected;
@@ -64,19 +63,10 @@ class DiffGenerator
         string $versionNumber,
         ?string $filterExpression,
         bool $formatted = false,
-        int $lineLength = 120,
-        bool $checkDbPlatform = true
+        int $lineLength = 120
     ) : string {
         if ($filterExpression !== null) {
-            $this->dbalConfiguration->setSchemaAssetsFilter(
-                static function ($assetName) use ($filterExpression) {
-                    if ($assetName instanceof AbstractAsset) {
-                        $assetName = $assetName->getName();
-                    }
-
-                    return preg_match($filterExpression, $assetName);
-                }
-            );
+            $this->dbalConfiguration->setFilterSchemaAssetsExpression($filterExpression);
         }
 
         $fromSchema = $this->createFromSchema();
@@ -86,15 +76,13 @@ class DiffGenerator
         $up = $this->migrationSqlGenerator->generate(
             $fromSchema->getMigrateToSql($toSchema, $this->platform),
             $formatted,
-            $lineLength,
-            $checkDbPlatform
+            $lineLength
         );
 
         $down = $this->migrationSqlGenerator->generate(
             $fromSchema->getMigrateFromSql($toSchema, $this->platform),
             $formatted,
-            $lineLength,
-            $checkDbPlatform
+            $lineLength
         );
 
         if ($up === '' && $down === '') {
@@ -117,13 +105,13 @@ class DiffGenerator
     {
         $toSchema = $this->schemaProvider->createSchema();
 
-        $schemaAssetsFilter = $this->dbalConfiguration->getSchemaAssetsFilter();
+        $filterExpression = $this->dbalConfiguration->getFilterSchemaAssetsExpression();
 
-        if ($schemaAssetsFilter !== null) {
+        if ($filterExpression !== null) {
             foreach ($toSchema->getTables() as $table) {
                 $tableName = $table->getName();
 
-                if ($schemaAssetsFilter($this->resolveTableName($tableName))) {
+                if (preg_match($filterExpression, $this->resolveTableName($tableName)) === 1) {
                     continue;
                 }
 

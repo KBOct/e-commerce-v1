@@ -3,8 +3,7 @@ Test DeprecationErrorHandler in weak mode
 --FILE--
 <?php
 
-$k = 'SYMFONY_DEPRECATIONS_HELPER';
-putenv($k.'='.$_SERVER[$k] = $_ENV[$k] = 'weak');
+putenv('SYMFONY_DEPRECATIONS_HELPER=weak');
 putenv('ANSICON');
 putenv('ConEmuANSI');
 putenv('TERM');

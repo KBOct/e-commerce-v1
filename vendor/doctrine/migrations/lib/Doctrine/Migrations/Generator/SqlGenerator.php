@@ -39,8 +39,7 @@ class SqlGenerator
     public function generate(
         array $sql,
         bool $formatted = false,
-        int $lineLength = 120,
-        bool $checkDbPlatform = true
+        int $lineLength = 120
     ) : string {
         $code = [];
 
@@ -60,7 +59,7 @@ class SqlGenerator
             $code[] = sprintf('$this->addSql(%s);', var_export($query, true));
         }
 
-        if (count($code) !== 0 && $checkDbPlatform && $this->configuration->isDatabasePlatformChecked()) {
+        if (count($code) !== 0) {
             $currentPlatform = $this->platform->getName();
 
             array_unshift(

@@ -25,11 +25,13 @@ trait ClassResolverTrait
     /**
      * Gets a class name for a given class or instance.
      *
-     * @param object|string $value
+     * @param mixed $value
      *
-     * @throws InvalidArgumentException If the class does not exist
+     * @return string
+     *
+     * @throws InvalidArgumentException If the class does not exists
      */
-    private function getClass($value): string
+    private function getClass($value)
     {
         if (\is_string($value)) {
             if (!class_exists($value) && !interface_exists($value, false)) {

@@ -11,13 +11,9 @@
 
 namespace Symfony\Bridge\Doctrine\Security\User;
 
-use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\Persistence\ObjectManager;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
@@ -29,7 +25,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class EntityUserProvider implements UserProviderInterface, PasswordUpgraderInterface
+class EntityUserProvider implements UserProviderInterface
 {
     private $registry;
     private $managerName;
@@ -87,7 +83,11 @@ class EntityUserProvider implements UserProviderInterface, PasswordUpgraderInter
             // That's the case when the user has been changed by a form with
             // validation errors.
             if (!$id = $this->getClassMetadata()->getIdentifierValues($user)) {
-                throw new \InvalidArgumentException('You cannot refresh a user from the EntityUserProvider that does not contain an identifier. The user object has to be serialized with its own identifier mapped by Doctrine.');
+                throw new \InvalidArgumentException('You cannot refresh a user '.
+                    'from the EntityUserProvider that does not contain an identifier. '.
+                    'The user object has to be serialized with its own identifier '.
+                    'mapped by Doctrine.'
+                );
             }
 
             $refreshedUser = $repository->find($id);
@@ -107,33 +107,17 @@ class EntityUserProvider implements UserProviderInterface, PasswordUpgraderInter
         return $class === $this->getClass() || is_subclass_of($class, $this->getClass());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
-    {
-        $class = $this->getClass();
-        if (!$user instanceof $class) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
-        }
-
-        $repository = $this->getRepository();
-        if ($repository instanceof PasswordUpgraderInterface) {
-            $repository->upgradePassword($user, $newEncodedPassword);
-        }
-    }
-
-    private function getObjectManager(): ObjectManager
+    private function getObjectManager()
     {
         return $this->registry->getManager($this->managerName);
     }
 
-    private function getRepository(): ObjectRepository
+    private function getRepository()
     {
         return $this->getObjectManager()->getRepository($this->classOrAlias);
     }
 
-    private function getClass(): string
+    private function getClass()
     {
         if (null === $this->class) {
             $class = $this->classOrAlias;
@@ -148,7 +132,7 @@ class EntityUserProvider implements UserProviderInterface, PasswordUpgraderInter
         return $this->class;
     }
 
-    private function getClassMetadata(): ClassMetadata
+    private function getClassMetadata()
     {
         return $this->getObjectManager()->getClassMetadata($this->classOrAlias);
     }

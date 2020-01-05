@@ -1,11 +1,6 @@
 CHANGELOG
 =========
 
-4.3.0
------
-
- * added `OptionsResolver::addNormalizer` method
-
 4.2.0
 -----
 

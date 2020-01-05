@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.42",
     "Names": {
         "ADP": [
             "ADP",
@@ -187,7 +187,7 @@
         ],
         "BYN": [
             "BYN",
-            "belarusz rubel"
+            "fehérorosz rubel"
         ],
         "BYR": [
             "BYR",
@@ -867,7 +867,7 @@
         ],
         "SZL": [
             "SZL",
-            "szvázi lilangeni"
+            "szváziföldi lilangeni"
         ],
         "THB": [
             "THB",
@@ -979,11 +979,7 @@
         ],
         "VND": [
             "VND",
-            "vietnámi dong"
-        ],
-        "VNN": [
-            "VNN",
-            "vietnámi dong (1978–1985)"
+            "vietnami dong"
         ],
         "VUV": [
             "VUV",

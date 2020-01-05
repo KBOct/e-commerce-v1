@@ -25,6 +25,8 @@ final class Validation
      *
      * If you want to configure the validator, use
      * {@link createValidatorBuilder()} instead.
+     *
+     * @return ValidatorInterface The new validator
      */
     public static function createValidator(): ValidatorInterface
     {
@@ -33,6 +35,8 @@ final class Validation
 
     /**
      * Creates a configurable builder for validator objects.
+     *
+     * @return ValidatorBuilderInterface The new builder
      */
     public static function createValidatorBuilder(): ValidatorBuilder
     {

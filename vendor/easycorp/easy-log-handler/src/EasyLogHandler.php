@@ -19,7 +19,7 @@ class EasyLogHandler extends StreamHandler
     /**
      * @param array $record
      */
-    public function handle(array $record): bool
+    public function handle(array $record)
     {
         throw new \RuntimeException('The method "handle()" should never be called (call "handleBatch()" instead). This is probably caused by a wrong "monolog" configuration. Please read EasyLogHandler README instructions to learn how to configure and use it.');
     }
@@ -27,7 +27,7 @@ class EasyLogHandler extends StreamHandler
     /**
      * @param array $records
      */
-    public function handleBatch(array $records): void
+    public function handleBatch(array $records)
     {
         // if the log records were filtered (by channel, level, etc.) the array
         // no longer contains consecutive numeric keys. Make them consecutive again

@@ -59,7 +59,7 @@ EOF
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $pool = $input->getArgument('pool');
@@ -69,7 +69,7 @@ EOF
         if (!$cachePool->hasItem($key)) {
             $io->note(sprintf('Cache item "%s" does not exist in cache pool "%s".', $key, $pool));
 
-            return 0;
+            return;
         }
 
         if (!$cachePool->deleteItem($key)) {
@@ -77,7 +77,5 @@ EOF
         }
 
         $io->success(sprintf('Cache item "%s" was successfully deleted.', $key));
-
-        return 0;
     }
 }

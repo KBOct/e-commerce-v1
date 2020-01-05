@@ -13,7 +13,6 @@ namespace Symfony\Component\Finder;
 
 use Symfony\Component\Finder\Comparator\DateComparator;
 use Symfony\Component\Finder\Comparator\NumberComparator;
-use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\Finder\Iterator\CustomFilterIterator;
 use Symfony\Component\Finder\Iterator\DateRangeFilterIterator;
 use Symfony\Component\Finder\Iterator\DepthRangeFilterIterator;
@@ -40,7 +39,6 @@ class Finder implements \IteratorAggregate, \Countable
 {
     const IGNORE_VCS_FILES = 1;
     const IGNORE_DOT_FILES = 2;
-    const IGNORE_VCS_IGNORED_FILES = 4;
 
     private $mode = 0;
     private $names = [];
@@ -174,7 +172,7 @@ class Finder implements \IteratorAggregate, \Countable
      */
     public function name($patterns)
     {
-        $this->names = array_merge($this->names, (array) $patterns);
+        $this->names = \array_merge($this->names, (array) $patterns);
 
         return $this;
     }
@@ -190,7 +188,7 @@ class Finder implements \IteratorAggregate, \Countable
      */
     public function notName($patterns)
     {
-        $this->notNames = array_merge($this->notNames, (array) $patterns);
+        $this->notNames = \array_merge($this->notNames, (array) $patterns);
 
         return $this;
     }
@@ -212,7 +210,7 @@ class Finder implements \IteratorAggregate, \Countable
      */
     public function contains($patterns)
     {
-        $this->contains = array_merge($this->contains, (array) $patterns);
+        $this->contains = \array_merge($this->contains, (array) $patterns);
 
         return $this;
     }
@@ -234,7 +232,7 @@ class Finder implements \IteratorAggregate, \Countable
      */
     public function notContains($patterns)
     {
-        $this->notContains = array_merge($this->notContains, (array) $patterns);
+        $this->notContains = \array_merge($this->notContains, (array) $patterns);
 
         return $this;
     }
@@ -258,7 +256,7 @@ class Finder implements \IteratorAggregate, \Countable
      */
     public function path($patterns)
     {
-        $this->paths = array_merge($this->paths, (array) $patterns);
+        $this->paths = \array_merge($this->paths, (array) $patterns);
 
         return $this;
     }
@@ -282,7 +280,7 @@ class Finder implements \IteratorAggregate, \Countable
      */
     public function notPath($patterns)
     {
-        $this->notPaths = array_merge($this->notPaths, (array) $patterns);
+        $this->notPaths = \array_merge($this->notPaths, (array) $patterns);
 
         return $this;
     }
@@ -370,24 +368,6 @@ class Finder implements \IteratorAggregate, \Countable
             $this->ignore |= static::IGNORE_VCS_FILES;
         } else {
             $this->ignore &= ~static::IGNORE_VCS_FILES;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Forces Finder to obey .gitignore and ignore files based on rules listed there.
-     *
-     * This option is disabled by default.
-     *
-     * @return $this
-     */
-    public function ignoreVCSIgnored(bool $ignoreVCSIgnored)
-    {
-        if ($ignoreVCSIgnored) {
-            $this->ignore |= static::IGNORE_VCS_IGNORED_FILES;
-        } else {
-            $this->ignore &= ~static::IGNORE_VCS_IGNORED_FILES;
         }
 
         return $this;
@@ -582,11 +562,11 @@ class Finder implements \IteratorAggregate, \Countable
     /**
      * Searches files and directories which match defined rules.
      *
-     * @param string|string[] $dirs A directory path or an array of directories
+     * @param string|array $dirs A directory path or an array of directories
      *
      * @return $this
      *
-     * @throws DirectoryNotFoundException if one of the directories does not exist
+     * @throws \InvalidArgumentException if one of the directories does not exist
      */
     public function in($dirs)
     {
@@ -595,11 +575,10 @@ class Finder implements \IteratorAggregate, \Countable
         foreach ((array) $dirs as $dir) {
             if (is_dir($dir)) {
                 $resolvedDirs[] = $this->normalizeDir($dir);
-            } elseif ($glob = glob($dir, (\defined('GLOB_BRACE') ? GLOB_BRACE : 0) | GLOB_ONLYDIR | GLOB_NOSORT)) {
-                sort($glob);
+            } elseif ($glob = glob($dir, (\defined('GLOB_BRACE') ? GLOB_BRACE : 0) | GLOB_ONLYDIR)) {
                 $resolvedDirs = array_merge($resolvedDirs, array_map([$this, 'normalizeDir'], $glob));
             } else {
-                throw new DirectoryNotFoundException(sprintf('The "%s" directory does not exist.', $dir));
+                throw new \InvalidArgumentException(sprintf('The "%s" directory does not exist.', $dir));
             }
         }
 
@@ -706,14 +685,6 @@ class Finder implements \IteratorAggregate, \Countable
             $notPaths[] = '#(^|/)\..+(/|$)#';
         }
 
-        if (static::IGNORE_VCS_IGNORED_FILES === (static::IGNORE_VCS_IGNORED_FILES & $this->ignore)) {
-            $gitignoreFilePath = sprintf('%s/.gitignore', $dir);
-            if (!is_readable($gitignoreFilePath)) {
-                throw new \RuntimeException(sprintf('The "ignoreVCSIgnored" option cannot be used by the Finder as the "%s" file is not readable.', $gitignoreFilePath));
-            }
-            $notPaths = array_merge($notPaths, [Gitignore::toRegex(file_get_contents($gitignoreFilePath))]);
-        }
-
         $minDepth = 0;
         $maxDepth = PHP_INT_MAX;
 
@@ -793,13 +764,17 @@ class Finder implements \IteratorAggregate, \Countable
     /**
      * Normalizes given directory names by removing trailing slashes.
      *
-     * Excluding: (s)ftp:// or ssh2.(s)ftp:// wrapper
+     * Excluding: (s)ftp:// wrapper
+     *
+     * @param string $dir
+     *
+     * @return string
      */
-    private function normalizeDir(string $dir): string
+    private function normalizeDir($dir)
     {
         $dir = rtrim($dir, '/'.\DIRECTORY_SEPARATOR);
 
-        if (preg_match('#^(ssh2\.)?s?ftp://#', $dir)) {
+        if (preg_match('#^s?ftp://#', $dir)) {
             $dir .= '/';
         }
 

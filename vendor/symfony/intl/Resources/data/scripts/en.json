@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.48.65",
     "Names": {
         "Adlm": "Adlam",
         "Afak": "Afaka",
@@ -134,7 +134,6 @@
         "Phnx": "Phoenician",
         "Plrd": "Pollard Phonetic",
         "Prti": "Inscriptional Parthian",
-        "Qaag": "Zawgyi",
         "Rjng": "Rejang",
         "Rohg": "Hanifi Rohingya",
         "Roro": "Rongorongo",
@@ -189,6 +188,7 @@
         "Zsye": "Emoji",
         "Zsym": "Symbols",
         "Zxxx": "Unwritten",
-        "Zyyy": "Common"
+        "Zyyy": "Common",
+        "Zzzz": "Unknown Script"
     }
 }

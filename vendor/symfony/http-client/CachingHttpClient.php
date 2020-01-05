@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpClient;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpClient\Response\ResponseStream;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +39,7 @@ class CachingHttpClient implements HttpClientInterface
     private $cache;
     private $defaultOptions = self::OPTIONS_DEFAULTS;
 
-    public function __construct(HttpClientInterface $client, StoreInterface $store, array $defaultOptions = [])
+    public function __construct(HttpClientInterface $client, StoreInterface $store, array $defaultOptions = [], LoggerInterface $logger = null)
     {
         if (!class_exists(HttpClientKernel::class)) {
             throw new \LogicException(sprintf('Using "%s" requires that the HttpKernel component version 4.3 or higher is installed, try running "composer require symfony/http-kernel:^4.3".', __CLASS__));
@@ -68,28 +69,26 @@ class CachingHttpClient implements HttpClientInterface
     {
         [$url, $options] = $this->prepareRequest($method, $url, $options, $this->defaultOptions, true);
         $url = implode('', $url);
+        $options['extra']['no_cache'] = $options['extra']['no_cache'] ?? !$options['buffer'];
 
-        if (!empty($options['body']) || !empty($options['extra']['no_cache']) || !\in_array($method, ['GET', 'HEAD', 'OPTIONS'])) {
+        if (!empty($options['body']) || $options['extra']['no_cache'] || !\in_array($method, ['GET', 'HEAD', 'OPTIONS'])) {
             return $this->client->request($method, $url, $options);
         }
 
         $request = Request::create($url, $method);
         $request->attributes->set('http_client_options', $options);
 
-        foreach ($options['normalized_headers'] as $name => $values) {
+        foreach ($options['headers'] as $name => $values) {
             if ('cookie' !== $name) {
-                foreach ($values as $value) {
-                    $request->headers->set($name, substr($value, 2 + \strlen($name)), false);
-                }
-
+                $request->headers->set($name, $values);
                 continue;
             }
 
             foreach ($values as $cookies) {
-                foreach (explode('; ', substr($cookies, \strlen('Cookie: '))) as $cookie) {
+                foreach (explode('; ', $cookies) as $cookie) {
                     if ('' !== $cookie) {
                         $cookie = explode('=', $cookie, 2);
-                        $request->cookies->set($cookie[0], $cookie[1] ?? '');
+                        $request->cookies->set($cookie[0], $cookie[1] ?? null);
                     }
                 }
             }
@@ -111,7 +110,7 @@ class CachingHttpClient implements HttpClientInterface
     {
         if ($responses instanceof ResponseInterface) {
             $responses = [$responses];
-        } elseif (!is_iterable($responses)) {
+        } elseif (!\is_iterable($responses)) {
             throw new \TypeError(sprintf('%s() expects parameter 1 to be an iterable of ResponseInterface objects, %s given.', __METHOD__, \is_object($responses) ? \get_class($responses) : \gettype($responses)));
         }
 

@@ -1,5 +1,5 @@
 {
-    "Version": "36",
+    "Version": "2.1.49.33",
     "Names": {
         "AD": "Andoro",
         "AE": "Unuiĝintaj Arabaj Emirlandoj",
@@ -84,7 +84,6 @@
         "GU": "Gvamo",
         "GW": "Gvineo-Bisaŭo",
         "GY": "Gujano",
-        "HM": "Herda kaj Makdonaldaj Insuloj",
         "HN": "Honduro",
         "HR": "Kroatujo",
         "HT": "Haitio",
@@ -128,6 +127,7 @@
         "MD": "Moldavujo",
         "MG": "Madagaskaro",
         "MH": "Marŝaloj",
+        "MK": "Makedonujo",
         "ML": "Malio",
         "MM": "Mjanmao",
         "MN": "Mongolujo",

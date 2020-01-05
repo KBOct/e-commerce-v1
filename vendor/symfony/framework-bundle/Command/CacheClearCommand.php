@@ -72,7 +72,7 @@ EOF
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $fs = $this->filesystem;
         $io = new SymfonyStyle($input, $output);
@@ -175,8 +175,6 @@ EOF
         }
 
         $io->success(sprintf('Cache for the "%s" environment (debug=%s) was successfully cleared.', $kernel->getEnvironment(), var_export($kernel->isDebug(), true)));
-
-        return 0;
     }
 
     private function warmup(string $warmupDir, string $realCacheDir, bool $enableOptionalWarmers = true)

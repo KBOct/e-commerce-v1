@@ -34,6 +34,7 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
     private $onlyConstructorArguments;
     private $hasProxyDumper;
     private $lazy;
+    private $expressionLanguage;
     private $byConstructor;
     private $definitions;
     private $aliases;
@@ -136,44 +137,14 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
         $this->lazy = false;
 
         $byConstructor = $this->byConstructor;
-        $this->byConstructor = $isRoot || $byConstructor;
+        $this->byConstructor = true;
         $this->processValue($value->getFactory());
         $this->processValue($value->getArguments());
-
-        $properties = $value->getProperties();
-        $setters = $value->getMethodCalls();
-
-        // Any references before a "wither" are part of the constructor-instantiation graph
-        $lastWitherIndex = null;
-        foreach ($setters as $k => $call) {
-            if ($call[2] ?? false) {
-                $lastWitherIndex = $k;
-            }
-        }
-
-        if (null !== $lastWitherIndex) {
-            $this->processValue($properties);
-            $setters = $properties = [];
-
-            foreach ($value->getMethodCalls() as $k => $call) {
-                if (null === $lastWitherIndex) {
-                    $setters[] = $call;
-                    continue;
-                }
-
-                if ($lastWitherIndex === $k) {
-                    $lastWitherIndex = null;
-                }
-
-                $this->processValue($call);
-            }
-        }
-
         $this->byConstructor = $byConstructor;
 
         if (!$this->onlyConstructorArguments) {
-            $this->processValue($properties);
-            $this->processValue($setters);
+            $this->processValue($value->getProperties());
+            $this->processValue($value->getMethodCalls());
             $this->processValue($value->getConfigurator());
         }
         $this->lazy = $lazy;

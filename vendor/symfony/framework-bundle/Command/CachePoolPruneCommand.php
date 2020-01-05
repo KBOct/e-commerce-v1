@@ -57,7 +57,7 @@ EOF
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -67,7 +67,5 @@ EOF
         }
 
         $io->success('Successfully pruned cache pool(s).');
-
-        return 0;
     }
 }

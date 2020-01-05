@@ -99,7 +99,7 @@ class DateTimeToLocalizedStringTransformer extends BaseDateTimeTransformer
      *
      * @param string|array $value Localized date string/array
      *
-     * @return \DateTime|null Normalized date
+     * @return \DateTime Normalized date
      *
      * @throws TransformationFailedException if the given value is not a string,
      *                                       if the date could not be parsed
@@ -111,7 +111,7 @@ class DateTimeToLocalizedStringTransformer extends BaseDateTimeTransformer
         }
 
         if ('' === $value) {
-            return null;
+            return;
         }
 
         // date-only patterns require parsing to be done in UTC, as midnight might not exist in the local timezone due
@@ -136,7 +136,7 @@ class DateTimeToLocalizedStringTransformer extends BaseDateTimeTransformer
                 $dateTime = new \DateTime(sprintf('@%s', $timestamp));
             }
             // set timezone separately, as it would be ignored if set via the constructor,
-            // see https://php.net/datetime.construct
+            // see http://php.net/manual/en/datetime.construct.php
             $dateTime->setTimezone(new \DateTimeZone($this->outputTimezone));
         } catch (\Exception $e) {
             throw new TransformationFailedException($e->getMessage(), $e->getCode(), $e);
@@ -162,14 +162,17 @@ class DateTimeToLocalizedStringTransformer extends BaseDateTimeTransformer
     {
         $dateFormat = $this->dateFormat;
         $timeFormat = $this->timeFormat;
-        $timezone = new \DateTimeZone($ignoreTimezone ? 'UTC' : $this->outputTimezone);
-
+        $timezone = $ignoreTimezone ? 'UTC' : $this->outputTimezone;
+        if (class_exists('IntlTimeZone', false)) {
+            // see https://bugs.php.net/bug.php?id=66323
+            $timezone = \IntlTimeZone::createTimeZone($timezone);
+        }
         $calendar = $this->calendar;
         $pattern = $this->pattern;
 
         $intlDateFormatter = new \IntlDateFormatter(\Locale::getDefault(), $dateFormat, $timeFormat, $timezone, $calendar, $pattern);
 
-        // new \intlDateFormatter may return null instead of false in case of failure, see https://bugs.php.net/66323
+        // new \intlDateFormatter may return null instead of false in case of failure, see https://bugs.php.net/bug.php?id=66323
         if (!$intlDateFormatter) {
             throw new TransformationFailedException(intl_get_error_message(), intl_get_error_code());
         }

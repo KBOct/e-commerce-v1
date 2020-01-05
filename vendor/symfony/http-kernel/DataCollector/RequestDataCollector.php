@@ -22,8 +22,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class RequestDataCollector extends DataCollector implements EventSubscriberInterface, LateDataCollectorInterface
 {
@@ -36,10 +34,8 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
 
     /**
      * {@inheritdoc}
-     *
-     * @param \Throwable|null $exception
      */
-    public function collect(Request $request, Response $response/*, \Throwable $exception = null*/)
+    public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         // attributes are serialized and as they can be anything, they need to be converted to strings.
         $attributes = [];
@@ -53,6 +49,7 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
             }
         }
 
+        $content = null;
         try {
             $content = $request->getContent();
         } catch (\LogicException $e) {
@@ -62,6 +59,7 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
 
         $sessionMetadata = [];
         $sessionAttributes = [];
+        $session = null;
         $flashes = [];
         if ($request->hasSession()) {
             $session = $request->getSession();
@@ -82,9 +80,9 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         }
 
         $dotenvVars = [];
-        foreach (explode(',', $_SERVER['SYMFONY_DOTENV_VARS'] ?? $_ENV['SYMFONY_DOTENV_VARS'] ?? '') as $name) {
-            if ('' !== $name && isset($_ENV[$name])) {
-                $dotenvVars[$name] = $_ENV[$name];
+        foreach (explode(',', getenv('SYMFONY_DOTENV_VARS')) as $name) {
+            if ('' !== $name && false !== $value = getenv($name)) {
+                $dotenvVars[$name] = $value;
             }
         }
 
@@ -254,18 +252,6 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         return $this->data['content'];
     }
 
-    public function isJsonRequest()
-    {
-        return 1 === preg_match('{^application/(?:\w+\++)*json$}i', $this->data['request_headers']['content-type']);
-    }
-
-    public function getPrettyJson()
-    {
-        $decoded = json_decode($this->getContent());
-
-        return JSON_ERROR_NONE === json_last_error() ? json_encode($decoded, JSON_PRETTY_PRINT) : null;
-    }
-
     public function getContentType()
     {
         return $this->data['content_type'];
@@ -352,17 +338,11 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         return isset($this->data['forward_token']) ? $this->data['forward_token'] : null;
     }
 
-    /**
-     * @final since Symfony 4.3
-     */
     public function onKernelController(FilterControllerEvent $event)
     {
         $this->controllers[$event->getRequest()] = $event->getController();
     }
 
-    /**
-     * @final since Symfony 4.3
-     */
     public function onKernelResponse(FilterResponseEvent $event)
     {
         if (!$event->isMasterRequest()) {

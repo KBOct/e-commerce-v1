@@ -39,9 +39,10 @@ use Doctrine\ORM\Query\AST\SelectStatement;
  */
 class LimitSubqueryWalker extends TreeWalkerAdapter
 {
-    public const IDENTIFIER_TYPE = 'doctrine_paginator.id.type';
-
-    public const FORCE_DBAL_TYPE_CONVERSION = 'doctrine_paginator.scalar_result.force_dbal_type_conversion';
+    /**
+     * ID type hint.
+     */
+    const IDENTIFIER_TYPE = 'doctrine_paginator.id.type';
 
     /**
      * Counter for generating unique order column aliases.
@@ -80,8 +81,6 @@ class LimitSubqueryWalker extends TreeWalkerAdapter
             self::IDENTIFIER_TYPE,
             Type::getType($rootClass->fieldMappings[$identifier]['type'])
         );
-
-        $this->_getQuery()->setHint(self::FORCE_DBAL_TYPE_CONVERSION, true);
 
         $pathExpression = new PathExpression(
             PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION,

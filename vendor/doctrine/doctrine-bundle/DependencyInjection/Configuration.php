@@ -10,7 +10,6 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use function array_key_exists;
-use function in_array;
 use function is_array;
 
 /**
@@ -35,10 +34,16 @@ class Configuration implements ConfigurationInterface
     /**
      * {@inheritDoc}
      */
-    public function getConfigTreeBuilder() : TreeBuilder
+    public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder('doctrine');
-        $rootNode    = $treeBuilder->getRootNode();
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $rootNode = $treeBuilder->root('doctrine');
+        }
 
         $this->addDbalSection($rootNode);
         $this->addOrmSection($rootNode);
@@ -91,7 +96,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->children()
                                 ->scalarNode('class')->isRequired()->end()
-                                ->booleanNode('commented')->setDeprecated()->end()
+                                ->booleanNode('commented')->defaultNull()->end()
                             ->end()
                         ->end()
                     ->end()
@@ -109,7 +114,13 @@ class Configuration implements ConfigurationInterface
     private function getDbalConnectionsNode()
     {
         $treeBuilder = new TreeBuilder('connections');
-        $node        = $treeBuilder->getRootNode();
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $node = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $node = $treeBuilder->root('connections');
+        }
 
         /** @var ArrayNodeDefinition $connectionNode */
         $connectionNode = $node
@@ -145,7 +156,7 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('keep_slave')->end()
                 ->arrayNode('options')
                     ->useAttributeAsKey('key')
-                    ->prototype('variable')->end()
+                    ->prototype('scalar')->end()
                 ->end()
                 ->arrayNode('mapping_types')
                     ->useAttributeAsKey('name')
@@ -383,7 +394,13 @@ class Configuration implements ConfigurationInterface
     private function getOrmTargetEntityResolverNode()
     {
         $treeBuilder = new TreeBuilder('resolve_target_entities');
-        $node        = $treeBuilder->getRootNode();
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $node = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $node = $treeBuilder->root('resolve_target_entities');
+        }
 
         $node
             ->useAttributeAsKey('interface')
@@ -402,7 +419,13 @@ class Configuration implements ConfigurationInterface
     private function getOrmEntityListenersNode()
     {
         $treeBuilder = new TreeBuilder('entity_listeners');
-        $node        = $treeBuilder->getRootNode();
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $node = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $node = $treeBuilder->root('entity_listeners');
+        }
 
         $normalizer = static function ($mappings) {
             $entities = [];
@@ -488,7 +511,13 @@ class Configuration implements ConfigurationInterface
     private function getOrmEntityManagersNode()
     {
         $treeBuilder = new TreeBuilder('entity_managers');
-        $node        = $treeBuilder->getRootNode();
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $node = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $node = $treeBuilder->root('entity_managers');
+        }
 
         $node
             ->requiresAtLeastOneElement()
@@ -652,7 +681,13 @@ class Configuration implements ConfigurationInterface
     private function getOrmCacheDriverNode($name)
     {
         $treeBuilder = new TreeBuilder($name);
-        $node        = $treeBuilder->getRootNode();
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $node = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $node = $treeBuilder->root($name);
+        }
 
         $node
             ->addDefaultsIfNotSet()
@@ -662,10 +697,25 @@ class Configuration implements ConfigurationInterface
                     return ['type' => $v];
                 })
             ->end()
+            ->beforeNormalization()
+                ->ifTrue(static function ($v) : bool {
+                    return is_array($v) && array_key_exists('cache_provider', $v);
+                })
+                ->then(static function ($v) : array {
+                    return ['type' => 'provider'] + $v;
+                })
+            ->end()
             ->children()
-                ->scalarNode('type')->defaultNull()->end()
+                ->scalarNode('type')->defaultValue('array')->end()
                 ->scalarNode('id')->end()
                 ->scalarNode('pool')->end()
+                ->scalarNode('host')->end()
+                ->scalarNode('port')->end()
+                ->scalarNode('database')->end()
+                ->scalarNode('instance_class')->end()
+                ->scalarNode('class')->end()
+                ->scalarNode('namespace')->defaultNull()->end()
+                ->scalarNode('cache_provider')->defaultNull()->end()
             ->end();
 
         return $node;

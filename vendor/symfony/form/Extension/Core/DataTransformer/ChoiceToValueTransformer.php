@@ -42,7 +42,7 @@ class ChoiceToValueTransformer implements DataTransformerInterface
 
         if (1 !== \count($choices)) {
             if (null === $value || '' === $value) {
-                return null;
+                return;
             }
 
             throw new TransformationFailedException(sprintf('The choice "%s" does not exist or is not unique', $value));

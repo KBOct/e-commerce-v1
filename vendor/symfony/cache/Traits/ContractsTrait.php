@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Cache\Traits;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Cache\Exception\InvalidArgumentException;
@@ -42,7 +41,7 @@ trait ContractsTrait
     public function setCallbackWrapper(?callable $callbackWrapper): callable
     {
         $previousWrapper = $this->callbackWrapper;
-        $this->callbackWrapper = $callbackWrapper ?? function (callable $callback, ItemInterface $item, bool &$save, CacheInterface $pool, \Closure $setMetadata, ?LoggerInterface $logger) {
+        $this->callbackWrapper = $callbackWrapper ?? function (callable $callback, ItemInterface $item, bool &$save, CacheInterface $pool, \Closure $setMetadata) {
             return $callback($item, $save);
         };
 
@@ -58,10 +57,10 @@ trait ContractsTrait
         static $setMetadata;
 
         $setMetadata = $setMetadata ?? \Closure::bind(
-            static function (CacheItem $item, float $startTime, ?array &$metadata) {
+            function (CacheItem $item, float $startTime, ?array &$metadata) {
                 if ($item->expiry > $endTime = microtime(true)) {
                     $item->newMetadata[CacheItem::METADATA_EXPIRY] = $metadata[CacheItem::METADATA_EXPIRY] = $item->expiry;
-                    $item->newMetadata[CacheItem::METADATA_CTIME] = $metadata[CacheItem::METADATA_CTIME] = (int) ceil(1000 * ($endTime - $startTime));
+                    $item->newMetadata[CacheItem::METADATA_CTIME] = $metadata[CacheItem::METADATA_CTIME] = 1000 * (int) ($endTime - $startTime);
                 } else {
                     unset($metadata[CacheItem::METADATA_EXPIRY], $metadata[CacheItem::METADATA_CTIME]);
                 }
@@ -85,13 +84,13 @@ trait ContractsTrait
             try {
                 $value = ($this->callbackWrapper)($callback, $item, $save, $pool, function (CacheItem $item) use ($setMetadata, $startTime, &$metadata) {
                     $setMetadata($item, $startTime, $metadata);
-                }, $this->logger ?? null);
+                });
                 $setMetadata($item, $startTime, $metadata);
 
                 return $value;
             } finally {
                 unset($this->computing[$key]);
             }
-        }, $beta, $metadata, $this->logger ?? null);
+        }, $beta, $metadata);
     }
 }
