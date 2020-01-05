@@ -16,4 +16,5 @@ Pour visualiser vos modifications :
 - Taper et executer la commande "symfony server:start"
 
 
-J'ai mis les dossiers vendor et node_modules mais s'il y a un problème, retéléchargez nodejs et yarn et exécutez les commandes "npm install" et "composer install" puis refaites les étapes ci-dessus
+
+<i>J'ai mis les dossiers vendor et node_modules mais s'il y a un problème, retéléchargez nodejs et yarn et exécutez les commandes "npm install" et "composer install" puis refaites les étapes ci-dessus</i>
