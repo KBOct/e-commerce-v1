@@ -17,4 +17,4 @@ Pour visualiser vos modifications :
 
 
 
-<i>J'ai mis les dossiers vendor et node_modules mais s'il y a un problème, retéléchargez nodejs et yarn et exécutez les commandes "npm install" et "composer install" puis refaites les étapes ci-dessus</i>
+<i>J'ai mis les dossiers vendor et node_modules mais s'il y a un problème, retéléchargez [nodejs](https://nodejs.org/en/) et [yarn](https://yarnpkg.com/lang/en/docs/install/) et exécutez les commandes "npm install" et "composer install" puis refaites les étapes ci-dessus</i>
