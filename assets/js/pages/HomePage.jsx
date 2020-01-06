@@ -21,45 +21,41 @@ const HomePage = props => {
       </p>
     </div>
 
-
+  <h2>Nos promotions</h2>
   <CardGroup>
   <Card>
-    <Card.Img variant="top" src="holder.js/100px160" />
+  <Card.Header>
+  3 produits ménagers achetés = <strong>1 produit offert</strong>
+  </Card.Header>
+    <Card.Img variant="top" src="http://placehold.it/1000x400" />
     <Card.Body>
-      <Card.Title>Card title</Card.Title>
+      <Card.Title>Super produit</Card.Title>
       <Card.Text>
-        This is a wider card with supporting text below as a natural lead-in to
-        additional content. This content is a little bit longer.
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Consectetur commodi rem recusandae ipsa laboriosam quidem aut omnis, enim aspernatur quasi! 
       </Card.Text>
     </Card.Body>
-    <Card.Footer>
-      <small className="text-muted">Last updated 3 mins ago</small>
-    </Card.Footer>
-  </Card>
-  <Card>
-    <Card.Img variant="top" src="holder.js/100px160" />
-    <Card.Body>
-      <Card.Title>Card title</Card.Title>
-      <Card.Text>
-        This card has supporting text below as a natural lead-in to additional
-        content.{' '}
-      </Card.Text>
-    </Card.Body>
-    <Card.Footer>
-      <small className="text-muted">Last updated 3 mins ago</small>
-    </Card.Footer>
   </Card>
   <Card>
   <Card.Header>
-    Card Header
+  3 produits ménagers achetés = <strong>1 produit offert</strong>
   </Card.Header>
-    <Card.Img variant="top" src="http://placehold.it/300x300" />
+    <Card.Img variant="top" src="http://placehold.it/1000x400" />
     <Card.Body>
-      <Card.Title>Card title</Card.Title>
+      <Card.Title>Super produit</Card.Title>
       <Card.Text>
-        This is a wider card with supporting text below as a natural lead-in to
-        additional content. This card has even longer content than the first to
-        show that equal height action.
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Consectetur commodi rem recusandae ipsa laboriosam quidem aut omnis, enim aspernatur quasi! 
+      </Card.Text>
+    </Card.Body>
+  </Card>
+  <Card>
+  <Card.Header>
+  3 produits ménagers achetés = <strong>1 produit offert</strong>
+  </Card.Header>
+    <Card.Img variant="top" src="http://placehold.it/1000x400" />
+    <Card.Body>
+      <Card.Title>Super produit</Card.Title>
+      <Card.Text>
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Consectetur commodi rem recusandae ipsa laboriosam quidem aut omnis, enim aspernatur quasi! 
       </Card.Text>
     </Card.Body>
   </Card>

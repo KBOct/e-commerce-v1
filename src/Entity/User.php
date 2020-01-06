@@ -13,11 +13,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @ApiResource(
- *  normalizationContext={"groups"={"users_read"}}
+ * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks
+ * @UniqueEntity(
+ *  fields={"email"},
+ *  message="Un autre utilisateur s'est déjà inscrit avec cette adresse email, merci de la modifier"
  * )
- * @UniqueEntity("email", message="Un utilisateur ayant cette adresse email existe déjà")
  */
 class User implements UserInterface
 {
@@ -25,15 +26,12 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
-     * @Assert\NotBlank(message="L'email doit être renseigné !")
-     * @Assert\Email(message="L'adresse email doit avoir un format valide !")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Email(message="Veuillez renseigner un email valide !")
      */
     private $email;
 
@@ -42,38 +40,29 @@ class User implements UserInterface
      */
     private $roles = [];
 
+    // /**
+    //  * @ORM\Column(type="string", length=180, unique=true)
+    //  */
+    // private $login;
+
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Assert\NotBlank(message="Le mot de passe est obligatoire")
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
-     * @Assert\NotBlank(message="Le prénom est obligatoire")
-     * @Assert\Length(min=3, minMessage="Le prénom doit faire entre 3 et 255 caractères", max=255, maxMessage="Le prénom doit faire entre 3 et 255 caractères")
+     * @Assert\NotBlank(message="Vous devez renseigner votre prénom")
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"customers_read", "invoices_read", "invoices_subresource", "users_read"})
-     * @Assert\NotBlank(message="Le nom de famille est obligatoire")
-     * @Assert\Length(min=3, minMessage="Le nom de famille doit faire entre 3 et 255 caractères", max=255, maxMessage="Le nom de famille doit faire entre 3 et 255 caractères")
+     * @Assert\NotBlank(message="Vous devez renseigner votre nom de famille")
      */
     private $lastName;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Customer", mappedBy="user")
-     */
-    private $customers;
-
-    public function __construct()
-    {
-        $this->customers = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -177,34 +166,5 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @return Collection|Customer[]
-     */
-    public function getCustomers(): Collection
-    {
-        return $this->customers;
-    }
 
-    public function addCustomer(Customer $customer): self
-    {
-        if (!$this->customers->contains($customer)) {
-            $this->customers[] = $customer;
-            $customer->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCustomer(Customer $customer): self
-    {
-        if ($this->customers->contains($customer)) {
-            $this->customers->removeElement($customer);
-            // set the owning side to null (unless already changed)
-            if ($customer->getUser() === $this) {
-                $customer->setUser(null);
-            }
-        }
-
-        return $this;
-    }
 }
